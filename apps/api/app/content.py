@@ -25,7 +25,7 @@ def seed(session):
     chapter = json.loads((ROOT / "data/games/information-sea.json").read_text(encoding="utf-8"))
     chapter_lesson = (module_dir / "information-sea.md").read_text(encoding="utf-8")
     expedition = json.loads((ROOT / "data/games/expedition.json").read_text(encoding="utf-8"))
-    expedition_lessons = {name: (ROOT / "knowledge/zh-CN/expedition" / name).read_text(encoding="utf-8") for name in ["representation.md", "learning.md", "generation.md", "tower.md", "optimization.md", "decoding.md"]}
+    expedition_lessons = {name: (ROOT / "knowledge/zh-CN/expedition" / name).read_text(encoding="utf-8") for name in ["representation.md", "learning.md", "generation.md", "tower.md", "optimization.md", "decoding.md", "architecture.md", "generalization.md"]}
     # A release pins relevant lesson/task text as well as the graph catalogs.
     digest = hashlib.sha256(json.dumps([catalog, relations, lessons, task_source, prism_lesson, chapter, chapter_lesson, expedition, expedition_lessons], sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:12]
     release_id = f"{catalog['dataset_version']}+{digest}"

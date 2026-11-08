@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import solutions from "../../../../data/games/expedition-fixtures.json";
-import { initialLab, labMetrics, labSatisfied, mse, trajectory, type ExpeditionIsland } from "./expedition";
+import { initialLab, labMetrics, labSatisfied, mse, trajectory, type ExpeditionIsland, type LabState } from "./expedition";
 
 describe("扩展章节各机关的可达条件", () => {
   for (const [id, stages] of Object.entries(solutions)) {
@@ -8,7 +8,9 @@ describe("扩展章节各机关的可达条件", () => {
       const node = id as ExpeditionIsland;
       expect(labSatisfied(node, 0, initialLab(node, 0))).toBe(false);
       stages.forEach((patch, stage) => {
-        const state = { ...initialLab(node, stage), ...patch };
+        // JSON imports widen string literals; the backend suite validates these
+        // same practice fixtures against the bounded LabState schema.
+        const state = { ...initialLab(node, stage), ...(patch as Partial<LabState>) };
         expect(labSatisfied(node, stage, state)).toBe(true);
         expect(labMetrics(node, stage, state).every(Number.isFinite)).toBe(true);
       });

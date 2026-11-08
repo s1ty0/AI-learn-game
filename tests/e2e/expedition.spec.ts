@@ -17,6 +17,31 @@ async function enter(page: Page, id: string) {
 }
 async function dial(page: Page, name: string, value: number) { await page.getByRole("slider", { name, exact: true }).fill(String(value)); }
 async function perform(page: Page, id: string, stage: number) {
+  if(id==='rmsnorm') {
+    if(stage===0) await page.getByRole('button',{name:'RMSNorm · 均方根',exact:true}).click();
+    if(stage===1) await dial(page,'整体倍数',2);
+    if(stage===2) await dial(page,'整体平移量',2);
+  } else if(id==='rope') {
+    if(stage===0) await page.getByRole('button',{name:'开启位置旋转',exact:true}).click();
+    if(stage===1) { await dial(page,'查询位置 m',2); await dial(page,'键位置 n',3); }
+    if(stage===2) await dial(page,'键位置 n',4);
+  } else if(id==='gqa') {
+    if(stage>0) await page.getByRole('button',{name:stage===1?'GQA · 2组K/V':'MQA · 1组K/V',exact:true}).click();
+    await page.getByRole('button',{name:'按当前结构计算',exact:true}).click();
+  } else if(id==='swiglu') {
+    if(stage<2) await dial(page,'门分支投影 a',stage===0?1:-2);
+    else await dial(page,'值分支投影 b',-1);
+  } else if(id==='split') {
+    if(stage===0) {
+      for(const i of [3,4,5,6]) { await page.getByRole('button',{name:`切换记录${i}分区`,exact:true}).click(); if(i>=5) await page.getByRole('button',{name:`切换记录${i}分区`,exact:true}).click(); }
+    } else if(stage===1) {
+      for(const name of ['甲','甲','甲','乙','丙']) await page.getByRole('button',{name:`${name}整组轮换分区`,exact:true}).click();
+    }
+  } else if(id==='leakage') {
+    if(stage===1) await dial(page,'验证特征值',200);
+    else await page.getByRole('button',{name:'仅训练拟合',exact:true}).click();
+  } else if(id==='overfit') await dial(page,'弯曲系数 c',stage===1?2:0);
+  else if(id==='schedule') for(let i=0;i<(stage===2?4:1);i++) await page.getByRole('button',{name:'调度前进一步',exact:true}).click();
   if (id === "batch") {
     for (const i of stage === 0 ? [1,2,3] : stage === 1 ? [3] : [1,3]) await page.getByRole("button", { name: `选择观测${i}`, exact: true }).click();
     await page.getByRole("button", { name: "执行一次批次更新", exact: true }).click();
@@ -163,13 +188,39 @@ test("向量支持乱序拖放，所有新场景在390像素宽无横向溢出�
       await expect(page.getByRole("heading", { name: node.steps[1].title, exact: true })).toBeVisible();
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    if (["embedding", "descent", "cache", "residual", "normalization", "block", "backprop", "batch", "momentum", "adam", "clipping", "topk", "topp", "stopping", "sampling"].includes(node.id)) await page.screenshot({ path: `.runtime/screenshots/expedition-${node.id}-mobile.png`, fullPage: true, animations: "disabled" });
+    if (["embedding", "descent", "cache", "residual", "normalization", "block", "backprop", "batch", "momentum", "adam", "clipping", "topk", "topp", "stopping", "sampling", "rmsnorm", "rope", "gqa", "swiglu", "split", "leakage", "overfit", "schedule"].includes(node.id)) await page.screenshot({ path: `.runtime/screenshots/expedition-${node.id}-mobile.png`, fullPage: true, animations: "disabled" });
     if (node.id === "loss") {
       await page.getByRole("slider", { name: "预测斜率 w", exact: true }).focus();
       await page.keyboard.press("Escape");
       await expect(page.getByRole("dialog")).toBeVisible();
     }
   }
+});
+
+test('分区支持拖放，等量跨组会被拒绝，训练拟合刻度不受验证变化影响',async({page})=>{
+  const fixture=await expeditionFixture(page,'generalization');
+  await page.goto('/');await enter(page,'split');
+  await page.locator('.partition-records>div').nth(0).dragTo(page.getByLabel('验证分区',{exact:true}));
+  await expect(page.getByRole('button',{name:'切换记录1分区',exact:true})).toContainText('验证');
+  await page.getByRole('button',{name:'回到群岛',exact:true}).click();
+  fixture.stages.split=1;
+  await page.reload();await page.getByRole('button',{name:'探索分流码头',exact:true}).click();
+  await expect(page.locator('.partition-bins b')).toHaveText(['2条','2条','2条']);
+  await page.getByRole('button',{name:'带着观察，继续',exact:true}).click();
+  await expect(page.locator('.room-feedback')).toContainText('整组');
+  expect(fixture.moves).toHaveLength(0);
+  await perform(page,'split',1);await page.getByRole('button',{name:'带着观察，继续',exact:true}).click();
+  await expect(page.getByRole('heading',{name:config.nodes.find(n=>n.id==='split')!.steps[2].title,exact:true})).toBeVisible();
+  await page.reload();await page.getByRole('button',{name:'探索分流码头',exact:true}).click();
+  await expect(page.getByRole('heading',{name:config.nodes.find(n=>n.id==='split')!.steps[2].title,exact:true})).toBeVisible();
+  await perform(page,'split',2);await page.getByRole('button',{name:'点亮这处发现',exact:true}).click();
+  await page.getByRole('button',{name:'带着发现，回到群岛',exact:true}).click();await enter(page,'leakage');
+  await page.getByRole('button',{name:'仅训练拟合',exact:true}).click();
+  await expect(page.locator('.fit-isolated strong')).toHaveText('min=0 · max=2');
+  await dial(page,'验证特征值',200);
+  await expect(page.locator('.fit-isolated strong')).toHaveText('min=0 · max=2');
+  await expect(page.locator('.scaler-pipeline>div').first()).toContainText('变换后 [0, 1.000]');
+  await expect(page.locator('.scaler-pipeline>div').last()).toContainText('变换后 100.000');
 });
 
 test("停止边界和有限观测可见，改变规则重启回放，新的关卡可刷新续玩", async ({ page }) => {

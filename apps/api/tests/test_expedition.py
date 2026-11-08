@@ -83,15 +83,15 @@ def test_entire_connected_journey_has_more_chapters_and_optional_branches_withou
             assert response.status_code == 200, response.text
     final = client.get("/api/v1/expedition").json()
     assert final["completed"] is True and final["all_explored"] is False
-    assert final["main_completed"] == final["main_total"] == 22
-    assert (final["chapter_total"], final["node_total"], final["mechanism_total"]) == (7, 29, 87)
+    assert final["main_completed"] == final["main_total"] == 28
+    assert (final["chapter_total"], final["node_total"], final["mechanism_total"]) == (9, 37, 111)
     assert all(chapter["completed"] for chapter in final["chapters"])
-    assert all(next(node for node in final["nodes"] if node["id"] == optional)["stage"] == 0 for optional in ["ffn", "l2", "cache", "backprop", "clipping", "sampling"])
+    assert all(next(node for node in final["nodes"] if node["id"] == optional)["stage"] == 0 for optional in ["ffn", "l2", "cache", "backprop", "clipping", "sampling", "swiglu", "schedule"])
     assert client.get("/api/v1/expedition/lessons/learning").status_code == 200
     lesson = client.get("/api/v1/expedition/lessons/tower")
     assert lesson.status_code == 200 and lesson.json()["status"] == "draft"
     assert "Pre-LN" in lesson.json()["markdown"] and "1e−5" in lesson.json()["markdown"]
-    for chapter_id in ["optimization", "decoding"]:
+    for chapter_id in ["optimization", "decoding", "architecture", "generalization"]:
         assert client.get(f"/api/v1/expedition/lessons/{chapter_id}").json()["status"] == "draft"
     assert client.get("/api/v1/chapter").json() == first
     assert client.get("/api/v1/learner-graph").json() == old_graph

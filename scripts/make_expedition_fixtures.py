@@ -7,6 +7,14 @@ import json
 from pathlib import Path
 
 SOLUTIONS = {
+    "rmsnorm": [{"norm_kind": "rms"}, {"norm_kind": "rms", "feature_scale": 2}, {"norm_kind": "rms", "feature_shift": 2, "reason": "rms-not-center"}],
+    "rope": [{"rotation_enabled": True, "query_position": 0, "key_position": 1}, {"rotation_enabled": True, "query_position": 2, "key_position": 3}, {"rotation_enabled": True, "query_position": 2, "key_position": 4, "reason": "relative-phase"}],
+    "gqa": [{"kv_heads": 4, "steps": 1}, {"kv_heads": 2, "steps": 1}, {"kv_heads": 1, "steps": 1, "reason": "share-kv"}],
+    "swiglu": [{"gate_input": 1, "branch_input": 2}, {"gate_input": -2, "branch_input": 2}, {"gate_input": 1, "branch_input": -1, "reason": "gated-product"}],
+    "split": [{"partitions": [0,0,1,1,2,2]}, {"partitions": [0,0,1,1,2,2]}, {"partitions": [0,0,1,1,2,2], "reason": "group-boundaries"}],
+    "leakage": [{"fit_scope": "train"}, {"fit_scope": "train", "held_out": 200}, {"fit_scope": "train", "held_out": 200, "reason": "train-only-fit"}],
+    "overfit": [{"curvature": 0}, {"curvature": 2}, {"curvature": 0, "reason": "validation-selection"}],
+    "schedule": [{"steps": 1}, {"steps": 2}, {"steps": 6, "reason": "rate-schedule"}],
     "batch": [{"rows": [0, 1, 2], "steps": 1}, {"rows": [0, 1], "steps": 1}, {"rows": [1, 2], "steps": 1, "reason": "batch-direction"}],
     "momentum": [{"momentum_beta": 0, "steps": 2}, {"momentum_beta": .9, "steps": 2}, {"momentum_beta": .9, "steps": 3, "reason": "history-state"}],
     "adam": [{"steps": 1, "correct_bias": False}, {"steps": 1, "correct_bias": True}, {"steps": 3, "correct_bias": True, "reason": "two-moments"}],

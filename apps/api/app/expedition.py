@@ -3,6 +3,7 @@
 import hashlib
 import json
 import math
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -13,9 +14,10 @@ from .content import DEMO_GRAPH
 from .models import AdventureSession, ContentRelease, now
 from .tower import BLOCK_ORDER, TOWER_IDS, tower_mechanics
 from .voyage import VOYAGE_IDS, voyage_mechanics
+from .frontier import FRONTIER_IDS, frontier_mechanics
 
 router = APIRouter(prefix="/api/v1/expedition")
-NEW_IDS = {"token", "embedding", "position", "ffn", "loss", "gradient", "descent", "l2", "temperature", "entropy", "generation", "cache"} | TOWER_IDS | VOYAGE_IDS
+NEW_IDS = {"token", "embedding", "position", "ffn", "loss", "gradient", "descent", "l2", "temperature", "entropy", "generation", "cache"} | TOWER_IDS | VOYAGE_IDS | FRONTIER_IDS
 
 
 class LabState(BaseModel):
@@ -47,6 +49,19 @@ class LabState(BaseModel):
     draw_set: int = Field(default=0, ge=0, le=1)
     stop_enabled: bool = False
     token_limit: int = Field(default=4, ge=1, le=4)
+    norm_kind: Literal["off", "rms", "layer"] = "off"
+    feature_scale: float = Field(default=1, ge=1, le=3, allow_inf_nan=False)
+    feature_shift: float = Field(default=0, ge=0, le=2, allow_inf_nan=False)
+    rotation_enabled: bool = False
+    query_position: int = Field(default=0, ge=0, le=6)
+    key_position: int = Field(default=1, ge=0, le=6)
+    kv_heads: Literal[1, 2, 4] = 4
+    gate_input: float = Field(default=0, ge=-4, le=4, allow_inf_nan=False)
+    branch_input: float = Field(default=2, ge=-2, le=2, allow_inf_nan=False)
+    partitions: list[int] = Field(default_factory=lambda: [0]*6, min_length=6, max_length=6)
+    fit_scope: Literal["train", "all"] = "all"
+    held_out: float = Field(default=100, ge=100, le=200, allow_inf_nan=False)
+    curvature: float = Field(default=2, ge=0, le=2, allow_inf_nan=False)
     reason: str | None = Field(default=None, max_length=50)
 
     @model_validator(mode="after")
@@ -65,6 +80,8 @@ class LabState(BaseModel):
             raise ValueError("Unknown cache mode")
         if len(set(self.chain)) != len(self.chain) or any(item not in BLOCK_ORDER for item in self.chain):
             raise ValueError("Unknown or repeated block component")
+        if any(partition not in {0, 1, 2} for partition in self.partitions):
+            raise ValueError("Unknown data partition")
         return self
 
 
@@ -91,6 +108,8 @@ def loss(weight):
 def mechanics(node, stage, state):
     """Public toy mechanisms, never an independent mastery rubric."""
     s = state
+    if node in FRONTIER_IDS:
+        return frontier_mechanics(node, stage, s)
     if node in VOYAGE_IDS:
         return voyage_mechanics(node, stage, s)
     if node in TOWER_IDS:
@@ -202,7 +221,7 @@ def current(request: Request):
 
 @router.get("/lessons/{chapter_id}")
 def lesson(chapter_id: str, request: Request):
-    if chapter_id not in {"representation", "learning", "generation", "tower", "optimization", "decoding"}:
+    if chapter_id not in {"representation", "learning", "generation", "tower", "optimization", "decoding", "architecture", "generalization"}:
         raise HTTPException(404, "Unknown chapter")
     with request.app.state.sessions() as session:
         state = expedition_state(session, request.app.state.release_id)

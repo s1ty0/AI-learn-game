@@ -7,6 +7,8 @@ import { TowerLab } from "./tower-lab";
 import { towerIds } from "@/lib/tower";
 import { VoyageLab } from "./voyage-lab";
 import { voyageIds } from "@/lib/voyage";
+import { FrontierLab } from "./frontier-lab";
+import { frontierIds } from "@/lib/frontier";
 import { request, ApiError } from "@/lib/api";
 import { explanations, initialLab, labMetrics, labSatisfied, mse, table, tokenParts, trajectory, vocabulary, type Expedition, type ExpeditionIsland, type LabState } from "@/lib/expedition";
 
@@ -81,6 +83,7 @@ export function ExpeditionIslandGame({ island, expedition, onSaved, onBack }: { 
     <div className="room-top"><button className="voyage-back" disabled={saving} onClick={onBack}><ArrowLeft size={16}/>回到群岛</button><div className="room-dots" aria-label={`探索 ${stage + 1}，共3步`}>{[0, 1, 2].map(index => <span key={index} className={index < stage ? "done" : index === stage ? "current" : ""}>{index < stage ? <Check size={10}/> : index + 1}</span>)}</div><span className="room-location">{definition.title}{definition.kind === "side" && " · 支线"}</span></div>
     <div className="room-story"><span className="voyage-eyebrow">探索 {stage + 1} / 3</span><h1 ref={heading} tabIndex={-1}>{task.title}</h1><p>{task.goal}</p></div>
     <section className="expedition-lab" aria-label={`${definition.title}机关`}>
+      {frontierIds.includes(island) && <FrontierLab island={island} stage={stage} state={state} saving={saving} update={update}/>}
       {voyageIds.includes(island) && <VoyageLab island={island} stage={stage} state={state} saving={saving} update={update}/>}
       {towerIds.includes(island) && <TowerLab island={island} stage={stage} state={state} saving={saving} update={update}/>}
       {island === "token" && <><div className="token-sentence">{Array.from(stage === 1 ? "AI让AI发光" : "AI让学习发光").map((letter, index, all) => <span key={index}><b>{letter}</b>{index < all.length - 1 && <button aria-label={`切分位置${index + 1}`} aria-pressed={state.cuts.includes(index + 1)} disabled={saving} onClick={() => cut(index + 1)}>{state.cuts.includes(index + 1) ? "│" : "·"}</button>}</span>)}</div><div className="token-boats">{tokenParts(stage, state.cuts).map((part, index) => <div key={index} className={vocabulary(stage).includes(part) ? "valid-cargo" : "invalid-cargo"}><strong>{part}</strong><small>{vocabulary(stage).includes(part) ? `编号 ${vocabulary(stage).indexOf(part)}` : "不在当前词表"}</small></div>)}</div><div className="lab-reference"><span>玩具词表</span>{vocabulary(stage).map((word, id) => <code key={word}>{id}：{word}</code>)}</div></>}

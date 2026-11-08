@@ -1,11 +1,14 @@
 import { blockOrder, towerIds, towerMetrics, towerSatisfied } from "./tower";
 import { voyageIds, voyageMetrics, voyageSatisfied } from "./voyage";
+import { frontierIds, frontierMetrics, frontierSatisfied } from "./frontier";
 
-export type ExpeditionIsland = "token" | "embedding" | "position" | "ffn" | "loss" | "gradient" | "descent" | "l2" | "temperature" | "entropy" | "generation" | "cache" | "residual" | "normalization" | "block" | "backprop" | "batch" | "momentum" | "adam" | "clipping" | "topk" | "topp" | "sampling" | "stopping";
+export type ExpeditionIsland = "token" | "embedding" | "position" | "ffn" | "loss" | "gradient" | "descent" | "l2" | "temperature" | "entropy" | "generation" | "cache" | "residual" | "normalization" | "block" | "backprop" | "batch" | "momentum" | "adam" | "clipping" | "topk" | "topp" | "sampling" | "stopping" | "rmsnorm" | "rope" | "gqa" | "swiglu" | "split" | "leakage" | "overfit" | "schedule";
 export type LabState = {
   cuts: number[]; rows: number[]; position_enabled: boolean; amount: number; inputs: number[]; weight: number; probes: number[];
   rate: number; steps: number; lam: number; temperature: number; probability: number; sequence: string[]; reuse: boolean; modes: string[]; reason: string | null; chain: string[]; local_slope: number;
   momentum_beta: number; correct_bias: boolean; clip_enabled: boolean; max_norm: number; keep_count: number; cutoff: number; draws: number; draw_set: number; stop_enabled: boolean; token_limit: number;
+  norm_kind: "off" | "rms" | "layer"; feature_scale: number; feature_shift: number; rotation_enabled: boolean; query_position: number; key_position: number; kv_heads: 1 | 2 | 4; gate_input: number; branch_input: number;
+  partitions: number[]; fit_scope: "train" | "all"; held_out: number; curvature: number;
 };
 export type ExpeditionNode = { id: ExpeditionIsland; chapter: string; title: string; concept: string; kind: string; requires: string[];
   entity_ids: string[]; steps: { title: string; goal: string; hint: string }[]; discovery: string; boundary: string;
@@ -18,7 +21,9 @@ export const table = [[1, 0], [0, 1], [1, 1]];
 export function initialLab(node: ExpeditionIsland, stage: number): LabState {
   const state: LabState = { cuts: [], rows: [], position_enabled: false, amount: 1, inputs: [-1, 2, 3], weight: 0, probes: [], rate: .1,
     steps: 0, lam: 0, temperature: 1, probability: .4, sequence: ["A"], reuse: false, modes: [], reason: null, chain: [], local_slope: 0,
-    momentum_beta: 0, correct_bias: false, clip_enabled: false, max_norm: 1, keep_count: 4, cutoff: 1, draws: 0, draw_set: 0, stop_enabled: false, token_limit: 4 };
+    momentum_beta: 0, correct_bias: false, clip_enabled: false, max_norm: 1, keep_count: 4, cutoff: 1, draws: 0, draw_set: 0, stop_enabled: false, token_limit: 4,
+    norm_kind: "off", feature_scale: 1, feature_shift: 0, rotation_enabled: false, query_position: 0, key_position: 1, kv_heads: 4, gate_input: 0, branch_input: 2,
+    partitions: [0,0,0,0,0,0], fit_scope: "all", held_out: 100, curvature: 2 };
   if (node === "token" && stage > 0) state.cuts = [2, 3, 5];
   if (node === "embedding" && stage === 2) state.rows = [2, 0, 2];
   if (node === "position" && stage > 0) { state.position_enabled = true; if (stage === 2) state.amount = 2; }
@@ -42,6 +47,14 @@ export function initialLab(node: ExpeditionIsland, stage: number): LabState {
   if (node === "topk" && stage > 0) state.keep_count = stage === 1 ? 2 : 1;
   if (node === "topp" && stage > 0) state.cutoff = stage === 1 ? .65 : .85;
   if (node === "stopping" && stage === 2) state.stop_enabled = true;
+  if (node === "rmsnorm" && stage>0) state.norm_kind = "rms";
+  if (node === "rope" && stage>0) { state.rotation_enabled=true; if(stage===2) { state.query_position=2; state.key_position=3; } }
+  if (node === "gqa" && stage===2) state.kv_heads=2;
+  if (node === "swiglu" && stage>0) state.gate_input=1;
+  if (node === "split" && stage>0) state.partitions=stage===1 ? [0,1,0,2,1,2] : [0,0,1,1,2,2];
+  if (node === "leakage" && stage>0) { state.fit_scope=stage===1 ? "train" : "all"; if(stage===2) state.held_out=200; }
+  if (node === "overfit" && stage===1) state.curvature=0;
+  if (node === "schedule" && stage>0) state.steps=stage===1 ? 1 : 2;
   return state;
 }
 
@@ -59,6 +72,7 @@ export function trajectory(rate: number, steps: number) {
   return { weight, path };
 }
 export function labMetrics(node: ExpeditionIsland, stage: number, s: LabState): number[] {
+  if (frontierIds.includes(node)) return frontierMetrics(node, s);
   if (voyageIds.includes(node)) return voyageMetrics(node, s);
   if (towerIds.includes(node)) return towerMetrics(node, s);
   if (node === "token") { const parts = tokenParts(stage, s.cuts); return [parts.length, ...parts.map(part => vocabulary(stage).indexOf(part))]; }
@@ -78,6 +92,7 @@ export function labMetrics(node: ExpeditionIsland, stage: number, s: LabState): 
 }
 
 export function labSatisfied(node: ExpeditionIsland, stage: number, s: LabState) {
+  if (frontierIds.includes(node)) return frontierSatisfied(node, stage, s);
   if (voyageIds.includes(node)) return voyageSatisfied(node, stage, s);
   if (towerIds.includes(node)) return towerSatisfied(node, stage, s);
   const metrics = labMetrics(node, stage, s);
@@ -96,6 +111,14 @@ export function labSatisfied(node: ExpeditionIsland, stage: number, s: LabState)
 }
 
 export const explanations: Record<ExpeditionIsland, { id: string; text: string }[]> = {
+  rmsnorm: [{ id: "rms-not-center", text: "调整均方根尺度，但没有先减特征均值" }, { id: "same-layer", text: "RMSNorm与LayerNorm在任何输入上都相同" }, { id: "always-centered", text: "RMSNorm输出一定严格零均值" }],
+  rope: [{ id: "relative-phase", text: "旋转后的查询与键点积包含相对位置" }, { id: "change-vocab", text: "只要移动位置就重新建立整个词表" }, { id: "any-context", text: "二维例子证明任意长度都能正确外推" }],
+  gqa: [{ id: "share-kv", text: "保持查询头，减少共享的K/V组数" }, { id: "same-output", text: "任意K/V共享都保证输出和质量不变" }, { id: "delete-query", text: "每少一组K/V就必须删掉一个查询头" }],
+  swiglu: [{ id: "gated-product", text: "一条投影先经SiLU，再与另一条逐元素相乘" }, { id: "binary-gate", text: "门分支只能是0或1" }, { id: "average-paths", text: "两条投影永远只取平均" }],
+  split: [{ id: "group-boundaries", text: "按目标隔离相关组，验证选型，测试留作最终评估" }, { id: "any-split", text: "只要行数平均，任何相关记录都可随意跨区" }, { id: "fit-test", text: "用测试集反复挑选模型后仍算独立评估" }],
+  leakage: [{ id: "train-only-fit", text: "仅训练拟合预处理，验证和测试只应用变换" }, { id: "label-only", text: "没读验证标签，就绝不可能泄漏" }, { id: "force-unit", text: "验证值变换后必须强行落在0到1之间" }],
+  overfit: [{ id: "validation-selection", text: "看验证信号选型，并保留测试评估的独立性" }, { id: "train-zero", text: "训练误差为0就已经证明泛化最好" }, { id: "always-simple", text: "所有任务都一定是越简单越好" }],
+  schedule: [{ id: "rate-schedule", text: "按进度改变学习率，不代替梯度或优化器" }, { id: "loss-control", text: "调度器保证每一步损失下降" }, { id: "replace-gradient", text: "有了Warmup就不再需要求梯度" }],
   batch: [{ id: "batch-direction", text: "批次改变平均梯度，单步不保证整批目标下降" }, { id: "always-full", text: "每个小批次都必须和整批同方向" }, { id: "no-gradient", text: "选了小批次就不需要计算梯度" }],
   momentum: [{ id: "history-state", text: "历史状态与当前梯度一起决定更新" }, { id: "current-only", text: "只要当前梯度变号，更新必立刻变号" }, { id: "always-faster", text: "任何任务用动量都会更快收敛" }],
   adam: [{ id: "two-moments", text: "历史一阶矩与平方梯度二阶矩共同缩放更新" }, { id: "just-rate", text: "Adam只是把所有坐标学习率一起增大" }, { id: "always-zero", text: "当前梯度为零就必定没有参数变化" }],
