@@ -17,7 +17,7 @@ export async function expeditionFixture(page: Page, chapter?: string, firstCompl
   const main = config.chapters.flatMap(group => group.main_path);
   function state() {
     const unlocked = (requires: string[]) => requires.every(id => id === "beacon" ? firstComplete() : stages[id] === 3);
-    return { ...config, release_id: "fixture", unlocked: firstComplete(), mastery: "unverified", main_total: 4 + main.length,
+    return { ...config, first_chapter: {id:"information-sea",title:"信息之海",completed:firstComplete(),all_explored:firstComplete(),main_completed:firstComplete()?4:0,main_total:4,next_node:"beacon",nodes:[],mastery:"unverified"}, release_id: "fixture", unlocked: firstComplete(), mastery: "unverified", main_total: 4 + main.length,
       chapter_total: 1 + config.chapters.length, node_total: 5 + config.nodes.length, mechanism_total: 15 + config.nodes.reduce((sum, node) => sum + node.steps.length, 0),
       main_completed: 4 + main.filter(id => stages[id] === 3).length,
       completed: firstComplete() && main.every(id => stages[id] === 3), all_explored: Object.values(stages).every(stage => stage === 3),

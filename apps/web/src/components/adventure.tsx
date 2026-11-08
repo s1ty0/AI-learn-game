@@ -14,13 +14,14 @@ import { ExpeditionAtlas, ExpeditionDiscoveries, ExpeditionIslandGame } from "@/
 import { type Expedition, type ExpeditionIsland } from "@/lib/expedition";
 import { StarMap } from "@/components/star-map";
 import { Intake } from "@/components/intake";
+import { Guidance } from "@/components/guidance";
 
 type Journey = {
   revision: number; stage: number; release_id: string; discovered: string[]; mastery: "unverified";
   trail: { stage: number; created_at: string; hint_used: boolean }[];
 };
 type Move = { base_revision: number; operation_key: string; stage: number; mask_enabled: boolean; future_value: number; reason: string | null; hint_used: boolean };
-type View = "world" | "room" | "reward" | "prism" | "chapter" | "expedition" | "stars" | "intake";
+type View = "world" | "room" | "reward" | "prism" | "chapter" | "expedition" | "stars" | "intake" | "guidance";
 
 function Modal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -136,6 +137,20 @@ export function Adventure() {
     else if (chapter?.nodes.find(item => item.id === node)?.unlocked) { setChapterNode(node); setChapterRun(value => value + 1); setView("chapter"); }
   }
   function showStars() { setSheet(null); setView("stars"); }
+  async function enterGuided(id: string) {
+    const fresh = await request<Expedition & {first_chapter: Chapter}>("/expedition");
+    setExpedition(fresh);setChapter(fresh.first_chapter);
+    const first = fresh.first_chapter.nodes.find(n=>n.id===id && n.unlocked && n.stage<3);
+    const later = fresh.nodes.find(n=>n.id===id && n.unlocked && n.stage<3);
+    if (!first && !later) throw new Error("Exploration changed");
+    if (id === "mask") {
+      const saved = await request<Journey>("/adventure");if(saved.stage>=3)throw new Error("Exploration changed");
+      setJourney(saved);setStage(saved.stage);setReplay(false);setFuture(saved.stage===1?30:10);setMask(saved.stage!==2);
+      setReason(null);setHint(false);setHintUsed(false);setFeedback("");setRetryMove(null);setView("room");
+    } else if (id === "prism") enterPrism();
+    else if (first && (first.id === "query" || first.id === "heads" || first.id === "beacon")) {setChapterNode(first.id);setChapterRun(value=>value+1);setView("chapter");}
+    else if (later) {setExpeditionIsland(later.id);setExpeditionRun(value=>value+1);setView("expedition");}
+  }
   function showMap() { setSheet("map"); void loadChapter(); }
   function showAtlas() { setSheet("atlas"); void loadExpedition(); }
   function enterExpedition(node: ExpeditionIsland) {
@@ -215,6 +230,7 @@ export function Adventure() {
 
     {view === "stars" && <StarMap onBack={() => setView("world")}/>}
     {view === "intake" && <Intake onBack={() => setView("world")}/>}
+    {view === "guidance" && <Guidance onBack={()=>setView("world")} onEnter={enterGuided}/>}
 
     {view === "room" && <main className="island-room">
       <div className="room-top"><button className="voyage-back" disabled={saving} onClick={() => setView("world")}><ArrowLeft size={16} />回到群岛</button><div className="room-dots" aria-label={`机关 ${stage + 1}，共 3 步`}>{[0, 1, 2].map(n => <span key={n} className={n < stage ? "done" : n === stage ? "current" : ""}>{n < stage ? <Check size={10} /> : n + 1}</span>)}</div><span className="room-location">回声小岛</span></div>
@@ -251,7 +267,7 @@ export function Adventure() {
 
     {view === "reward" && <main className="voyage-reward"><div className="reward-emblem"><Sparkles size={42}/><span/><span/><span/></div><span className="voyage-eyebrow">发现一片新的光</span><h1 ref={heading} tabIndex={-1}>小岛，亮起来了。</h1><p className="reward-story">一条被挡住的光路，<br/>不会把后面的变化传到前面。</p><div className="discovery-card"><span>刚才的机关，在 AI 中有个名字</span><h2>因果掩码</h2><p>让当前位置只能读取自己和前面的信息。</p><small>已记录这次探索；还可以用新情境验证理解。</small></div><button className="voyage-primary" disabled={saving} onClick={() => setView("world")}>带着发现，回到群岛<ArrowRight size={17}/></button><button className="voyage-hint" onClick={() => setSheet("journal")}>看看我的发现</button></main>}
 
-    {sheet === "menu" && <Modal title="航行选项" onClose={() => setSheet(null)}><button className="voyage-menu-link" onClick={() => { setSheet(null); setView("intake"); }}><Compass size={20}/><span>找到我的起点<small>约10个短任务，保留未知项</small></span><ArrowRight size={17}/></button><p className="voyage-sheet-copy">探索时只看眼前。想整理思路时，再打开手记。</p><button className="voyage-menu-link" onClick={showStars}><Sparkles size={20}/><span>我的星图<small>连接已发现知识，保存自己的理解</small></span><ArrowRight size={17}/></button><button className="voyage-menu-link" onClick={showAtlas}><Sparkles size={20}/><span>群岛总览<small>更多海域、主线与支线</small></span><ArrowRight size={17}/></button><button className="voyage-menu-link" onClick={showMap}><Compass size={20}/><span>这一程的航图<small>主线、可选支线和归航终点</small></span><ArrowRight size={17}/></button><Link className="voyage-menu-link" href="/workbench"><Compass size={20}/><span>图谱手记<small>整理连接、查资料、回看旧版本</small></span><ArrowRight size={17}/></Link><button className="voyage-menu-link" onClick={() => { setSheet("journal"); }}><Sparkles size={20}/><span>我的发现<small>只保留你已经遇见的知识</small></span><ArrowRight size={17}/></button></Modal>}
+    {sheet === "menu" && <Modal title="航行选项" onClose={() => setSheet(null)}><button className="voyage-menu-link" onClick={() => { setSheet(null); setView("guidance"); }}><Compass size={20}/><span>下一束光<small>推荐下一步，困难先补桥</small></span><ArrowRight size={17}/></button><button className="voyage-menu-link" onClick={() => { setSheet(null); setView("intake"); }}><Compass size={20}/><span>找到我的起点<small>约10个短任务，保留未知项</small></span><ArrowRight size={17}/></button><p className="voyage-sheet-copy">探索时只看眼前。想整理思路时，再打开手记。</p><button className="voyage-menu-link" onClick={showStars}><Sparkles size={20}/><span>我的星图<small>连接已发现知识，保存自己的理解</small></span><ArrowRight size={17}/></button><button className="voyage-menu-link" onClick={showAtlas}><Sparkles size={20}/><span>群岛总览<small>更多海域、主线与支线</small></span><ArrowRight size={17}/></button><button className="voyage-menu-link" onClick={showMap}><Compass size={20}/><span>这一程的航图<small>主线、可选支线和归航终点</small></span><ArrowRight size={17}/></button><Link className="voyage-menu-link" href="/workbench"><Compass size={20}/><span>图谱手记<small>整理连接、查资料、回看旧版本</small></span><ArrowRight size={17}/></Link><button className="voyage-menu-link" onClick={() => { setSheet("journal"); }}><Sparkles size={20}/><span>我的发现<small>只保留你已经遇见的知识</small></span><ArrowRight size={17}/></button></Modal>}
     {sheet === "map" && <Modal title="这一程的航图" onClose={() => setSheet(null)}><ChapterMap chapter={chapter} onEnter={enterChapter} onRetry={() => { void loadChapter(); }}/>{chapter?.completed && <button className="voyage-secondary" onClick={showAtlas}><Sparkles size={15}/>继续航行，展开群岛</button>}</Modal>}
     {sheet === "atlas" && <Modal title="群岛总览" onClose={() => setSheet(null)}><ExpeditionAtlas expedition={expedition} onEnter={enterExpedition} onFirst={showMap} onRetry={() => { void loadExpedition(); }}/></Modal>}
     {sheet === "journal" && <Modal title="我的发现" onClose={() => setSheet(null)}>{complete ? <><div className="discovery-constellation"><span className="discovery-star">✧</span><strong>因果掩码</strong><small>信息的边界</small></div><p className="voyage-sheet-copy">你打开过光闸，也关上过光闸。你发现，切断来自后面的信息，前面的输出就不会被它改变。</p><div className="discovery-trail">{journey?.trail.map((event, index) => <p key={event.stage}><Check size={14}/><span>{titles[event.stage]}</span><time>{new Date(event.created_at).toLocaleDateString("zh-CN")}</time></p>)}</div>{prism?.stage === 3 && <div className="journal-prism"><strong>Softmax · 信息参与多少</strong><p>把分数变成和为1的权重，再按比例汇聚。</p><div>可读范围 <ArrowRight size={12}/> 权重分配 <ArrowRight size={12}/> 汇聚结果</div><small>这条连接来自本次探索，仍待迁移验证。</small></div>}<ChapterDiscoveries chapter={chapter}/><ExpeditionDiscoveries expedition={expedition} onEnter={enterExpedition}/><p className="voyage-journal-note">这是探索足迹，还需要在新情境中验证掌握。</p><button className="voyage-secondary" onClick={showStars}><Sparkles size={15}/>把发现接进我的星图</button><button className="voyage-secondary" onClick={() => { setSheet(null); enter(); }}><RotateCcw size={15}/>重游回声机关</button>{prism?.unlocked && <button className="voyage-secondary" onClick={() => { setSheet(null); enterPrism(); }}><Sparkles size={15}/>{prism.stage === 3 ? "重游分光台" : "探索分光台"}</button>}</> : <div className="empty-discoveries"><Sparkles size={34}/><p>第一束光，等你发现。</p><small>已经经过的机关会自动保存。</small></div>}</Modal>}
