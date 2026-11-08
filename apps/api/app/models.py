@@ -75,6 +75,14 @@ class Attempt(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class IntakeSession(Base):
+    __tablename__ = "intake_sessions"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer, default=0)
+    finished: Mapped[int] = mapped_column(Integer, default=0)
+    events: Mapped[list] = mapped_column(JSONB, default=list)
+
+
 class AdventureSession(Base):
     __tablename__ = "adventure_sessions"
     id: Mapped[str] = mapped_column(String, primary_key=True)

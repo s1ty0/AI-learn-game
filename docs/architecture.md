@@ -12,6 +12,8 @@
 
 ## 1. 服务分工
 
+初始画像首版独立保存于intake_sessions：只读GET与answer/hint/finish动作接口，事务锁、幂等和修订冲突沿用相同原则。探测结果只用于粗略建议，不改探索解锁、个人图或掌握投影；具体内容、分支及限制见[入门画像](./intake.md)。
+
 ```mermaid
 flowchart LR
     U[学习者浏览器] --> W[Next.js知识页与学习界面]
