@@ -17,6 +17,30 @@ async function enter(page: Page, id: string) {
 }
 async function dial(page: Page, name: string, value: number) { await page.getByRole("slider", { name, exact: true }).fill(String(value)); }
 async function perform(page: Page, id: string, stage: number) {
+  if (id === "batch") {
+    for (const i of stage === 0 ? [1,2,3] : stage === 1 ? [3] : [1,3]) await page.getByRole("button", { name: `选择观测${i}`, exact: true }).click();
+    await page.getByRole("button", { name: "执行一次批次更新", exact: true }).click();
+  } else if (id === "momentum") {
+    if (stage === 1) await dial(page, "动量系数 μ", .9);
+    for (let i=0;i<(stage === 2 ? 3 : 2);i++) await page.getByRole("button", { name: "沿梯度走一步", exact: true }).click();
+  } else if (id === "adam") {
+    if (stage === 1) await page.getByRole("button", { name: "开启偏差修正", exact: true }).click();
+    for (let i=0;i<(stage === 2 ? 3 : 1);i++) await page.getByRole("button", { name: "执行一次Adam更新", exact: true }).click();
+  } else if (id === "clipping") {
+    if (stage === 1) await page.getByRole("button", { name: "开启范数裁剪", exact: true }).click();
+    if (stage === 2) await dial(page,"最大梯度范数",2);
+    await page.getByRole("button", { name: "运行并记录范数", exact: true }).click();
+  } else if (id === "topk") await dial(page,"保留候选数 k",[2,1,3][stage]);
+  else if (id === "topp") await dial(page,"累计阈值 p",[.65,.85,.35][stage]);
+  else if (id === "sampling") {
+    if (stage === 2) await page.getByRole("button", { name: "第二组观测点", exact: true }).click();
+    await page.getByRole("button", { name: stage === 0 ? "抽取一次" : "取满10次", exact: true }).click();
+  } else if (id === "stopping") {
+    if (stage === 0) await page.getByRole("button", { name: "启用EOS停止", exact: true }).click();
+    if (stage === 1) await dial(page,"最多新增token",1);
+    for (let i=0;i<(stage === 1 ? 1 : 2);i++) await page.getByRole("button", { name: "生成下一个token", exact: true }).click();
+    await expect(page.getByRole("button", { name: "生成下一个token", exact: true })).toBeDisabled();
+  }
   if (id === "residual") {
     if (stage === 0) await page.getByRole("button", { name: "接通原信号支路", exact: true }).click();
     if (stage > 0) await dial(page, "子层改变量", stage === 1 ? -1 : 0);
@@ -139,11 +163,38 @@ test("向量支持乱序拖放，所有新场景在390像素宽无横向溢出�
       await expect(page.getByRole("heading", { name: node.steps[1].title, exact: true })).toBeVisible();
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    if (["embedding", "descent", "cache", "residual", "normalization", "block", "backprop"].includes(node.id)) await page.screenshot({ path: `.runtime/screenshots/expedition-${node.id}-mobile.png`, fullPage: true, animations: "disabled" });
+    if (["embedding", "descent", "cache", "residual", "normalization", "block", "backprop", "batch", "momentum", "adam", "clipping", "topk", "topp", "stopping", "sampling"].includes(node.id)) await page.screenshot({ path: `.runtime/screenshots/expedition-${node.id}-mobile.png`, fullPage: true, animations: "disabled" });
     if (node.id === "loss") {
       await page.getByRole("slider", { name: "预测斜率 w", exact: true }).focus();
       await page.keyboard.press("Escape");
       await expect(page.getByRole("dialog")).toBeVisible();
     }
   }
+});
+
+test("停止边界和有限观测可见，改变规则重启回放，新的关卡可刷新续玩", async ({ page }) => {
+  const fixture = await expeditionFixture(page,"decoding");
+  fixture.stages.topk = fixture.stages.topp = 3;
+  await page.goto("/"); await enter(page,"stopping");
+  await page.getByRole("button",{name:"启用EOS停止",exact:true}).click();
+  for (let i=0;i<2;i++) await page.getByRole("button",{name:"生成下一个token",exact:true}).click();
+  await expect(page.locator(".stop-readout")).toContainText("遇到EOS，已停止");
+  await expect(page.getByRole("button",{name:"生成下一个token",exact:true})).toBeDisabled();
+  await page.getByRole("button",{name:"带着观察，继续",exact:true}).click();
+  await expect(page.getByRole("heading",{name:config.nodes.find(n=>n.id==='stopping')!.steps[1].title,exact:true})).toBeVisible();
+  await page.reload(); await page.getByRole("button",{name:"探索停船灯塔",exact:true}).click();
+  await expect(page.getByRole("heading",{name:config.nodes.find(n=>n.id==='stopping')!.steps[1].title,exact:true})).toBeVisible();
+  await dial(page,"最多新增token",1); await page.getByRole("button",{name:"生成下一个token",exact:true}).click();
+  await expect(page.locator(".stop-readout")).toContainText("达到新增上限");
+  await expect(page.locator(".stopping-history>span")).toHaveCount(2);
+  await dial(page,"最多新增token",3);
+  await expect(page.locator(".stopping-history>span")).toHaveCount(1);
+  await page.keyboard.press("Escape"); await enter(page,"sampling");
+  await page.getByRole("button",{name:"取满10次",exact:true}).click();
+  await expect(page.locator(".draw-frequencies strong")).toHaveText(["4","3","2","1"]);
+  await page.getByRole("button",{name:"第二组观测点",exact:true}).click();
+  await expect(page.locator(".draw-result b")).toHaveCount(0);
+  await page.getByRole("button",{name:"取满10次",exact:true}).click();
+  await expect(page.locator(".draw-frequencies strong")).toHaveText(["1","5","1","3"]);
+  expect(fixture.moves).toHaveLength(1);
 });

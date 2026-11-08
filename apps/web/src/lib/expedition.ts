@@ -1,9 +1,11 @@
 import { blockOrder, towerIds, towerMetrics, towerSatisfied } from "./tower";
+import { voyageIds, voyageMetrics, voyageSatisfied } from "./voyage";
 
-export type ExpeditionIsland = "token" | "embedding" | "position" | "ffn" | "loss" | "gradient" | "descent" | "l2" | "temperature" | "entropy" | "generation" | "cache" | "residual" | "normalization" | "block" | "backprop";
+export type ExpeditionIsland = "token" | "embedding" | "position" | "ffn" | "loss" | "gradient" | "descent" | "l2" | "temperature" | "entropy" | "generation" | "cache" | "residual" | "normalization" | "block" | "backprop" | "batch" | "momentum" | "adam" | "clipping" | "topk" | "topp" | "sampling" | "stopping";
 export type LabState = {
   cuts: number[]; rows: number[]; position_enabled: boolean; amount: number; inputs: number[]; weight: number; probes: number[];
   rate: number; steps: number; lam: number; temperature: number; probability: number; sequence: string[]; reuse: boolean; modes: string[]; reason: string | null; chain: string[]; local_slope: number;
+  momentum_beta: number; correct_bias: boolean; clip_enabled: boolean; max_norm: number; keep_count: number; cutoff: number; draws: number; draw_set: number; stop_enabled: boolean; token_limit: number;
 };
 export type ExpeditionNode = { id: ExpeditionIsland; chapter: string; title: string; concept: string; kind: string; requires: string[];
   entity_ids: string[]; steps: { title: string; goal: string; hint: string }[]; discovery: string; boundary: string;
@@ -15,7 +17,8 @@ export type Expedition = { id: string; version: string; release_id: string; node
 export const table = [[1, 0], [0, 1], [1, 1]];
 export function initialLab(node: ExpeditionIsland, stage: number): LabState {
   const state: LabState = { cuts: [], rows: [], position_enabled: false, amount: 1, inputs: [-1, 2, 3], weight: 0, probes: [], rate: .1,
-    steps: 0, lam: 0, temperature: 1, probability: .4, sequence: ["A"], reuse: false, modes: [], reason: null, chain: [], local_slope: 0 };
+    steps: 0, lam: 0, temperature: 1, probability: .4, sequence: ["A"], reuse: false, modes: [], reason: null, chain: [], local_slope: 0,
+    momentum_beta: 0, correct_bias: false, clip_enabled: false, max_norm: 1, keep_count: 4, cutoff: 1, draws: 0, draw_set: 0, stop_enabled: false, token_limit: 4 };
   if (node === "token" && stage > 0) state.cuts = [2, 3, 5];
   if (node === "embedding" && stage === 2) state.rows = [2, 0, 2];
   if (node === "position" && stage > 0) { state.position_enabled = true; if (stage === 2) state.amount = 2; }
@@ -32,6 +35,13 @@ export function initialLab(node: ExpeditionIsland, stage: number): LabState {
   if (node === "normalization") { state.inputs = [1, 2, 3]; state.amount = 0; state.position_enabled = stage > 0; }
   if (node === "block") state.chain = stage === 0 ? [] : stage === 1 ? blockOrder.slice(0, 3) : [...blockOrder];
   if (node === "backprop") { state.weight = stage === 1 ? 2 : 1; state.local_slope = stage === 1 ? -2 : stage === 2 ? 2 : 0; }
+  if (node === "batch" && stage > 0) state.rows = stage === 1 ? [0, 1, 2] : [0, 1];
+  if (node === "momentum" && stage === 2) state.momentum_beta = .9;
+  if (node === "adam" && stage === 2) state.correct_bias = true;
+  if (node === "clipping" && stage === 2) state.clip_enabled = true;
+  if (node === "topk" && stage > 0) state.keep_count = stage === 1 ? 2 : 1;
+  if (node === "topp" && stage > 0) state.cutoff = stage === 1 ? .65 : .85;
+  if (node === "stopping" && stage === 2) state.stop_enabled = true;
   return state;
 }
 
@@ -49,6 +59,7 @@ export function trajectory(rate: number, steps: number) {
   return { weight, path };
 }
 export function labMetrics(node: ExpeditionIsland, stage: number, s: LabState): number[] {
+  if (voyageIds.includes(node)) return voyageMetrics(node, s);
   if (towerIds.includes(node)) return towerMetrics(node, s);
   if (node === "token") { const parts = tokenParts(stage, s.cuts); return [parts.length, ...parts.map(part => vocabulary(stage).indexOf(part))]; }
   if (node === "embedding") return [s.rows.length, ...s.rows.flatMap(row => table[row] ?? [])];
@@ -67,6 +78,7 @@ export function labMetrics(node: ExpeditionIsland, stage: number, s: LabState): 
 }
 
 export function labSatisfied(node: ExpeditionIsland, stage: number, s: LabState) {
+  if (voyageIds.includes(node)) return voyageSatisfied(node, stage, s);
   if (towerIds.includes(node)) return towerSatisfied(node, stage, s);
   const metrics = labMetrics(node, stage, s);
   if (node === "token") return JSON.stringify(s.cuts.toSorted((a,b) => a-b)) === JSON.stringify(stage === 2 ? [2, 3] : [2, 3, 5]) && (stage !== 1 || s.reason === "same-id");
@@ -84,6 +96,14 @@ export function labSatisfied(node: ExpeditionIsland, stage: number, s: LabState)
 }
 
 export const explanations: Record<ExpeditionIsland, { id: string; text: string }[]> = {
+  batch: [{ id: "batch-direction", text: "批次改变平均梯度，单步不保证整批目标下降" }, { id: "always-full", text: "每个小批次都必须和整批同方向" }, { id: "no-gradient", text: "选了小批次就不需要计算梯度" }],
+  momentum: [{ id: "history-state", text: "历史状态与当前梯度一起决定更新" }, { id: "current-only", text: "只要当前梯度变号，更新必立刻变号" }, { id: "always-faster", text: "任何任务用动量都会更快收敛" }],
+  adam: [{ id: "two-moments", text: "历史一阶矩与平方梯度二阶矩共同缩放更新" }, { id: "just-rate", text: "Adam只是把所有坐标学习率一起增大" }, { id: "always-zero", text: "当前梯度为零就必定没有参数变化" }],
+  clipping: [{ id: "preserve-direction", text: "统一缩放梯度长度，保留非零梯度方向" }, { id: "clip-each", text: "把每个分量都截成同一个最大值" }, { id: "replace-rate", text: "裁剪后不再需要学习率" }],
+  topk: [{ id: "candidate-set", text: "先保留最高的k个候选，再在集合内归一化" }, { id: "kth-only", text: "无论概率如何，都直接选择第k名" }, { id: "truth-filter", text: "保留下来的候选一定符合事实" }],
+  topp: [{ id: "cumulative-prefix", text: "累计到首次达到阈值，保留这个最短前缀" }, { id: "individual-p", text: "只保留单个概率大于p的所有候选" }, { id: "fixed-count", text: "任意分布下都固定保留p个候选" }],
+  sampling: [{ id: "finite-observation", text: "有限次频数随观测点变化，不能当作分布本身" }, { id: "ten-proof", text: "十次频数一定严格等于真实概率" }, { id: "fake-random", text: "预设观测点就是通过了随机性检验" }],
+  stopping: [{ id: "stop-boundaries", text: "EOS可提前停止，新增上限提供另一条边界" }, { id: "prefix-count", text: "新增token上限必须包含提示前缀" }, { id: "quality-done", text: "停止就说明内容已经完整且正确" }],
   residual: [{ id: "identity-path", text: "零修正时仍保留原输入的恒等支路" }, { id: "always-grow", text: "残差只允许信号越来越大" }, { id: "no-gradient-loss", text: "任意深度的梯度都不会消失" }],
   normalization: [{ id: "feature-axis", text: "本关在同一token的特征维统计" }, { id: "batch-axis", text: "本关把不同样本混合统计" }, { id: "token-axis", text: "本关把所有token平均为一个值" }],
   block: [{ id: "pre-norm", text: "本关先归一化再进子层，另有Post-LN约定" }, { id: "only-order", text: "所有Transformer都只能采用这个顺序" }, { id: "replace-skip", text: "归一化会替代残差支路" }],

@@ -76,20 +76,23 @@ def test_entire_connected_journey_has_more_chapters_and_optional_branches_withou
         assert response.status_code == 200
     first = client.get("/api/v1/chapter").json()
     assert client.get("/api/v1/expedition").json()["next_node"] == "token"
-    for node in ["token", "embedding", "position", "loss", "gradient", "descent", "temperature", "entropy", "generation", "residual", "normalization", "block"]:
+    chapters = json.loads((ROOT / "data/games/expedition.json").read_text(encoding="utf-8"))["chapters"]
+    for node in [node for chapter in chapters for node in chapter["main_path"]]:
         for stage in range(3):
             response = client.post(f"/api/v1/expedition/{node}/moves", json=body(node, stage))
             assert response.status_code == 200, response.text
     final = client.get("/api/v1/expedition").json()
     assert final["completed"] is True and final["all_explored"] is False
-    assert final["main_completed"] == final["main_total"] == 16
-    assert (final["chapter_total"], final["node_total"], final["mechanism_total"]) == (5, 21, 63)
+    assert final["main_completed"] == final["main_total"] == 22
+    assert (final["chapter_total"], final["node_total"], final["mechanism_total"]) == (7, 29, 87)
     assert all(chapter["completed"] for chapter in final["chapters"])
-    assert all(next(node for node in final["nodes"] if node["id"] == optional)["stage"] == 0 for optional in ["ffn", "l2", "cache", "backprop"])
+    assert all(next(node for node in final["nodes"] if node["id"] == optional)["stage"] == 0 for optional in ["ffn", "l2", "cache", "backprop", "clipping", "sampling"])
     assert client.get("/api/v1/expedition/lessons/learning").status_code == 200
     lesson = client.get("/api/v1/expedition/lessons/tower")
     assert lesson.status_code == 200 and lesson.json()["status"] == "draft"
     assert "Pre-LN" in lesson.json()["markdown"] and "1e−5" in lesson.json()["markdown"]
+    for chapter_id in ["optimization", "decoding"]:
+        assert client.get(f"/api/v1/expedition/lessons/{chapter_id}").json()["status"] == "draft"
     assert client.get("/api/v1/chapter").json() == first
     assert client.get("/api/v1/learner-graph").json() == old_graph
 

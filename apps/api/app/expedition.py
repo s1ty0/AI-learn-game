@@ -12,9 +12,10 @@ from .chapter import attention, chapter_state, session_id
 from .content import DEMO_GRAPH
 from .models import AdventureSession, ContentRelease, now
 from .tower import BLOCK_ORDER, TOWER_IDS, tower_mechanics
+from .voyage import VOYAGE_IDS, voyage_mechanics
 
 router = APIRouter(prefix="/api/v1/expedition")
-NEW_IDS = {"token", "embedding", "position", "ffn", "loss", "gradient", "descent", "l2", "temperature", "entropy", "generation", "cache"} | TOWER_IDS
+NEW_IDS = {"token", "embedding", "position", "ffn", "loss", "gradient", "descent", "l2", "temperature", "entropy", "generation", "cache"} | TOWER_IDS | VOYAGE_IDS
 
 
 class LabState(BaseModel):
@@ -36,6 +37,16 @@ class LabState(BaseModel):
     modes: list[str] = Field(default_factory=list, max_length=2)
     chain: list[str] = Field(default_factory=list, max_length=6)
     local_slope: float = Field(default=0, ge=-8, le=8, allow_inf_nan=False)
+    momentum_beta: float = Field(default=0, ge=0, le=.9, allow_inf_nan=False)
+    correct_bias: bool = False
+    clip_enabled: bool = False
+    max_norm: float = Field(default=1, ge=.5, le=5, allow_inf_nan=False)
+    keep_count: int = Field(default=4, ge=1, le=4)
+    cutoff: float = Field(default=1, ge=.05, le=1, allow_inf_nan=False)
+    draws: int = Field(default=0, ge=0, le=10)
+    draw_set: int = Field(default=0, ge=0, le=1)
+    stop_enabled: bool = False
+    token_limit: int = Field(default=4, ge=1, le=4)
     reason: str | None = Field(default=None, max_length=50)
 
     @model_validator(mode="after")
@@ -80,6 +91,8 @@ def loss(weight):
 def mechanics(node, stage, state):
     """Public toy mechanisms, never an independent mastery rubric."""
     s = state
+    if node in VOYAGE_IDS:
+        return voyage_mechanics(node, stage, s)
     if node in TOWER_IDS:
         return tower_mechanics(node, stage, s)
     if node == "token":
@@ -189,7 +202,7 @@ def current(request: Request):
 
 @router.get("/lessons/{chapter_id}")
 def lesson(chapter_id: str, request: Request):
-    if chapter_id not in {"representation", "learning", "generation", "tower"}:
+    if chapter_id not in {"representation", "learning", "generation", "tower", "optimization", "decoding"}:
         raise HTTPException(404, "Unknown chapter")
     with request.app.state.sessions() as session:
         state = expedition_state(session, request.app.state.release_id)

@@ -7,6 +7,14 @@ import json
 from pathlib import Path
 
 SOLUTIONS = {
+    "batch": [{"rows": [0, 1, 2], "steps": 1}, {"rows": [0, 1], "steps": 1}, {"rows": [1, 2], "steps": 1, "reason": "batch-direction"}],
+    "momentum": [{"momentum_beta": 0, "steps": 2}, {"momentum_beta": .9, "steps": 2}, {"momentum_beta": .9, "steps": 3, "reason": "history-state"}],
+    "adam": [{"steps": 1, "correct_bias": False}, {"steps": 1, "correct_bias": True}, {"steps": 3, "correct_bias": True, "reason": "two-moments"}],
+    "clipping": [{"steps": 1, "clip_enabled": False}, {"steps": 1, "clip_enabled": True, "max_norm": 1}, {"steps": 1, "clip_enabled": True, "max_norm": 2, "reason": "preserve-direction"}],
+    "topk": [{"keep_count": 2}, {"keep_count": 1}, {"keep_count": 3, "reason": "candidate-set"}],
+    "topp": [{"cutoff": .65}, {"cutoff": .85}, {"cutoff": .35, "reason": "cumulative-prefix"}],
+    "sampling": [{"draws": 1, "draw_set": 0}, {"draws": 10, "draw_set": 0}, {"draws": 10, "draw_set": 1, "reason": "finite-observation"}],
+    "stopping": [{"steps": 2, "stop_enabled": True, "token_limit": 4}, {"steps": 1, "stop_enabled": False, "token_limit": 1}, {"steps": 2, "stop_enabled": True, "token_limit": 4, "reason": "stop-boundaries"}],
     "residual": [{"weight": .5, "reuse": True}, {"weight": -1, "reuse": True}, {"weight": 0, "reuse": True, "reason": "identity-path"}],
     "normalization": [{"inputs": [1, 2, 3], "amount": 0, "position_enabled": True}, {"inputs": [1, 2, 3], "amount": 2, "position_enabled": True}, {"inputs": [2, 2, 2], "amount": 0, "position_enabled": True, "reason": "feature-axis"}],
     "block": [{"chain": ["norm-attention", "attention", "add-attention"]}, {"chain": ["norm-attention", "attention", "add-attention", "norm-ffn", "ffn", "add-ffn"]}, {"chain": ["norm-attention", "attention", "add-attention", "norm-ffn", "ffn", "add-ffn"], "reason": "pre-norm"}],
