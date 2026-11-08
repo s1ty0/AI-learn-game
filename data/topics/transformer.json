@@ -1,0 +1,90 @@
+{
+  "schema_version": "0.1.0",
+  "kind": "topic",
+  "id": "topic-transformer",
+  "locale": "zh-CN",
+  "status": "draft",
+  "updated_on": "2026-11-07",
+  "title": "Transformer训练与生成贯穿专题",
+  "entity_id": "entity-0065",
+  "entry_path": "knowledge/zh-CN/transformer/README.md",
+  "assets": [
+    "knowledge/zh-CN/transformer/assets/flow.svg",
+    "knowledge/zh-CN/transformer/assets/flow.png"
+  ],
+  "example_path": "examples/tiny_transformer.py",
+  "modules": [
+    {
+      "id": "TF-M01",
+      "title": "输入与位置",
+      "path": "knowledge/zh-CN/transformer/input-and-position.md",
+      "entity_ids": [
+        "entity-0144",
+        "entity-0073",
+        "entity-0069"
+      ],
+      "source_ids": [
+        "source-003",
+        "source-015",
+        "source-041"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "TF-M02",
+      "title": "多头与掩码",
+      "path": "knowledge/zh-CN/transformer/multihead-and-mask.md",
+      "entity_ids": [
+        "entity-0064",
+        "entity-0143",
+        "entity-0068",
+        "entity-0158"
+      ],
+      "source_ids": [
+        "source-003",
+        "source-026",
+        "source-028"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "TF-M03",
+      "title": "残差归一化与FFN",
+      "path": "knowledge/zh-CN/transformer/block-components.md",
+      "entity_ids": [
+        "entity-0058",
+        "entity-0056",
+        "entity-0148",
+        "entity-0152"
+      ],
+      "source_ids": [
+        "source-003",
+        "source-042"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "TF-M04",
+      "title": "训练与生成",
+      "path": "knowledge/zh-CN/transformer/training-and-generation.md",
+      "entity_ids": [
+        "entity-0016",
+        "entity-0022",
+        "entity-0078"
+      ],
+      "source_ids": [
+        "source-020",
+        "source-003"
+      ],
+      "status": "draft"
+    }
+  ],
+  "practice_path": "data/quests/transformer.json",
+  "assessment_path": "data/assessments/transformer-challenges.json",
+  "limitations": [
+    "合成编号，不是真实文本",
+    "没有独立测试质量结论",
+    "没有游戏界面或个人进度存储",
+    "未完成独立教学审校和试学"
+  ]
+}

@@ -1,0 +1,482 @@
+{
+  "schema_version": "0.1.0",
+  "dataset_version": "0.1.4",
+  "kind": "relations",
+  "updated_on": "2026-11-07",
+  "items": [
+    {
+      "id": "relation-0001",
+      "from_id": "entity-0138",
+      "to_id": "entity-0014",
+      "relation_type": "has_example",
+      "statement": "损失函数的一个具体选择是均方误差。",
+      "conditions": "需结合任务和定义核查。",
+      "source_ids": [
+        "source-001"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0002",
+      "from_id": "entity-0138",
+      "to_id": "entity-0016",
+      "relation_type": "has_example",
+      "statement": "损失函数的一个具体选择是交叉熵损失。",
+      "conditions": "区分数学交叉熵与具体 API 输入约定。",
+      "source_ids": [
+        "source-001"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0003",
+      "from_id": "entity-0022",
+      "to_id": "entity-0006",
+      "relation_type": "uses",
+      "statement": "梯度下降使用目标对参数的梯度构造更新。",
+      "conditions": "针对适用的可微目标；不承诺全局最优。",
+      "source_ids": [
+        "source-009"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0004",
+      "from_id": "entity-0022",
+      "to_id": "entity-0141",
+      "relation_type": "uses",
+      "statement": "学习率参与确定梯度下降的更新步幅。",
+      "conditions": "效果依赖目标、尺度和具体更新规则。",
+      "source_ids": [
+        "source-009"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0005",
+      "from_id": "entity-0022",
+      "to_id": "entity-0140",
+      "relation_type": "updates",
+      "statement": "梯度下降更新模型参数。",
+      "conditions": "需明确可优化参数与目标。",
+      "source_ids": [
+        "source-009"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0006",
+      "from_id": "entity-0024",
+      "to_id": "entity-0022",
+      "relation_type": "variant_of",
+      "statement": "小批量方法用批次构造梯度估计。",
+      "conditions": "术语层级和全批次定义需统一。",
+      "source_ids": [
+        "source-009"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0007",
+      "from_id": "entity-0035",
+      "to_id": "entity-0139",
+      "relation_type": "modifies",
+      "statement": "L2 惩罚可作为目标函数的一部分。",
+      "conditions": "明确惩罚系数、参数范围与归一化约定。",
+      "source_ids": [
+        "source-008"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0008",
+      "from_id": "entity-0035",
+      "to_id": "entity-0036",
+      "relation_type": "conditional_equivalence",
+      "statement": "L2 正则与权重衰减的等价性取决于更新规则和系数约定。",
+      "conditions": "不能将普通 SGD 下的关系直接推广到 Adam 等自适应方法。",
+      "source_ids": [
+        "source-004",
+        "source-008"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0009",
+      "from_id": "entity-0030",
+      "to_id": "entity-0029",
+      "relation_type": "variant_of",
+      "statement": "AdamW 对权重衰减进行解耦。",
+      "conditions": "需核查更新公式和实现参数。",
+      "source_ids": [
+        "source-004",
+        "source-002"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0010",
+      "from_id": "entity-0065",
+      "to_id": "entity-0064",
+      "relation_type": "has_component",
+      "statement": "Transformer 架构包含多头注意力模块。",
+      "conditions": "原始架构与后续变体分别记录；正文待核查。",
+      "source_ids": [
+        "source-003"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0011",
+      "from_id": "entity-0065",
+      "to_id": "entity-0058",
+      "relation_type": "has_component",
+      "statement": "原始 Transformer 使用残差连接。",
+      "conditions": "正文待核查，不将所有后续变体视为相同。",
+      "source_ids": [
+        "source-003"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0012",
+      "from_id": "entity-0065",
+      "to_id": "entity-0056",
+      "relation_type": "has_component",
+      "statement": "原始 Transformer 使用层归一化。",
+      "conditions": "具体位置与现代变体需分开核查。",
+      "source_ids": [
+        "source-003"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0013",
+      "from_id": "entity-0065",
+      "to_id": "entity-0069",
+      "relation_type": "uses",
+      "statement": "原始 Transformer 引入位置信息。",
+      "conditions": "区分原始方法与 RoPE 等后续方法。",
+      "source_ids": [
+        "source-003"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0014",
+      "from_id": "entity-0064",
+      "to_id": "entity-0143",
+      "relation_type": "has_component",
+      "statement": "原始多头注意力可结合多个缩放点积注意力头。",
+      "conditions": "需核查投影、拼接和维度；不定义为所有注意力变体的必需结构。",
+      "source_ids": [
+        "source-003"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0015",
+      "from_id": "entity-0082",
+      "to_id": "entity-0002",
+      "relation_type": "uses",
+      "statement": "LoRA 使用低秩分解形式参数化适配更新。",
+      "conditions": "具体注入模块与秩的作用需核查正文。",
+      "source_ids": [
+        "source-010"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0016",
+      "from_id": "entity-0095",
+      "to_id": "entity-0094",
+      "relation_type": "related_to",
+      "statement": "DPO 与基于人类偏好的语言模型适配相关。",
+      "conditions": "比较目标、假设及训练流程，不能当作同义词。",
+      "source_ids": [
+        "source-011"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0017",
+      "from_id": "entity-0145",
+      "to_id": "entity-0144",
+      "relation_type": "produces",
+      "statement": "文本tokenizer依据规则将文本转换为token序列及相应编号。",
+      "conditions": "具体切分依赖词表、版本和设置。",
+      "source_ids": [
+        "source-015"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0018",
+      "from_id": "entity-0144",
+      "to_id": "entity-0073",
+      "relation_type": "related_to",
+      "statement": "文本token通常经编号关联到嵌入表示。",
+      "conditions": "区分单位、编号和向量；不声称所有模型的输入均为文本。",
+      "source_ids": [
+        "source-015",
+        "source-003"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0019",
+      "from_id": "entity-0065",
+      "to_id": "entity-0148",
+      "relation_type": "has_component",
+      "statement": "原始Transformer包含逐位置的前馈网络。",
+      "conditions": "需明确原始架构与其他变体，不能以注意力替代所有模块。",
+      "source_ids": [
+        "source-003",
+        "source-014"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0020",
+      "from_id": "entity-0143",
+      "to_id": "entity-0142",
+      "relation_type": "uses",
+      "statement": "缩放点积注意力通过Softmax得到每个查询对各键的权重。",
+      "conditions": "明确计算维度、掩码和额外训练处理。",
+      "source_ids": [
+        "source-003",
+        "source-018"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0021",
+      "from_id": "entity-0016",
+      "to_id": "entity-0146",
+      "relation_type": "related_to",
+      "statement": "PyTorch CrossEntropyLoss使用logits作为模型输入。",
+      "conditions": "这是指定接口的输入约定，数学交叉熵可由概率定义。",
+      "source_ids": [
+        "source-020"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0022",
+      "from_id": "entity-0138",
+      "to_id": "entity-0022",
+      "relation_type": "related_to",
+      "statement": "目标给出优化标准，梯度下降是利用梯度的更新方法。",
+      "conditions": "区分单样本损失、总目标与更新方法。",
+      "source_ids": [
+        "source-021"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0023",
+      "from_id": "entity-0006",
+      "to_id": "entity-0007",
+      "relation_type": "related_to",
+      "statement": "复合目标可利用链式法则求参数梯度。",
+      "conditions": "区分可微性、求导计算与参数更新。",
+      "source_ids": [
+        "source-017"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0024",
+      "from_id": "entity-0052",
+      "to_id": "entity-0022",
+      "relation_type": "related_to",
+      "statement": "反向传播求导与梯度下降更新参数是不同职责。",
+      "conditions": "并非所有求导都用于梯度下降。",
+      "source_ids": [
+        "source-021",
+        "source-024"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0025",
+      "from_id": "entity-0035",
+      "to_id": "entity-0022",
+      "relation_type": "related_to",
+      "statement": "L2修改目标梯度，更新算法决定惩罚怎样作用于参数。",
+      "conditions": "明确优化器和系数约定。",
+      "source_ids": [
+        "source-004",
+        "source-022"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0026",
+      "from_id": "entity-0065",
+      "to_id": "entity-0144",
+      "relation_type": "related_to",
+      "statement": "文本输入的处理单位通过表示进入架构。",
+      "conditions": "文本情境，不推广为所有模态必须经文本tokenizer。",
+      "source_ids": [
+        "source-003",
+        "source-015"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0027",
+      "from_id": "entity-0065",
+      "to_id": "entity-0068",
+      "relation_type": "uses",
+      "statement": "因果解码器用掩码限制访问未来位置。",
+      "conditions": "不是所有Transformer都使用相同掩码。",
+      "source_ids": [
+        "source-003",
+        "source-028"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0028",
+      "from_id": "entity-0158",
+      "to_id": "entity-0068",
+      "relation_type": "related_to",
+      "statement": "填充与因果掩码限制不同的信息访问范围。",
+      "conditions": "接口真假语义必须核查，损失忽略项另行处理。",
+      "source_ids": [
+        "source-028"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0029",
+      "from_id": "entity-0016",
+      "to_id": "entity-0012",
+      "relation_type": "related_to",
+      "statement": "固定有效目标分布时交叉熵与KL含有常数差项。",
+      "conditions": "概率有效且相应项有限；不能忽略目标分布是否变化。",
+      "source_ids": [
+        "source-024"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0030",
+      "from_id": "entity-0157",
+      "to_id": "entity-0074",
+      "relation_type": "related_to",
+      "statement": "SentencePiece可支持BPE等算法。",
+      "conditions": "工具体系不是单一切分算法，配置与版本需固定。",
+      "source_ids": [
+        "source-025"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    },
+    {
+      "id": "relation-0031",
+      "from_id": "entity-0157",
+      "to_id": "entity-0076",
+      "relation_type": "related_to",
+      "statement": "SentencePiece可支持Unigram方法。",
+      "conditions": "不能把WordPiece、BPE、Unigram视为同义词。",
+      "source_ids": [
+        "source-025"
+      ],
+      "review_status": "proposed",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "hard_prerequisite": false
+    }
+  ]
+}

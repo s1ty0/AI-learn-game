@@ -1,0 +1,14 @@
+{
+  "id": "mist-sea-glow-v1",
+  "title": "雾海微光",
+  "duration_seconds": 64,
+  "sample_rate": 22050,
+  "channels": 1,
+  "format": "PCM16 WAV",
+  "tempo_bpm": 60,
+  "origin": "Project-authored procedural score and synthesis; no third-party samples.",
+  "source_script": "scripts/compose_ambient.py",
+  "sha256": "de558440e97bd1fcbaea444e29f7e785e515ccae420daa015c57fb46eb35f3e1",
+  "loop": "Note tails wrap periodically across the 64-second boundary.",
+  "review_status": "Playable prototype; subjective listening and device comfort remain to be reviewed."
+}

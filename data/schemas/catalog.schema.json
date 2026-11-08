@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI learning atlas catalog v0.1.0",
+  "type": "object",
+  "required": ["schema_version", "dataset_version", "kind", "updated_on", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "0.1.0"},
+    "dataset_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "kind": {"enum": ["domains", "entities", "sources", "relations", "backlog"]},
+    "updated_on": {"$ref": "#/$defs/date"},
+    "items": {"type": "array", "items": {"type": "object"}}
+  },
+  "allOf": [
+    {"if": {"properties": {"kind": {"const": "domains"}}}, "then": {"properties": {"items": {"items": {"$ref": "#/$defs/domain"}}}}},
+    {"if": {"properties": {"kind": {"const": "entities"}}}, "then": {"properties": {"items": {"items": {"$ref": "#/$defs/entity"}}}}},
+    {"if": {"properties": {"kind": {"const": "sources"}}}, "then": {"properties": {"items": {"items": {"$ref": "#/$defs/source"}}}}},
+    {"if": {"properties": {"kind": {"const": "relations"}}}, "then": {"properties": {"items": {"items": {"$ref": "#/$defs/relation"}}}}},
+    {"if": {"properties": {"kind": {"const": "backlog"}}}, "then": {"properties": {"items": {"items": {"$ref": "#/$defs/issue"}}}}}
+  ],
+  "$defs": {
+    "text": {"type": "string", "minLength": 1},
+    "date": {"type": "string", "format": "date", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+    "strings": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/text"}},
+    "domain": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "name", "status"],
+      "properties": {"id": {"type": "string", "pattern": "^domain-[0-9]{3,}$"}, "name": {"$ref": "#/$defs/text"}, "status": {"enum": ["candidate", "reviewed"]}}
+    },
+    "source_link": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_id", "locator", "purpose", "review_status"],
+      "properties": {"source_id": {"$ref": "#/$defs/text"}, "locator": {"$ref": "#/$defs/text"}, "purpose": {"enum": ["candidate_reference", "definition", "implementation", "teaching"]}, "review_status": {"enum": ["pending", "reviewed", "rejected"]}}
+    },
+    "entity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "name", "aliases", "entity_type", "domain_ids", "content_status", "game_status", "source_links", "notes"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^entity-[0-9]{4,}$"}, "name": {"$ref": "#/$defs/text"}, "aliases": {"$ref": "#/$defs/strings"},
+        "entity_type": {"enum": ["concept", "objective", "algorithm", "algorithm_family", "training_method", "mechanism", "architecture", "representation", "model_family", "inference_method", "evaluation_method", "system_mechanism", "domain", "function_family", "function", "compression_method", "data_method", "metric", "hyperparameter"]},
+        "domain_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/text"}},
+        "content_status": {"enum": ["candidate", "source_registered", "reviewed", "needs_revision", "archived"]},
+        "game_status": {"enum": ["not_designed", "designed", "playable", "validated"]},
+        "source_links": {"type": "array", "items": {"$ref": "#/$defs/source_link"}}, "notes": {"$ref": "#/$defs/text"},
+        "reviewed_by": {"$ref": "#/$defs/text"}, "reviewed_on": {"$ref": "#/$defs/date"}
+      },
+      "allOf": [{"if": {"properties": {"content_status": {"const": "reviewed"}}}, "then": {"required": ["reviewed_by", "reviewed_on"], "properties": {"source_links": {"minItems": 1}}}}]
+    },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "title", "creator", "source_type", "url", "checked_on", "checked_scope", "access_status", "observed_version", "reuse_status", "stored_material"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^source-[0-9]{3,}$"}, "title": {"$ref": "#/$defs/text"}, "creator": {"$ref": "#/$defs/text"},
+        "source_type": {"enum": ["official_documentation", "original_paper", "author_course", "author_textbook", "question_bank", "author_article"]},
+        "url": {"type": "string", "pattern": "^https://[^ ]+$"}, "checked_on": {"$ref": "#/$defs/date"}, "checked_scope": {"$ref": "#/$defs/text"},
+        "access_status": {"enum": ["candidate", "index_checked", "page_checked", "abstract_checked", "section_checked", "unavailable"]},
+        "observed_version": {"$ref": "#/$defs/text"}, "reuse_status": {"enum": ["not_assessed", "restricted", "permitted_with_conditions"]},
+        "stored_material": {"const": "metadata_and_original_notes_only"}
+      }
+    },
+    "relation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "from_id", "to_id", "relation_type", "statement", "conditions", "source_ids", "review_status", "reviewed_by", "reviewed_on", "hard_prerequisite"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^relation-[0-9]{4,}$"}, "from_id": {"$ref": "#/$defs/text"}, "to_id": {"$ref": "#/$defs/text"},
+        "relation_type": {"enum": ["has_example", "uses", "updates", "produces", "variant_of", "modifies", "conditional_equivalence", "has_component", "related_to", "prerequisite"]},
+        "statement": {"$ref": "#/$defs/text"}, "conditions": {"$ref": "#/$defs/text"}, "source_ids": {"$ref": "#/$defs/strings"},
+        "review_status": {"enum": ["proposed", "reviewed", "rejected"]}, "hard_prerequisite": {"type": "boolean"},
+        "reviewed_by": {"type": ["string", "null"]}, "reviewed_on": {"anyOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]}
+      },
+      "allOf": [
+        {"if": {"properties": {"review_status": {"const": "reviewed"}}}, "then": {"properties": {"source_ids": {"minItems": 1}, "reviewed_by": {"$ref": "#/$defs/text"}, "reviewed_on": {"$ref": "#/$defs/date"}}}},
+        {"if": {"properties": {"hard_prerequisite": {"const": true}}}, "then": {"properties": {"relation_type": {"const": "prerequisite"}, "review_status": {"const": "reviewed"}}}}
+      ]
+    },
+    "issue": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "title", "entity_ids", "issue_type", "status", "created_on"],
+      "properties": {"id": {"type": "string", "pattern": "^issue-[0-9]{3,}$"}, "title": {"$ref": "#/$defs/text"}, "entity_ids": {"$ref": "#/$defs/strings"}, "issue_type": {"enum": ["content_review", "source_gap", "teaching_source_gap", "reuse_review", "prerequisite_design", "coverage_gap", "game_design"]}, "status": {"enum": ["open", "in_progress", "resolved"]}, "created_on": {"$ref": "#/$defs/date"}}
+    }
+  }
+}

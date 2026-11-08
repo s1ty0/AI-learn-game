@@ -1,0 +1,16 @@
+{
+  "id": "information-sea",
+  "version": "information-sea-v1",
+  "title": "信息之海",
+  "status": "draft",
+  "completion_kind": "exploration-not-mastery",
+  "nodes": [
+    {"id": "mask", "title": "回声小岛", "kind": "main", "requires": [], "entity_ids": ["entity-0068"]},
+    {"id": "prism", "title": "分光台", "kind": "main", "requires": ["mask"], "entity_ids": ["entity-0142", "entity-0147"]},
+    {"id": "query", "title": "寻光镜", "kind": "main", "requires": ["prism"], "entity_ids": ["entity-0143"]},
+    {"id": "heads", "title": "双镜湾", "kind": "side", "requires": ["query"], "entity_ids": ["entity-0064"]},
+    {"id": "beacon", "title": "归航灯塔", "kind": "finale", "requires": ["query"], "entity_ids": ["entity-0068", "entity-0143"]}
+  ],
+  "main_path": ["mask", "prism", "query", "beacon"],
+  "notes": "这是局部游戏章节的探索顺序，不代表所有概念的数学硬性先修。双镜湾为可选支线，不阻塞主线终点。"
+}

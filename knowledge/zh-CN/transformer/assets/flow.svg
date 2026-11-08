@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1520" height="1080" viewBox="0 0 1520 1080">
+<title>Transformer教学变体：共享前向、训练分支和生成分支</title>
+<desc>顶部追踪编号到分数，中间展开Pre-Norm模块，下面分别说明标签、损失、反向更新和生成。示例为一层双头小模型。</desc>
+<rect width="100%" height="100%" fill="#f7f9fc"/>
+<text x="40" y="56" fill="#172b4d" font-size="31" font-family="Microsoft YaHei, sans-serif">Transformer：先看同一条前向，再分清训练与生成</text>
+<text x="40" y="97" fill="#172b4d" font-size="20" font-family="Microsoft YaHei, sans-serif">本项目教学变体：一层 / 两个头 / d=8 / Pre-Norm / 正弦位置 / 无缓存</text>
+<text x="40" y="144" fill="#172b4d" font-size="20" font-family="Microsoft YaHei, sans-serif">共享前向：B=批次大小，T=当前长度，V=词表大小</text>
+<rect x="40" y="165" width="260" height="120" rx="12" fill="#e8f0fc" stroke="#8294ad" stroke-width="2"/>
+<text x="55" y="202" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">token 编号</text>
+<text x="55" y="235" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">输入 [B, T]</text>
+<text x="55" y="263" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">先明确切分规则</text>
+<line x1="304" y1="225" x2="336" y2="225" stroke="#435c7d" stroke-width="3"/>
+<polygon points="336,225 326,219 326,231" fill="#435c7d"/>
+<rect x="340" y="165" width="260" height="120" rx="12" fill="#e8f0fc" stroke="#8294ad" stroke-width="2"/>
+<text x="355" y="202" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">嵌入查表</text>
+<text x="355" y="235" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">[B, T, 8]</text>
+<text x="355" y="263" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">编号不等于向量</text>
+<line x1="604" y1="225" x2="636" y2="225" stroke="#435c7d" stroke-width="3"/>
+<polygon points="636,225 626,219 626,231" fill="#435c7d"/>
+<rect x="640" y="165" width="260" height="120" rx="12" fill="#e8f0fc" stroke="#8294ad" stroke-width="2"/>
+<text x="655" y="202" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">加入位置信息</text>
+<text x="655" y="235" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">[B, T, 8]</text>
+<text x="655" y="263" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">本例采用逐元素相加</text>
+<line x1="904" y1="225" x2="936" y2="225" stroke="#435c7d" stroke-width="3"/>
+<polygon points="936,225 926,219 926,231" fill="#435c7d"/>
+<rect x="940" y="165" width="260" height="120" rx="12" fill="#e8f0fc" stroke="#8294ad" stroke-width="2"/>
+<text x="955" y="202" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">因果 Decoder Block</text>
+<text x="955" y="235" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">[B, T, 8]</text>
+<text x="955" y="263" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">只访问允许的键</text>
+<line x1="1204" y1="225" x2="1236" y2="225" stroke="#435c7d" stroke-width="3"/>
+<polygon points="1236,225 1226,219 1226,231" fill="#435c7d"/>
+<rect x="1240" y="165" width="260" height="120" rx="12" fill="#e8f0fc" stroke="#8294ad" stroke-width="2"/>
+<text x="1255" y="202" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">最终归一化与输出</text>
+<text x="1255" y="235" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">logits: [B, T, V]</text>
+<text x="1255" y="263" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">分数不是概率</text>
+<text x="40" y="343" fill="#172b4d" font-size="23" font-family="Microsoft YaHei, sans-serif">展开一个 Block：本例采用归一化在前的教学结构</text>
+<rect x="40" y="365" width="215" height="120" rx="12" fill="#edf1f7" stroke="#8294ad" stroke-width="2"/>
+<text x="55" y="402" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">LayerNorm</text>
+<text x="55" y="435" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">沿特征维归一化</text>
+<text x="55" y="463" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">输入 → 归一化结果</text>
+<line x1="258" y1="425" x2="281" y2="425" stroke="#435c7d" stroke-width="3"/>
+<polygon points="281,425 271,419 271,431" fill="#435c7d"/>
+<rect x="285" y="365" width="215" height="120" rx="12" fill="#edf1f7" stroke="#8294ad" stroke-width="2"/>
+<text x="300" y="402" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">多头注意力</text>
+<text x="300" y="435" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">Q/K/V · 掩码</text>
+<text x="300" y="463" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">汇聚 → 拼接 → 投影</text>
+<line x1="503" y1="425" x2="526" y2="425" stroke="#435c7d" stroke-width="3"/>
+<polygon points="526,425 516,419 516,431" fill="#435c7d"/>
+<rect x="530" y="365" width="215" height="120" rx="12" fill="#edf1f7" stroke="#8294ad" stroke-width="2"/>
+<text x="545" y="402" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">残差相加</text>
+<text x="545" y="435" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">加回本段输入</text>
+<text x="545" y="463" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">恢复到 [B,T,8]</text>
+<line x1="748" y1="425" x2="771" y2="425" stroke="#435c7d" stroke-width="3"/>
+<polygon points="771,425 761,419 761,431" fill="#435c7d"/>
+<rect x="775" y="365" width="215" height="120" rx="12" fill="#edf1f7" stroke="#8294ad" stroke-width="2"/>
+<text x="790" y="402" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">LayerNorm</text>
+<text x="790" y="435" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">进入前馈分支</text>
+<text x="790" y="463" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">再沿特征维归一化</text>
+<line x1="993" y1="425" x2="1016" y2="425" stroke="#435c7d" stroke-width="3"/>
+<polygon points="1016,425 1006,419 1006,431" fill="#435c7d"/>
+<rect x="1020" y="365" width="215" height="120" rx="12" fill="#edf1f7" stroke="#8294ad" stroke-width="2"/>
+<text x="1035" y="402" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">FFN</text>
+<text x="1035" y="435" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">8 → 16 → 8</text>
+<text x="1035" y="463" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">逐位置非线性变换</text>
+<line x1="1238" y1="425" x2="1261" y2="425" stroke="#435c7d" stroke-width="3"/>
+<polygon points="1261,425 1251,419 1251,431" fill="#435c7d"/>
+<rect x="1265" y="365" width="215" height="120" rx="12" fill="#edf1f7" stroke="#8294ad" stroke-width="2"/>
+<text x="1280" y="402" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">残差相加</text>
+<text x="1280" y="435" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">加回前馈分支输入</text>
+<text x="1280" y="463" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">输出仍为 [B,T,8]</text>
+<text x="40" y="528" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">上面是模块数据流；残差的跳接公式与完整张量形状见专题正文。</text>
+<text x="40" y="591" fill="#245a40" font-size="24" font-family="Microsoft YaHei, sans-serif">训练分支：用真实序列构造下一位置的监督信号</text>
+<rect x="40" y="615" width="430" height="125" rx="12" fill="#e4f3e9" stroke="#8294ad" stroke-width="2"/>
+<text x="55" y="652" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">下一位对齐</text>
+<text x="55" y="685" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">输入 [1,2,3,4,5]</text>
+<text x="55" y="713" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">目标 [2,3,4,5,6]</text>
+<rect x="540" y="615" width="430" height="125" rx="12" fill="#e4f3e9" stroke="#8294ad" stroke-width="2"/>
+<text x="555" y="652" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">交叉熵损失</text>
+<text x="555" y="685" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">共享前向 logits + 对应目标</text>
+<text x="555" y="713" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">只聚合有效监督位置</text>
+<rect x="1040" y="615" width="430" height="125" rx="12" fill="#e4f3e9" stroke="#8294ad" stroke-width="2"/>
+<text x="1055" y="652" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">反向与更新</text>
+<text x="1055" y="685" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">求梯度 → 优化器更新参数</text>
+<text x="1055" y="713" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">训练损失 ≠ 独立测试质量</text>
+<line x1="475" y1="677" x2="535" y2="677" stroke="#435c7d" stroke-width="3"/>
+<polygon points="535,677 525,671 525,683" fill="#435c7d"/>
+<line x1="975" y1="677" x2="1035" y2="677" stroke="#435c7d" stroke-width="3"/>
+<polygon points="1035,677 1025,671 1025,683" fill="#435c7d"/>
+<text x="40" y="819" fill="#78541a" font-size="24" font-family="Microsoft YaHei, sans-serif">生成分支：只用当前前缀，选择一个新单位再继续</text>
+<rect x="40" y="845" width="430" height="125" rx="12" fill="#fff1d8" stroke="#8294ad" stroke-width="2"/>
+<text x="55" y="882" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">当前前缀</text>
+<text x="55" y="915" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">例如 [1,2]</text>
+<text x="55" y="943" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">执行共享前向</text>
+<rect x="540" y="845" width="430" height="125" rx="12" fill="#fff1d8" stroke="#8294ad" stroke-width="2"/>
+<text x="555" y="882" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">选下一 token</text>
+<text x="555" y="915" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">取最后位置的 logits</text>
+<text x="555" y="943" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">本例 argmax，不回传梯度</text>
+<rect x="1040" y="845" width="430" height="125" rx="12" fill="#fff1d8" stroke="#8294ad" stroke-width="2"/>
+<text x="1055" y="882" fill="#172b4d" font-size="22" font-family="Microsoft YaHei, sans-serif">追加并重复</text>
+<text x="1055" y="915" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">例如 [1,2] → [1,2,3]</text>
+<text x="1055" y="943" fill="#172b4d" font-size="18" font-family="Microsoft YaHei, sans-serif">受位置表长度与步数限制</text>
+<line x1="475" y1="907" x2="535" y2="907" stroke="#435c7d" stroke-width="3"/>
+<polygon points="535,907 525,901 525,913" fill="#435c7d"/>
+<line x1="975" y1="907" x2="1035" y2="907" stroke="#435c7d" stroke-width="3"/>
+<polygon points="1035,907 1025,901 1025,913" fill="#435c7d"/>
+<text x="40" y="1031" fill="#172b4d" font-size="21" font-family="Microsoft YaHei, sans-serif">阅读入口：知识总览 → 模块专题 → 可运行实验 → 独立挑战 → 个人图谱修订</text>
+<text x="40" y="1062" fill="#172b4d" font-size="17" font-family="Microsoft YaHei, sans-serif">仅为教学小模型：没有真实分词、预训练、独立测试结论或现代大模型能力认证。</text>
+</svg>

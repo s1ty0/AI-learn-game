@@ -1,0 +1,90 @@
+{
+  "schema_version": "0.1.0",
+  "kind": "assessment",
+  "topic_id": "topic-transformer",
+  "items": [
+    {
+      "id": "TF-A01",
+      "family_id": "tf-head-shapes",
+      "module_ids": [
+        "TF-M02",
+        "TF-M03"
+      ],
+      "status": "draft",
+      "entity_ids": [
+        "entity-0064",
+        "entity-0058"
+      ],
+      "prompt": "独立变式：B=2、T=3、d=12、h=3；无偏置标准多头。写Q/K/V分头、权重、拼接输出形状与注意力投影参数量。若输出变成d=10，能否直接加到原输入？",
+      "required_points": [
+        "每个Q/K/V分头为2×3×3×4，轴依次批次/头/序列/头宽",
+        "权重为2×3×3×3，拼接后2×3×12",
+        "QKV与输出投影参数共4×12²=576",
+        "输出宽度10不能直接残差加到宽度12，需显式投影或重设结构"
+      ],
+      "critical_errors": [
+        "拆错序列与头轴",
+        "仅凭能广播就认定残差正确"
+      ],
+      "remediation_module_ids": [
+        "TF-M02",
+        "TF-M03"
+      ]
+    },
+    {
+      "id": "TF-A02",
+      "family_id": "tf-leakage",
+      "module_ids": [
+        "TF-M02",
+        "TF-M04"
+      ],
+      "status": "draft",
+      "entity_ids": [
+        "entity-0068",
+        "entity-0078"
+      ],
+      "prompt": "某模型训练损失很好，但固定前两项、改变后续输入时前两位置分数也变化。请提出可验证的解释和下一次最小实验。",
+      "required_points": [
+        "将未来访问或其他跨位置泄漏作为待验证原因，不仅凭现象唯一归因",
+        "固定参数和前缀，检查因果权重及掩码开关的对照",
+        "修复后复验前缀输出不依赖未来，但不把此项通过当作泛化证明"
+      ],
+      "critical_errors": [
+        "仅用损失低证明实现正确",
+        "把屏蔽损失当作屏蔽注意力"
+      ],
+      "remediation_module_ids": [
+        "TF-M02",
+        "TF-M04"
+      ]
+    },
+    {
+      "id": "TF-A03",
+      "family_id": "tf-alignment",
+      "module_ids": [
+        "TF-M01",
+        "TF-M04"
+      ],
+      "status": "draft",
+      "entity_ids": [
+        "entity-0144",
+        "entity-0016",
+        "entity-0078"
+      ],
+      "prompt": "完整序列[2,5,1,4]。写训练输入与目标。若最后一个目标被标为-100，哪几项贡献损失？从前缀[2,5]生成时取哪个位置的分数？",
+      "required_points": [
+        "输入[2,5,1]，目标[5,1,4]，忽略后目标[5,1,-100]",
+        "仅前两个监督位置贡献损失；忽略标记不自动改变注意力可见性",
+        "取当前前缀最后位置分数，选择新编号并追加；不用真实未来目标作为生成输入"
+      ],
+      "critical_errors": [
+        "输入与目标完全相同",
+        "把编号距离解释为语义距离"
+      ],
+      "remediation_module_ids": [
+        "TF-M01",
+        "TF-M04"
+      ]
+    }
+  ]
+}

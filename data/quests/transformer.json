@@ -1,0 +1,191 @@
+{
+  "schema_version": "0.1.0",
+  "kind": "practice",
+  "topic_id": "topic-transformer",
+  "items": [
+    {
+      "id": "TF-Q01",
+      "module_id": "TF-M01",
+      "goal": "编号与向量的区别",
+      "prompt": "查出[1,2,1]对应的玩具嵌入行，说明重复编号会怎样。",
+      "entity_ids": [
+        "entity-0144"
+      ],
+      "status": "draft",
+      "hint": "先找编号对应的表行，不比较编号大小。",
+      "phases": [
+        "predict",
+        "operate",
+        "explain",
+        "revise_graph"
+      ],
+      "completion_evidence": [
+        "独立预测与操作记录",
+        "解释关键关系",
+        "个人图谱修订提案"
+      ],
+      "routing_note": "练习提示不作为独立掌握证据，尚未接入自适应引擎。"
+    },
+    {
+      "id": "TF-Q02",
+      "module_id": "TF-M01",
+      "goal": "单位与位置信息的区别",
+      "prompt": "比较同一编号在位置0与1处查表后、加位置后的表示。",
+      "entity_ids": [
+        "entity-0069"
+      ],
+      "status": "draft",
+      "hint": "先分开看嵌入项与位置项。",
+      "phases": [
+        "predict",
+        "operate",
+        "explain",
+        "revise_graph"
+      ],
+      "completion_evidence": [
+        "独立预测与操作记录",
+        "解释关键关系",
+        "个人图谱修订提案"
+      ],
+      "routing_note": "练习提示不作为独立掌握证据，尚未接入自适应引擎。"
+    },
+    {
+      "id": "TF-Q03",
+      "module_id": "TF-M02",
+      "goal": "分头与拼接的维度",
+      "prompt": "输入B×T×8、头数2，逐步填写Q/K/V及汇聚输出形状。",
+      "entity_ids": [
+        "entity-0064"
+      ],
+      "status": "draft",
+      "hint": "分头只拆特征宽度，不拆序列位置。",
+      "phases": [
+        "predict",
+        "operate",
+        "explain",
+        "revise_graph"
+      ],
+      "completion_evidence": [
+        "独立预测与操作记录",
+        "解释关键关系",
+        "个人图谱修订提案"
+      ],
+      "routing_note": "练习提示不作为独立掌握证据，尚未接入自适应引擎。"
+    },
+    {
+      "id": "TF-Q04",
+      "module_id": "TF-M02",
+      "goal": "未来不可见的实验证据",
+      "prompt": "只改变后两个输入编号，预测前两个位置输出是否变化，再运行核查。",
+      "entity_ids": [
+        "entity-0068"
+      ],
+      "status": "draft",
+      "hint": "先列出每个查询允许访问的键。",
+      "phases": [
+        "predict",
+        "operate",
+        "explain",
+        "revise_graph"
+      ],
+      "completion_evidence": [
+        "独立预测与操作记录",
+        "解释关键关系",
+        "个人图谱修订提案"
+      ],
+      "routing_note": "练习提示不作为独立掌握证据，尚未接入自适应引擎。"
+    },
+    {
+      "id": "TF-Q05",
+      "module_id": "TF-M03",
+      "goal": "位置汇聚与逐位置变换",
+      "prompt": "固定模块输入，只改变一个位置送入FFN的向量，预测直接影响范围。",
+      "entity_ids": [
+        "entity-0148"
+      ],
+      "status": "draft",
+      "hint": "区分直接读取与此前已经汇聚的信息。",
+      "phases": [
+        "predict",
+        "operate",
+        "explain",
+        "revise_graph"
+      ],
+      "completion_evidence": [
+        "独立预测与操作记录",
+        "解释关键关系",
+        "个人图谱修订提案"
+      ],
+      "routing_note": "练习提示不作为独立掌握证据，尚未接入自适应引擎。"
+    },
+    {
+      "id": "TF-Q06",
+      "module_id": "TF-M04",
+      "goal": "下一位目标对齐",
+      "prompt": "对[1,2,3,4,5,6]写出输入与监督标签，解释因果可见性。",
+      "entity_ids": [
+        "entity-0078"
+      ],
+      "status": "draft",
+      "hint": "为输入的每个位置单独写下一编号。",
+      "phases": [
+        "predict",
+        "operate",
+        "explain",
+        "revise_graph"
+      ],
+      "completion_evidence": [
+        "独立预测与操作记录",
+        "解释关键关系",
+        "个人图谱修订提案"
+      ],
+      "routing_note": "练习提示不作为独立掌握证据，尚未接入自适应引擎。"
+    },
+    {
+      "id": "TF-Q07",
+      "module_id": "TF-M04",
+      "goal": "损失忽略与掩码的职责",
+      "prompt": "将目标设置为-100后，判断它会不会自动屏蔽注意力读取。",
+      "entity_ids": [
+        "entity-0016"
+      ],
+      "status": "draft",
+      "hint": "分别画出注意力计算和损失计算的作用位置。",
+      "phases": [
+        "predict",
+        "operate",
+        "explain",
+        "revise_graph"
+      ],
+      "completion_evidence": [
+        "独立预测与操作记录",
+        "解释关键关系",
+        "个人图谱修订提案"
+      ],
+      "routing_note": "练习提示不作为独立掌握证据，尚未接入自适应引擎。"
+    },
+    {
+      "id": "TF-Q08",
+      "module_id": "TF-M04",
+      "goal": "生成取值与追加",
+      "prompt": "从前缀[1,2]开始，说明取哪个位置的分数、怎样追加和继续。",
+      "entity_ids": [
+        "entity-0078"
+      ],
+      "status": "draft",
+      "hint": "区分已有前缀位置与待生成位置。",
+      "phases": [
+        "predict",
+        "operate",
+        "explain",
+        "revise_graph"
+      ],
+      "completion_evidence": [
+        "独立预测与操作记录",
+        "解释关键关系",
+        "个人图谱修订提案"
+      ],
+      "routing_note": "练习提示不作为独立掌握证据，尚未接入自适应引擎。"
+    }
+  ]
+}

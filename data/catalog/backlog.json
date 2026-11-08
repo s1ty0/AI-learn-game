@@ -1,0 +1,86 @@
+{
+  "schema_version": "0.1.0",
+  "dataset_version": "0.1.4",
+  "kind": "backlog",
+  "updated_on": "2026-11-07",
+  "items": [
+    {
+      "id": "issue-001",
+      "title": "核查损失、梯度、更新与 L2 的定义、公式和符号",
+      "entity_ids": [
+        "entity-0138",
+        "entity-0022",
+        "entity-0035"
+      ],
+      "issue_type": "content_review",
+      "status": "open",
+      "created_on": "2026-11-07"
+    },
+    {
+      "id": "issue-002",
+      "title": "核查 Transformer 原始论文正文并拆分模块关系",
+      "entity_ids": [
+        "entity-0065"
+      ],
+      "issue_type": "content_review",
+      "status": "open",
+      "created_on": "2026-11-07"
+    },
+    {
+      "id": "issue-003",
+      "title": "为已登记但缺少来源的实体寻找一手依据",
+      "entity_ids": [],
+      "issue_type": "source_gap",
+      "status": "open",
+      "created_on": "2026-11-07"
+    },
+    {
+      "id": "issue-004",
+      "title": "寻找并审核通俗中文讲解与可复用范围",
+      "entity_ids": [],
+      "issue_type": "teaching_source_gap",
+      "status": "open",
+      "created_on": "2026-11-07"
+    },
+    {
+      "id": "issue-005",
+      "title": "逐项核查来源授权，当前不导入全文",
+      "entity_ids": [],
+      "issue_type": "reuse_review",
+      "status": "open",
+      "created_on": "2026-11-07"
+    },
+    {
+      "id": "issue-006",
+      "title": "定义首批算法目标的硬性先修与替代路线",
+      "entity_ids": [
+        "entity-0022",
+        "entity-0035",
+        "entity-0065"
+      ],
+      "issue_type": "prerequisite_design",
+      "status": "open",
+      "created_on": "2026-11-07"
+    },
+    {
+      "id": "issue-007",
+      "title": "补数学基础、视觉、语音等分支的细粒度条目",
+      "entity_ids": [],
+      "issue_type": "coverage_gap",
+      "status": "open",
+      "created_on": "2026-11-07"
+    },
+    {
+      "id": "issue-008",
+      "title": "建立算法交互实验与独立评价样本",
+      "entity_ids": [
+        "entity-0138",
+        "entity-0022",
+        "entity-0035"
+      ],
+      "issue_type": "game_design",
+      "status": "open",
+      "created_on": "2026-11-07"
+    }
+  ]
+}

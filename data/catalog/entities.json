@@ -1,0 +1,2663 @@
+{
+  "schema_version": "0.1.0",
+  "dataset_version": "0.1.4",
+  "kind": "entities",
+  "updated_on": "2026-11-07",
+  "items": [
+    {
+      "id": "entity-0001",
+      "name": "向量",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0002",
+      "name": "矩阵",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0003",
+      "name": "张量",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0004",
+      "name": "导数",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-017",
+          "locator": "2.4.2偏导与2.4.3梯度定义；未核查全章练习",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0005",
+      "name": "偏导",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-017",
+          "locator": "2.4.2偏导与2.4.3梯度定义；未核查全章练习",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0006",
+      "name": "梯度",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-009",
+          "locator": "Minibatch SGD; equation 3.1.10（具体概念覆盖待复核）",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-017",
+          "locator": "2.4.2偏导与2.4.3梯度定义；未核查全章练习",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-023",
+          "locator": "数值计算与梯度优化的部分章节；未逐式审校",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0007",
+      "name": "链式法则",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0008",
+      "name": "概率",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0009",
+      "name": "期望",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0010",
+      "name": "似然",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0011",
+      "name": "熵",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0012",
+      "name": "KL 散度",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0013",
+      "name": "数值稳定性",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0014",
+      "name": "均方误差",
+      "aliases": [
+        "Mean Squared Error",
+        "MSE"
+      ],
+      "entity_type": "objective",
+      "domain_ids": [
+        "domain-002"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-001",
+          "locator": "Loss Functions / nn.MSELoss",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-016",
+          "locator": "3.1.1.2损失函数及平方误差公式；不覆盖全章主张",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0015",
+      "name": "平均绝对误差",
+      "aliases": [],
+      "entity_type": "objective",
+      "domain_ids": [
+        "domain-002"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-001",
+          "locator": "Loss Functions / nn.L1Loss",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0016",
+      "name": "交叉熵",
+      "aliases": [
+        "Cross Entropy"
+      ],
+      "entity_type": "objective",
+      "domain_ids": [
+        "domain-002"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-001",
+          "locator": "Loss Functions / nn.CrossEntropyLoss",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-020",
+          "locator": "接口说明中输入logits、类别目标与损失定义；未运行接口",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-024",
+          "locator": "章节引言及输出目标相关内容定位；未完整审校全章",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0017",
+      "name": "负对数似然",
+      "aliases": [
+        "Negative Log-Likelihood",
+        "NLL"
+      ],
+      "entity_type": "objective",
+      "domain_ids": [
+        "domain-002"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0018",
+      "name": "Huber 损失",
+      "aliases": [],
+      "entity_type": "objective",
+      "domain_ids": [
+        "domain-002"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0019",
+      "name": "对比损失",
+      "aliases": [],
+      "entity_type": "objective",
+      "domain_ids": [
+        "domain-002"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0020",
+      "name": "InfoNCE",
+      "aliases": [],
+      "entity_type": "objective",
+      "domain_ids": [
+        "domain-002"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0021",
+      "name": "排序损失",
+      "aliases": [],
+      "entity_type": "objective",
+      "domain_ids": [
+        "domain-002"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0022",
+      "name": "梯度下降",
+      "aliases": [
+        "Gradient Descent",
+        "GD"
+      ],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-009",
+          "locator": "Minibatch SGD; equation 3.1.10（具体概念覆盖待复核）",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-012",
+          "locator": "11.3.1、学习率及11.3.2的更新与边界；未运行教材代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-021",
+          "locator": "章节引言、病态条件与优化器目录；未完整审校全章",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0023",
+      "name": "随机梯度下降",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-002",
+          "locator": "Algorithms / 随机梯度下降（名称映射待复核）",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0024",
+      "name": "小批量梯度下降",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-009",
+          "locator": "Minibatch SGD; equation 3.1.10（具体概念覆盖待复核）",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0025",
+      "name": "Momentum",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-021",
+          "locator": "章节引言、病态条件与优化器目录；未完整审校全章",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0026",
+      "name": "Nesterov",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0027",
+      "name": "AdaGrad",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-002",
+          "locator": "Algorithms / AdaGrad（名称映射待复核）",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0028",
+      "name": "RMSProp",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-002",
+          "locator": "Algorithms / RMSProp（名称映射待复核）",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0029",
+      "name": "Adam",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-002",
+          "locator": "Algorithms / Adam（名称映射待复核）",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-021",
+          "locator": "章节引言、病态条件与优化器目录；未完整审校全章",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0030",
+      "name": "AdamW",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-002",
+          "locator": "Algorithms / AdamW（名称映射待复核）",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-004",
+          "locator": "Abstract: optimizer-dependent equivalence distinction",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-029",
+          "locator": "接口、更新伪代码、参数组及衰减说明；未运行框架实现",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0031",
+      "name": "学习率调度",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0032",
+      "name": "预热",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0033",
+      "name": "梯度裁剪",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0034",
+      "name": "L1 正则",
+      "aliases": [
+        "L1 正则化",
+        "L1 regularization"
+      ],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-004"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-022",
+          "locator": "引言及L2惩罚与曲率方向的部分分析；未完整审校全章",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0035",
+      "name": "L2 正则",
+      "aliases": [
+        "L2 正则化",
+        "L2 regularization"
+      ],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-004"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-004",
+          "locator": "Abstract: optimizer-dependent equivalence distinction",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-008",
+          "locator": "3.7.1 Norms and Weight Decay; 3.7.5 Summary",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-013",
+          "locator": "公式4.5.1—4.5.3及L2惩罚说明；实现未复现",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-022",
+          "locator": "引言及L2惩罚与曲率方向的部分分析；未完整审校全章",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0036",
+      "name": "权重衰减",
+      "aliases": [
+        "Weight Decay"
+      ],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-004"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-004",
+          "locator": "Abstract: optimizer-dependent equivalence distinction",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-013",
+          "locator": "公式4.5.1—4.5.3及L2惩罚说明；实现未复现",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-029",
+          "locator": "接口、更新伪代码、参数组及衰减说明；未运行框架实现",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0037",
+      "name": "Dropout",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-004"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0038",
+      "name": "早停",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-004"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0039",
+      "name": "数据增强",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-004"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0040",
+      "name": "标签平滑",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-004"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0041",
+      "name": "线性回归",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-005"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-009",
+          "locator": "Minibatch SGD; equation 3.1.10（具体概念覆盖待复核）",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-016",
+          "locator": "3.1.1.2损失函数及平方误差公式；不覆盖全章主张",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0042",
+      "name": "逻辑回归",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-005"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0043",
+      "name": "决策树",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-005"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0044",
+      "name": "随机森林",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-005"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0045",
+      "name": "梯度提升",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-005"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0046",
+      "name": "支持向量机",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-005"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0047",
+      "name": "最近邻",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-005"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0048",
+      "name": "朴素贝叶斯",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-005"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0049",
+      "name": "K-means",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-005"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0050",
+      "name": "主成分分析",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-005"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0051",
+      "name": "多层感知机",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0052",
+      "name": "反向传播",
+      "aliases": [
+        "Backpropagation"
+      ],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0053",
+      "name": "激活函数",
+      "aliases": [],
+      "entity_type": "function_family",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0054",
+      "name": "初始化",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0055",
+      "name": "批归一化",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0056",
+      "name": "层归一化",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-014",
+          "locator": "10.7.1模型及子模块目录；未核查全部代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-042",
+          "locator": "归一化轴、方差约定、仿射参数及训练/评估行为",
+          "purpose": "implementation",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0057",
+      "name": "RMSNorm",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0058",
+      "name": "残差连接",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-014",
+          "locator": "10.7.1模型及子模块目录；未核查全部代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0059",
+      "name": "RNN",
+      "aliases": [],
+      "entity_type": "architecture",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0060",
+      "name": "LSTM",
+      "aliases": [],
+      "entity_type": "architecture",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0061",
+      "name": "GRU",
+      "aliases": [],
+      "entity_type": "architecture",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0062",
+      "name": "自注意力",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-003",
+          "locator": "摘要与待核查的架构正文；摘要不足以验证模块细节",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-027",
+          "locator": "自注意力及位置机制的部分说明；未完整审校代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0063",
+      "name": "交叉注意力",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0064",
+      "name": "多头注意力",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-003",
+          "locator": "摘要与待核查的架构正文；摘要不足以验证模块细节",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-014",
+          "locator": "10.7.1模型及子模块目录；未核查全部代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-026",
+          "locator": "多头结构和投影说明；未运行教材实现",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0065",
+      "name": "Transformer",
+      "aliases": [
+        "Transformer architecture"
+      ],
+      "entity_type": "architecture",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-003",
+          "locator": "摘要与待核查的架构正文；摘要不足以验证模块细节",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-014",
+          "locator": "10.7.1模型及子模块目录；未核查全部代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-026",
+          "locator": "多头结构和投影说明；未运行教材实现",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0066",
+      "name": "编码器",
+      "aliases": [],
+      "entity_type": "architecture",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-014",
+          "locator": "10.7.1模型及子模块目录；未核查全部代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0067",
+      "name": "解码器",
+      "aliases": [],
+      "entity_type": "architecture",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-014",
+          "locator": "10.7.1模型及子模块目录；未核查全部代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0068",
+      "name": "因果掩码",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0069",
+      "name": "位置编码",
+      "aliases": [],
+      "entity_type": "representation",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-014",
+          "locator": "10.7.1模型及子模块目录；未核查全部代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-027",
+          "locator": "自注意力及位置机制的部分说明；未完整审校代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0070",
+      "name": "RoPE",
+      "aliases": [],
+      "entity_type": "representation",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0071",
+      "name": "MoE",
+      "aliases": [],
+      "entity_type": "architecture",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0072",
+      "name": "One-hot",
+      "aliases": [],
+      "entity_type": "representation",
+      "domain_ids": [
+        "domain-008"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0073",
+      "name": "词嵌入",
+      "aliases": [],
+      "entity_type": "representation",
+      "domain_ids": [
+        "domain-008"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-015",
+          "locator": "文本到编号、词/字符/子词切分介绍；未运行真实tokenizer",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-041",
+          "locator": "查表、输入编号与输出形状；未逐项核查稀疏梯度等选项",
+          "purpose": "implementation",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0074",
+      "name": "BPE",
+      "aliases": [],
+      "entity_type": "representation",
+      "domain_ids": [
+        "domain-008"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-025",
+          "locator": "BPE、字节级与SentencePiece部分说明；未复现词表训练",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0075",
+      "name": "WordPiece",
+      "aliases": [],
+      "entity_type": "representation",
+      "domain_ids": [
+        "domain-008"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-025",
+          "locator": "BPE、字节级与SentencePiece部分说明；未复现词表训练",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0076",
+      "name": "Unigram 分词",
+      "aliases": [],
+      "entity_type": "representation",
+      "domain_ids": [
+        "domain-008"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-025",
+          "locator": "BPE、字节级与SentencePiece部分说明；未复现词表训练",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0077",
+      "name": "上下文表示",
+      "aliases": [],
+      "entity_type": "representation",
+      "domain_ids": [
+        "domain-008"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0078",
+      "name": "自回归语言建模",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-009"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0079",
+      "name": "掩码语言建模",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-009"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0080",
+      "name": "监督微调",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-009"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0081",
+      "name": "指令微调",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-009"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0082",
+      "name": "LoRA",
+      "aliases": [
+        "Low-Rank Adaptation"
+      ],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-009"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-010",
+          "locator": "Abstract",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0083",
+      "name": "QLoRA",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-009"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0084",
+      "name": "Adapter",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-009"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0085",
+      "name": "提示微调",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-009"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0086",
+      "name": "知识蒸馏",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-009"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0087",
+      "name": "马尔可夫决策过程",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-010"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0088",
+      "name": "价值函数",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-010"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0089",
+      "name": "Q-learning",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-010"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0090",
+      "name": "策略梯度",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-010"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0091",
+      "name": "Actor-Critic",
+      "aliases": [],
+      "entity_type": "algorithm_family",
+      "domain_ids": [
+        "domain-010"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0092",
+      "name": "PPO",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-010"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0093",
+      "name": "奖励模型",
+      "aliases": [],
+      "entity_type": "model_family",
+      "domain_ids": [
+        "domain-010"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0094",
+      "name": "RLHF",
+      "aliases": [],
+      "entity_type": "training_method",
+      "domain_ids": [
+        "domain-010"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0095",
+      "name": "DPO",
+      "aliases": [
+        "Direct Preference Optimization"
+      ],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-010"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-011",
+          "locator": "Abstract",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0096",
+      "name": "自编码器",
+      "aliases": [],
+      "entity_type": "model_family",
+      "domain_ids": [
+        "domain-011"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0097",
+      "name": "VAE",
+      "aliases": [],
+      "entity_type": "model_family",
+      "domain_ids": [
+        "domain-011"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0098",
+      "name": "GAN",
+      "aliases": [],
+      "entity_type": "model_family",
+      "domain_ids": [
+        "domain-011"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0099",
+      "name": "扩散模型",
+      "aliases": [],
+      "entity_type": "model_family",
+      "domain_ids": [
+        "domain-011"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0100",
+      "name": "流匹配",
+      "aliases": [],
+      "entity_type": "model_family",
+      "domain_ids": [
+        "domain-011"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0101",
+      "name": "视觉 Transformer",
+      "aliases": [],
+      "entity_type": "model_family",
+      "domain_ids": [
+        "domain-011"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0102",
+      "name": "跨模态对比学习",
+      "aliases": [],
+      "entity_type": "model_family",
+      "domain_ids": [
+        "domain-011"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0103",
+      "name": "贪心解码",
+      "aliases": [],
+      "entity_type": "inference_method",
+      "domain_ids": [
+        "domain-012"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0104",
+      "name": "束搜索",
+      "aliases": [],
+      "entity_type": "inference_method",
+      "domain_ids": [
+        "domain-012"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0105",
+      "name": "温度采样",
+      "aliases": [],
+      "entity_type": "inference_method",
+      "domain_ids": [
+        "domain-012"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0106",
+      "name": "Top-k",
+      "aliases": [],
+      "entity_type": "inference_method",
+      "domain_ids": [
+        "domain-012"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0107",
+      "name": "Top-p",
+      "aliases": [],
+      "entity_type": "inference_method",
+      "domain_ids": [
+        "domain-012"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0108",
+      "name": "KV 缓存",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-012"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0109",
+      "name": "量化",
+      "aliases": [],
+      "entity_type": "compression_method",
+      "domain_ids": [
+        "domain-012"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0110",
+      "name": "剪枝",
+      "aliases": [],
+      "entity_type": "compression_method",
+      "domain_ids": [
+        "domain-012"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0111",
+      "name": "投机解码",
+      "aliases": [],
+      "entity_type": "inference_method",
+      "domain_ids": [
+        "domain-012"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0112",
+      "name": "FlashAttention",
+      "aliases": [],
+      "entity_type": "algorithm",
+      "domain_ids": [
+        "domain-012"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0113",
+      "name": "划分与交叉验证",
+      "aliases": [],
+      "entity_type": "evaluation_method",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0114",
+      "name": "数据泄漏",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0115",
+      "name": "去重",
+      "aliases": [],
+      "entity_type": "data_method",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0116",
+      "name": "准确率",
+      "aliases": [],
+      "entity_type": "metric",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0117",
+      "name": "精确率",
+      "aliases": [],
+      "entity_type": "metric",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0118",
+      "name": "召回率",
+      "aliases": [],
+      "entity_type": "metric",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0119",
+      "name": "F1",
+      "aliases": [],
+      "entity_type": "metric",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0120",
+      "name": "校准",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0121",
+      "name": "困惑度",
+      "aliases": [],
+      "entity_type": "metric",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0122",
+      "name": "对照实验",
+      "aliases": [],
+      "entity_type": "evaluation_method",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0123",
+      "name": "消融",
+      "aliases": [],
+      "entity_type": "evaluation_method",
+      "domain_ids": [
+        "domain-013"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0124",
+      "name": "向量检索",
+      "aliases": [],
+      "entity_type": "system_mechanism",
+      "domain_ids": [
+        "domain-014"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0125",
+      "name": "近似最近邻",
+      "aliases": [],
+      "entity_type": "system_mechanism",
+      "domain_ids": [
+        "domain-014"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0126",
+      "name": "重排",
+      "aliases": [],
+      "entity_type": "system_mechanism",
+      "domain_ids": [
+        "domain-014"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0127",
+      "name": "检索增强生成",
+      "aliases": [
+        "Retrieval-Augmented Generation",
+        "RAG"
+      ],
+      "entity_type": "system_mechanism",
+      "domain_ids": [
+        "domain-014"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0128",
+      "name": "工具调用",
+      "aliases": [],
+      "entity_type": "system_mechanism",
+      "domain_ids": [
+        "domain-014"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0129",
+      "name": "工作流",
+      "aliases": [],
+      "entity_type": "system_mechanism",
+      "domain_ids": [
+        "domain-014"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0130",
+      "name": "智能体",
+      "aliases": [],
+      "entity_type": "system_mechanism",
+      "domain_ids": [
+        "domain-014"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0131",
+      "name": "视觉",
+      "aliases": [],
+      "entity_type": "domain",
+      "domain_ids": [
+        "domain-015"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0132",
+      "name": "语音",
+      "aliases": [],
+      "entity_type": "domain",
+      "domain_ids": [
+        "domain-015"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0133",
+      "name": "推荐",
+      "aliases": [],
+      "entity_type": "domain",
+      "domain_ids": [
+        "domain-015"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0134",
+      "name": "图学习",
+      "aliases": [],
+      "entity_type": "domain",
+      "domain_ids": [
+        "domain-015"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0135",
+      "name": "时间序列",
+      "aliases": [],
+      "entity_type": "domain",
+      "domain_ids": [
+        "domain-015"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0136",
+      "name": "因果推断",
+      "aliases": [],
+      "entity_type": "domain",
+      "domain_ids": [
+        "domain-015"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0137",
+      "name": "安全与鲁棒性",
+      "aliases": [],
+      "entity_type": "domain",
+      "domain_ids": [
+        "domain-015"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "目录种子；分类、定义、关系和教学内容均待逐项核查。"
+    },
+    {
+      "id": "entity-0138",
+      "name": "损失函数",
+      "aliases": [],
+      "entity_type": "function_family",
+      "domain_ids": [
+        "domain-002"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-016",
+          "locator": "3.1.1.2损失函数及平方误差公式；不覆盖全章主张",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-024",
+          "locator": "章节引言及输出目标相关内容定位；未完整审校全章",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "用于建立核心关系的候选实体，待核查。"
+    },
+    {
+      "id": "entity-0139",
+      "name": "目标函数",
+      "aliases": [],
+      "entity_type": "function_family",
+      "domain_ids": [
+        "domain-002"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-013",
+          "locator": "公式4.5.1—4.5.3及L2惩罚说明；实现未复现",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "用于建立核心关系的候选实体，待核查。"
+    },
+    {
+      "id": "entity-0140",
+      "name": "模型参数",
+      "aliases": [],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "用于建立核心关系的候选实体，待核查。"
+    },
+    {
+      "id": "entity-0141",
+      "name": "学习率",
+      "aliases": [],
+      "entity_type": "hyperparameter",
+      "domain_ids": [
+        "domain-003"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-009",
+          "locator": "Minibatch SGD; equation 3.1.10（具体概念覆盖待复核）",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-012",
+          "locator": "11.3.1、学习率及11.3.2的更新与边界；未运行教材代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "用于建立核心关系的候选实体，待核查。"
+    },
+    {
+      "id": "entity-0142",
+      "name": "Softmax",
+      "aliases": [],
+      "entity_type": "function",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-018",
+          "locator": "章节引言及公式10.3.1—10.3.2；未核查全部代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-019",
+          "locator": "3.4.2未归一化分数与3.4.4概率约束；未核查全章",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "用于建立核心关系的候选实体，待核查。"
+    },
+    {
+      "id": "entity-0143",
+      "name": "缩放点积注意力",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-028",
+          "locator": "函数参考、缩放/布尔掩码语义、dropout和实现选择；未运行PyTorch内核",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "用于建立核心关系的候选实体，待核查。"
+    },
+    {
+      "id": "entity-0144",
+      "name": "token",
+      "aliases": [
+        "词元",
+        "文本处理单位"
+      ],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-008"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-015",
+          "locator": "文本到编号、词/字符/子词切分介绍；未运行真实tokenizer",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-025",
+          "locator": "BPE、字节级与SentencePiece部分说明；未复现词表训练",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "中文版增补实体；正式定义、全部变体和任务仍待审校。"
+    },
+    {
+      "id": "entity-0145",
+      "name": "tokenizer",
+      "aliases": [
+        "分词器",
+        "标记器"
+      ],
+      "entity_type": "system_mechanism",
+      "domain_ids": [
+        "domain-008"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-015",
+          "locator": "文本到编号、词/字符/子词切分介绍；未运行真实tokenizer",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-025",
+          "locator": "BPE、字节级与SentencePiece部分说明；未复现词表训练",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "中文版增补实体；正式定义、全部变体和任务仍待审校。"
+    },
+    {
+      "id": "entity-0146",
+      "name": "logits",
+      "aliases": [
+        "未归一化分数",
+        "logit"
+      ],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-019",
+          "locator": "3.4.2未归一化分数与3.4.4概率约束；未核查全章",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-020",
+          "locator": "接口说明中输入logits、类别目标与损失定义；未运行接口",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "中文版增补实体；正式定义、全部变体和任务仍待审校。"
+    },
+    {
+      "id": "entity-0147",
+      "name": "注意力机制",
+      "aliases": [
+        "Attention",
+        "attention"
+      ],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-018",
+          "locator": "章节引言及公式10.3.1—10.3.2；未核查全部代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "中文版增补实体；正式定义、全部变体和任务仍待审校。"
+    },
+    {
+      "id": "entity-0148",
+      "name": "前馈网络",
+      "aliases": [
+        "Feed-Forward Network",
+        "FFN"
+      ],
+      "entity_type": "architecture",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-014",
+          "locator": "10.7.1模型及子模块目录；未核查全部代码",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        },
+        {
+          "source_id": "source-024",
+          "locator": "章节引言及输出目标相关内容定位；未完整审校全章",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "中文版增补实体；正式定义、全部变体和任务仍待审校。"
+    },
+    {
+      "id": "entity-0149",
+      "name": "Jacobian",
+      "aliases": [
+        "雅可比矩阵"
+      ],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0150",
+      "name": "Hessian",
+      "aliases": [
+        "海森矩阵"
+      ],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-001"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-023",
+          "locator": "数值计算与梯度优化的部分章节；未逐式审校",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0151",
+      "name": "自动微分",
+      "aliases": [
+        "Automatic Differentiation"
+      ],
+      "entity_type": "algorithm_family",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0152",
+      "name": "预归一化",
+      "aliases": [
+        "Pre-Norm"
+      ],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0153",
+      "name": "后归一化",
+      "aliases": [
+        "Post-Norm"
+      ],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0154",
+      "name": "GQA",
+      "aliases": [
+        "Grouped-Query Attention",
+        "分组查询注意力"
+      ],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-028",
+          "locator": "函数参考、缩放/布尔掩码语义、dropout和实现选择；未运行PyTorch内核",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0155",
+      "name": "MQA",
+      "aliases": [
+        "Multi-Query Attention",
+        "多查询注意力"
+      ],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0156",
+      "name": "SwiGLU",
+      "aliases": [],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0157",
+      "name": "SentencePiece",
+      "aliases": [],
+      "entity_type": "system_mechanism",
+      "domain_ids": [
+        "domain-008"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-025",
+          "locator": "BPE、字节级与SentencePiece部分说明；未复现词表训练",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0158",
+      "name": "填充掩码",
+      "aliases": [
+        "Padding Mask"
+      ],
+      "entity_type": "mechanism",
+      "domain_ids": [
+        "domain-007"
+      ],
+      "content_status": "source_registered",
+      "game_status": "not_designed",
+      "source_links": [
+        {
+          "source_id": "source-028",
+          "locator": "函数参考、缩放/布尔掩码语义、dropout和实现选择；未运行PyTorch内核",
+          "purpose": "candidate_reference",
+          "review_status": "pending"
+        }
+      ],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0159",
+      "name": "梯度消失",
+      "aliases": [
+        "Vanishing Gradients"
+      ],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    },
+    {
+      "id": "entity-0160",
+      "name": "梯度爆炸",
+      "aliases": [
+        "Exploding Gradients"
+      ],
+      "entity_type": "concept",
+      "domain_ids": [
+        "domain-006"
+      ],
+      "content_status": "candidate",
+      "game_status": "not_designed",
+      "source_links": [],
+      "notes": "深入档案发现的覆盖缺口；待独立来源、定义与关系核查。"
+    }
+  ]
+}

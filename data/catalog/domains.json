@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.1.0",
+  "dataset_version": "0.1.4",
+  "kind": "domains",
+  "updated_on": "2026-11-07",
+  "items": [
+    {
+      "id": "domain-001",
+      "name": "数学与数值基础",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-002",
+      "name": "目标与损失",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-003",
+      "name": "优化",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-004",
+      "name": "正则与泛化",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-005",
+      "name": "经典机器学习",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-006",
+      "name": "神经网络基础",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-007",
+      "name": "序列与注意力架构",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-008",
+      "name": "表示与分词",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-009",
+      "name": "预训练与适配",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-010",
+      "name": "偏好学习与强化学习",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-011",
+      "name": "生成模型与多模态",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-012",
+      "name": "推理与效率",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-013",
+      "name": "数据与评估",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-014",
+      "name": "检索与应用机制",
+      "status": "candidate"
+    },
+    {
+      "id": "domain-015",
+      "name": "持续扩展分支",
+      "status": "candidate"
+    }
+  ]
+}

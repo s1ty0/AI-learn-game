@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Transformer topic and task drafts v0.1.0",
+  "type": "object",
+  "required": ["schema_version", "kind"],
+  "properties": {"schema_version": {"const": "0.1.0"}, "kind": {"enum": ["topic", "practice", "assessment"]}},
+  "allOf": [
+    {"if": {"properties": {"kind": {"const": "topic"}}}, "then": {
+      "required": ["id", "locale", "status", "updated_on", "title", "entity_id", "entry_path", "assets", "example_path", "modules", "practice_path", "assessment_path", "limitations"],
+      "properties": {
+        "id": {"const": "topic-transformer"}, "locale": {"const": "zh-CN"}, "status": {"const": "draft"},
+        "updated_on": {"type": "string", "format": "date"}, "title": {"$ref": "#/$defs/text"}, "entity_id": {"$ref": "#/$defs/text"},
+        "entry_path": {"$ref": "#/$defs/text"}, "assets": {"$ref": "#/$defs/refs"}, "example_path": {"$ref": "#/$defs/text"},
+        "practice_path": {"$ref": "#/$defs/text"}, "assessment_path": {"$ref": "#/$defs/text"}, "limitations": {"$ref": "#/$defs/refs"},
+        "modules": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/module"}}
+      }
+    }},
+    {"if": {"properties": {"kind": {"const": "practice"}}}, "then": {
+      "required": ["topic_id", "items"], "properties": {"topic_id": {"const": "topic-transformer"}, "items": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/practice"}}}
+    }},
+    {"if": {"properties": {"kind": {"const": "assessment"}}}, "then": {
+      "required": ["topic_id", "items"], "properties": {"topic_id": {"const": "topic-transformer"}, "items": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/assessment"}}}
+    }}
+  ],
+  "$defs": {
+    "text": {"type": "string", "minLength": 1},
+    "refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/text"}},
+    "module": {"type": "object", "additionalProperties": false, "required": ["id", "title", "path", "entity_ids", "source_ids", "status"],
+      "properties": {"id": {"type": "string", "pattern": "^TF-M[0-9]{2}$"}, "title": {"$ref": "#/$defs/text"}, "path": {"$ref": "#/$defs/text"}, "entity_ids": {"$ref": "#/$defs/refs"}, "source_ids": {"$ref": "#/$defs/refs"}, "status": {"const": "draft"}}},
+    "practice": {"type": "object", "additionalProperties": false, "required": ["id", "module_id", "goal", "prompt", "entity_ids", "status", "hint", "phases", "completion_evidence", "routing_note"],
+      "properties": {"id": {"type": "string", "pattern": "^TF-Q[0-9]{2}$"}, "module_id": {"$ref": "#/$defs/text"}, "goal": {"$ref": "#/$defs/text"}, "prompt": {"$ref": "#/$defs/text"}, "entity_ids": {"$ref": "#/$defs/refs"}, "status": {"const": "draft"}, "hint": {"$ref": "#/$defs/text"}, "phases": {"const": ["predict", "operate", "explain", "revise_graph"]}, "completion_evidence": {"$ref": "#/$defs/refs"}, "routing_note": {"$ref": "#/$defs/text"}}},
+    "assessment": {"type": "object", "additionalProperties": false, "required": ["id", "family_id", "module_ids", "status", "entity_ids", "prompt", "required_points", "critical_errors", "remediation_module_ids"],
+      "properties": {"id": {"type": "string", "pattern": "^TF-A[0-9]{2}$"}, "family_id": {"$ref": "#/$defs/text"}, "module_ids": {"$ref": "#/$defs/refs"}, "status": {"const": "draft"}, "entity_ids": {"$ref": "#/$defs/refs"}, "prompt": {"$ref": "#/$defs/text"}, "required_points": {"$ref": "#/$defs/refs"}, "critical_errors": {"$ref": "#/$defs/refs"}, "remediation_module_ids": {"$ref": "#/$defs/refs"}}}
+  }
+}

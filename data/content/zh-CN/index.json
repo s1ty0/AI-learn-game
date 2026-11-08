@@ -1,0 +1,377 @@
+{
+  "schema_version": "0.2.0",
+  "content_version": "0.2.1",
+  "locale": "zh-CN",
+  "updated_on": "2026-11-07",
+  "language_policy": "docs/language-policy.md",
+  "glossary": [
+    {
+      "entity_id": "entity-0138",
+      "display_name": "损失函数",
+      "first_mention": "损失函数（把任务中的预测或决策偏差转为可计算代价的函数）",
+      "explanation": "把任务中的预测或决策偏差转为可计算代价的函数。",
+      "source_ids": [
+        "source-016"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0006",
+      "display_name": "梯度",
+      "first_mention": "梯度（由各参数偏导数组成、描述目标局部变化的向量）",
+      "explanation": "由各参数偏导数组成、描述目标局部变化的向量。",
+      "source_ids": [
+        "source-017"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0022",
+      "display_name": "梯度下降",
+      "first_mention": "梯度下降（利用目标对参数的梯度逐步更新参数的优化方法）",
+      "explanation": "利用目标对参数的梯度逐步更新参数的优化方法。",
+      "source_ids": [
+        "source-012"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0035",
+      "display_name": "L2 正则化",
+      "first_mention": "L2 正则化（向目标加入指定权重平方和惩罚的正则方法）",
+      "explanation": "向目标加入指定权重平方和惩罚的正则方法。",
+      "source_ids": [
+        "source-013",
+        "source-004"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0065",
+      "display_name": "Transformer",
+      "first_mention": "Transformer（一类以注意力机制为核心的神经网络架构）",
+      "explanation": "一类以注意力机制为核心的神经网络架构。",
+      "source_ids": [
+        "source-003",
+        "source-014"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0144",
+      "display_name": "token",
+      "first_mention": "token（文本被切分后用于模型处理的基本单位，不固定等于一个字或一个词）",
+      "explanation": "文本被切分后用于模型处理的基本单位，不固定等于一个字或一个词。",
+      "source_ids": [
+        "source-015"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0145",
+      "display_name": "tokenizer",
+      "first_mention": "tokenizer（将文本切分成单位并转换为模型所需编号的组件）",
+      "explanation": "将文本切分成单位并转换为模型所需编号的组件。",
+      "source_ids": [
+        "source-015"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0146",
+      "display_name": "logits",
+      "first_mention": "logits（尚未转换为类别概率的模型输出分数）",
+      "explanation": "尚未转换为类别概率的模型输出分数。",
+      "source_ids": [
+        "source-019",
+        "source-020"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0142",
+      "display_name": "Softmax",
+      "first_mention": "Softmax（把一组分数转换为非负、总和为1的权重的函数）",
+      "explanation": "把一组分数转换为非负、总和为1的权重的函数。",
+      "source_ids": [
+        "source-019"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0143",
+      "display_name": "缩放点积注意力",
+      "first_mention": "缩放点积注意力（缩放查询与键的点积分数后生成权重、再汇聚值的计算）",
+      "explanation": "缩放查询与键的点积分数后生成权重、再汇聚值的计算。",
+      "source_ids": [
+        "source-003"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0064",
+      "display_name": "多头注意力",
+      "first_mention": "多头注意力（组合多个注意力头的输出以形成表示的模块）",
+      "explanation": "组合多个注意力头的输出以形成表示的模块。",
+      "source_ids": [
+        "source-003"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0073",
+      "display_name": "嵌入表示",
+      "first_mention": "嵌入表示（把输入单位映射到模型使用的向量表示）",
+      "explanation": "把输入单位映射到模型使用的向量表示。",
+      "source_ids": [
+        "source-003",
+        "source-015"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0058",
+      "display_name": "残差连接",
+      "first_mention": "残差连接（把模块输入与适当维度的模块输出相加的连接）",
+      "explanation": "把模块输入与适当维度的模块输出相加的连接。",
+      "source_ids": [
+        "source-003",
+        "source-014"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0056",
+      "display_name": "层归一化",
+      "first_mention": "层归一化（对指定特征维度进行归一化并使用可学习参数调整的操作）",
+      "explanation": "对指定特征维度进行归一化并使用可学习参数调整的操作。",
+      "source_ids": [
+        "source-014"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0016",
+      "display_name": "交叉熵损失",
+      "first_mention": "交叉熵损失（用目标分布与预测概率计算分类代价的一类损失）",
+      "explanation": "用目标分布与预测概率计算分类代价的一类损失。",
+      "source_ids": [
+        "source-020"
+      ],
+      "status": "draft"
+    },
+    {
+      "entity_id": "entity-0141",
+      "display_name": "学习率",
+      "first_mention": "学习率（参与控制优化更新步幅的超参数，步幅还取决于梯度和更新规则）",
+      "explanation": "参与控制优化更新步幅的超参数，步幅还取决于梯度和更新规则。",
+      "source_ids": [
+        "source-012"
+      ],
+      "status": "draft"
+    }
+  ],
+  "articles": [
+    {
+      "id": "article-zh-001",
+      "entity_id": "entity-0138",
+      "title": "损失函数：让训练有明确的比较标准",
+      "path": "knowledge/zh-CN/01-loss-function.md",
+      "source_ids": [
+        "source-016"
+      ],
+      "locale": "zh-CN",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "depth_path": "knowledge/zh-CN/deep/01-loss-function.md",
+      "depth_source_ids": [
+        "source-016",
+        "source-024"
+      ],
+      "depth_status": "layered_draft",
+      "open_gaps": [
+        "概率建模推导",
+        "Huber/对比/排序损失独立档案"
+      ]
+    },
+    {
+      "id": "article-zh-002",
+      "entity_id": "entity-0006",
+      "title": "梯度：描述目标怎样随参数变化",
+      "path": "knowledge/zh-CN/02-gradient.md",
+      "source_ids": [
+        "source-017"
+      ],
+      "locale": "zh-CN",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "depth_path": "knowledge/zh-CN/deep/02-gradient.md",
+      "depth_source_ids": [
+        "source-017",
+        "source-023"
+      ],
+      "depth_status": "layered_draft",
+      "open_gaps": [
+        "自动微分与反向传播完整实现",
+        "多变量形状规范"
+      ]
+    },
+    {
+      "id": "article-zh-003",
+      "entity_id": "entity-0022",
+      "title": "梯度下降：用局部信息逐步更新参数",
+      "path": "knowledge/zh-CN/03-gradient-descent.md",
+      "source_ids": [
+        "source-012"
+      ],
+      "locale": "zh-CN",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "depth_path": "knowledge/zh-CN/deep/03-gradient-descent.md",
+      "depth_source_ids": [
+        "source-012",
+        "source-021"
+      ],
+      "depth_status": "layered_draft",
+      "open_gaps": [
+        "强凸收敛率证明",
+        "随机梯度方差分析",
+        "完整优化器比较"
+      ]
+    },
+    {
+      "id": "article-zh-004",
+      "entity_id": "entity-0035",
+      "title": "L2 正则化：把参数惩罚加入目标",
+      "path": "knowledge/zh-CN/04-l2-regularization.md",
+      "source_ids": [
+        "source-013",
+        "source-004"
+      ],
+      "locale": "zh-CN",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "depth_path": "knowledge/zh-CN/deep/04-l2-regularization.md",
+      "depth_source_ids": [
+        "source-013",
+        "source-004",
+        "source-022",
+        "source-029"
+      ],
+      "depth_status": "layered_draft",
+      "open_gaps": [
+        "岭回归矩阵解",
+        "高斯先验推导",
+        "完整Adam/AdamW对照"
+      ]
+    },
+    {
+      "id": "article-zh-005",
+      "entity_id": "entity-0065",
+      "title": "Transformer：让不同位置的信息相互联系",
+      "path": "knowledge/zh-CN/05-transformer.md",
+      "source_ids": [
+        "source-003",
+        "source-014",
+        "source-015"
+      ],
+      "locale": "zh-CN",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "depth_path": "knowledge/zh-CN/deep/05-transformer.md",
+      "depth_source_ids": [
+        "source-003",
+        "source-014",
+        "source-015",
+        "source-026",
+        "source-027"
+      ],
+      "depth_status": "layered_draft",
+      "open_gaps": [
+        "原始完整编码器—解码器复现",
+        "现代变体深入档案",
+        "真实文本与独立评价"
+      ]
+    },
+    {
+      "id": "article-zh-006",
+      "entity_id": "entity-0144",
+      "title": "token：文本怎样变成模型的输入单位",
+      "path": "knowledge/zh-CN/06-token.md",
+      "source_ids": [
+        "source-015"
+      ],
+      "locale": "zh-CN",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "depth_path": "knowledge/zh-CN/deep/06-token.md",
+      "depth_source_ids": [
+        "source-015",
+        "source-025"
+      ],
+      "depth_status": "layered_draft",
+      "open_gaps": [
+        "完整词表训练",
+        "真实tokenizer回归样本"
+      ]
+    },
+    {
+      "id": "article-zh-007",
+      "entity_id": "entity-0143",
+      "title": "缩放点积注意力：算权重，再汇聚信息",
+      "path": "knowledge/zh-CN/07-scaled-dot-product-attention.md",
+      "source_ids": [
+        "source-003",
+        "source-018"
+      ],
+      "locale": "zh-CN",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "depth_path": "knowledge/zh-CN/deep/07-scaled-dot-product-attention.md",
+      "depth_source_ids": [
+        "source-003",
+        "source-018",
+        "source-026",
+        "source-028"
+      ],
+      "depth_status": "layered_draft",
+      "open_gaps": [
+        "手工反向推导",
+        "融合内核与缓存实验",
+        "现代注意力变体"
+      ]
+    },
+    {
+      "id": "article-zh-008",
+      "entity_id": "entity-0016",
+      "title": "交叉熵损失：检查给目标类别分配了多少概率",
+      "path": "knowledge/zh-CN/08-cross-entropy.md",
+      "source_ids": [
+        "source-020",
+        "source-019"
+      ],
+      "locale": "zh-CN",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_on": null,
+      "depth_path": "knowledge/zh-CN/deep/08-cross-entropy.md",
+      "depth_source_ids": [
+        "source-020",
+        "source-019",
+        "source-024"
+      ],
+      "depth_status": "layered_draft",
+      "open_gaps": [
+        "多标签与二元损失独立档案",
+        "语言模型完整目标错位实验"
+      ]
+    }
+  ]
+}
