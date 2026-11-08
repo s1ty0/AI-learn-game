@@ -8,11 +8,17 @@ class Position(BaseModel):
     y: float = Field(allow_inf_nan=False, ge=-100000, le=100000)
 
 
+class DiscoveryOrigin(BaseModel):
+    node_id: str = Field(min_length=1, max_length=120)
+    release_id: str = Field(min_length=1, max_length=200)
+
+
 class NodeData(BaseModel):
     label: str = Field(min_length=1, max_length=100)
     subtitle: str = Field(default="我的理解", max_length=100)
     category: str = Field(default="custom", max_length=30)
     note: str = Field(default="", max_length=3000)
+    discovery_origins: list[DiscoveryOrigin] = Field(default_factory=list, max_length=50)
 
 
 class GraphNode(BaseModel):
@@ -27,6 +33,9 @@ class GraphEdge(BaseModel):
     source: str
     target: str
     label: str = Field(default="待解释的关系", max_length=200)
+    note: str = Field(default="", max_length=3000)
+    reference_id: str | None = Field(default=None, max_length=120)
+    reference_release: str | None = Field(default=None, max_length=200)
 
 
 class GraphPayload(BaseModel):

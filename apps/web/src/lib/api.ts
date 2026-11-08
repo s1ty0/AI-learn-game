@@ -1,6 +1,6 @@
 import type { Edge, Node } from "@xyflow/react";
 
-export type ConceptData = { label: string; subtitle: string; category: string; note: string };
+export type ConceptData = { label: string; subtitle: string; category: string; note: string; discovery_origins?: { node_id: string; release_id: string }[] };
 export type ConceptNode = Node<ConceptData, "knowledge">;
 export type GraphPayload = { nodes: ConceptNode[]; edges: Edge[] };
 export type Snapshot = { revision: number; release_id: string; payload: GraphPayload; note: string; created_at: string; restored_from: number | null };

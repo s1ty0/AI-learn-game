@@ -10,6 +10,7 @@ import "./chapter.css";
 import "./expedition.css";
 import "./voyage-labs.css";
 import "./frontier.css";
+import "./star-map.css";
 
 export const metadata: Metadata = { title: "知行 · 迷雾群岛", description: "从一束光出发，在探索中发现 AI 的秘密。" };
 export default function RootLayout({ children }: { children: React.ReactNode }) {

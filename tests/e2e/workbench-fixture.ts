@@ -4,10 +4,13 @@ import type { Snapshot } from "../../apps/web/src/lib/api";
 // Only the seed read reaches the real API. All mutations and historical reads use
 // a shared per-test memory store, including when the test opens a second tab.
 // PostgreSQL persistence, conflicts and idempotency are covered by API tests.
-export async function workbenchFixture(context: BrowserContext) {
-  const seed = await context.request.get("http://127.0.0.1:3000/api/v1/learner-graph");
-  if (!seed.ok()) throw new Error("Workbench seed unavailable");
-  const initial: Snapshot = await seed.json();
+export async function workbenchFixture(context: BrowserContext, supplied?: Snapshot) {
+  let initial = supplied;
+  if (!initial) {
+    const seed = await context.request.get("http://127.0.0.1:3000/api/v1/learner-graph");
+    if (!seed.ok()) throw new Error("Workbench seed unavailable");
+    initial = await seed.json() as Snapshot;
+  }
   const versions: Snapshot[] = [structuredClone({ ...initial, revision: 0, note: "独立浏览器夹具", restored_from: null })];
   const attempts: Record<string, unknown>[] = [];
   const operations = new Map<string, { hash: string; result: Snapshot }>();

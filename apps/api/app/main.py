@@ -13,6 +13,7 @@ from .models import ContentRelease, EntityRevision, LearnerGraph, GraphSnapshot,
 from .schemas import GraphMutation, RestoreMutation, AttemptSubmission, AdventureMove, PrismMove
 from .chapter import router as chapter_router
 from .expedition import router as expedition_router
+from .discoveries import router as discoveries_router
 
 
 def fingerprint(value):
@@ -31,6 +32,7 @@ def create_app(database_engine=None):
             app.state.engine.dispose()
 
     app = FastAPI(title="LearnAI Local Prototype", version="0.1.0", lifespan=lifespan)
+    app.include_router(discoveries_router)
 
     def session_dep():
         with app.state.sessions() as session:
