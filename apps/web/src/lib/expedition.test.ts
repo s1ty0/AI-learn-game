@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import solutions from "../../../../data/games/expedition-fixtures.json";
 import { initialLab, labMetrics, labSatisfied, mse, trajectory, type ExpeditionIsland } from "./expedition";
 
-describe("三章各机关的可达条件", () => {
+describe("扩展章节各机关的可达条件", () => {
   for (const [id, stages] of Object.entries(solutions)) {
     it(`${id}三步有可解配置，初始第一步不会无操作通过`, () => {
       const node = id as ExpeditionIsland;

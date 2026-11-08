@@ -17,10 +17,11 @@ export async function expeditionFixture(page: Page, chapter?: string, firstCompl
   const main = config.chapters.flatMap(group => group.main_path);
   function state() {
     const unlocked = (requires: string[]) => requires.every(id => id === "beacon" ? firstComplete() : stages[id] === 3);
-    return { ...config, release_id: "fixture", unlocked: firstComplete(), mastery: "unverified", main_total: 13,
+    return { ...config, release_id: "fixture", unlocked: firstComplete(), mastery: "unverified", main_total: 4 + main.length,
+      chapter_total: 1 + config.chapters.length, node_total: 5 + config.nodes.length, mechanism_total: 15 + config.nodes.reduce((sum, node) => sum + node.steps.length, 0),
       main_completed: 4 + main.filter(id => stages[id] === 3).length,
       completed: firstComplete() && main.every(id => stages[id] === 3), all_explored: Object.values(stages).every(stage => stage === 3),
-      next_node: main.find(id => stages[id] < 3) ?? "generation",
+      next_node: main.find(id => stages[id] < 3) ?? main.at(-1),
       chapters: config.chapters.map(group => { const opened = config.nodes.some(node => node.chapter === group.id && unlocked(node.requires));
         return { ...group, title: opened ? group.title : "迷雾中的海域", theme: opened ? group.theme : "继续航行后显现", unlocked: opened,
           main_completed: group.main_path.filter(id => stages[id] === 3).length, completed: group.main_path.every(id => stages[id] === 3) }; }),

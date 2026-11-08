@@ -1,70 +1,566 @@
 {
-  "id": "light-expedition", "version": "light-expedition-v1", "status": "draft",
+  "id": "light-expedition",
+  "version": "light-expedition-v2",
+  "status": "draft",
   "chapters": [
-    {"id": "representation", "title": "表征工坊", "theme": "把文字变成能计算的表示", "main_path": ["token", "embedding", "position"]},
-    {"id": "learning", "title": "学习山谷", "theme": "从误差、方向到参数更新", "main_path": ["loss", "gradient", "descent"]},
-    {"id": "generation", "title": "生成港湾", "theme": "把分数变成一步步的输出", "main_path": ["temperature", "entropy", "generation"]}
+    {
+      "id": "representation",
+      "title": "表征工坊",
+      "theme": "把文字变成能计算的表示",
+      "main_path": [
+        "token",
+        "embedding",
+        "position"
+      ]
+    },
+    {
+      "id": "learning",
+      "title": "学习山谷",
+      "theme": "从误差、方向到参数更新",
+      "main_path": [
+        "loss",
+        "gradient",
+        "descent"
+      ]
+    },
+    {
+      "id": "generation",
+      "title": "生成港湾",
+      "theme": "把分数变成一步步的输出",
+      "main_path": [
+        "temperature",
+        "entropy",
+        "generation"
+      ]
+    },
+    {
+      "id": "tower",
+      "title": "积木高塔",
+      "theme": "把表示、加工与梯度接成模块",
+      "main_path": [
+        "residual",
+        "normalization",
+        "block"
+      ]
+    }
   ],
   "nodes": [
-    {"id": "token", "chapter": "representation", "title": "碎词码头", "concept": "token与词表", "kind": "main", "requires": ["beacon"], "entity_ids": ["entity-0144", "entity-0145"], "steps": [
-      {"title": "把一句话装进小船", "goal": "在字缝处切分，让每块都在玩具词表中。", "hint": "切成 AI｜让｜学习｜发光。点击字缝可切开或合上。"},
-      {"title": "相同的货物，用同一张票", "goal": "看看两处AI的编号，再选出这次发现的关系。", "hint": "同一个词表里，相同token查到同一个编号。编号不表示语义远近。"},
-      {"title": "换一个词表，再装一次", "goal": "词表加入“学习发光”，把原句装成3块。", "hint": "试试 AI｜让｜学习发光。真实tokenizer使用自己的固定规则，本关是玩具词表。"}],
-      "discovery": "token是文本处理的基本单位。切分和编号由词表及分词规则决定，不必等于一个字或一个词。", "boundary": "本关是手工玩具词表，不模拟某个真实模型的完整tokenizer。"},
-    {"id": "embedding", "chapter": "representation", "title": "向量仓库", "concept": "Embedding查表", "kind": "main", "requires": ["token"], "entity_ids": ["entity-0073"], "steps": [
-      {"title": "按编号取出向量", "goal": "为编号序列[2,0,2]依次选取表行。", "hint": "每个编号查对应行：2、0、2。重复编号仍取同一行。"},
-      {"title": "换一批编号，仓库不变", "goal": "为新序列[1,2]依次选取表行。", "hint": "选1号行，再选2号行。向量来自表，不是把编号直接当坐标。"},
-      {"title": "编号大，就更有意义吗", "goal": "保留正确取货结果，说明编号与向量的区别。", "hint": "编号是查表地址；向量是表示。编号大小不能直接当语义距离。"}],
-      "discovery": "Embedding（嵌入）按离散编号查出向量。同一张表中重复编号对应同一行，向量参数可在训练中学习。", "boundary": "二维表为固定教学样本，不代表真实词向量的维度或语义。"},
-    {"id": "position", "chapter": "representation", "title": "时序信标", "concept": "位置信息", "kind": "finale", "requires": ["embedding"], "entity_ids": ["entity-0069"], "steps": [
-      {"title": "让相同货物带上位置", "goal": "打开位置信号，让相同内容在三个位置产生不同表示。", "hint": "内容都是2。加上位置0、1、2，就能区分它们所在的位置。"},
-      {"title": "调节位置的信号", "goal": "保持内容为2，让第三个位置的表示变为6。", "hint": "位置贡献是位置编号乘信号强度，第三个位置编号为2；强度可调到2。"},
-      {"title": "带走内容，也带走顺序", "goal": "解释位置信号补充了什么，完成本章主线。", "hint": "位置表示补充顺序线索，不代替token的内容表示。"}],
-      "discovery": "位置编码为表示补充顺序信息。本关用内容表示加位置项演示，内容和位置承担不同职责。", "boundary": "简单标量相加只是示意，不等同真实正弦编码、RoPE或全部位置机制。"},
-    {"id": "ffn", "chapter": "representation", "title": "逐点加工坊", "concept": "FFN逐位置变换", "kind": "side", "requires": ["embedding"], "entity_ids": ["entity-0148"], "steps": [
-      {"title": "只加工第一件货物", "goal": "把第一个输入调到1或更大，观察其他位置是否改变。", "hint": "固定加工规则是 max(0,2x-1)。第二、第三个输入先保持2、3。"},
-      {"title": "轮到第二个位置", "goal": "保留第一件，将第二个输入调到0或更小。", "hint": "同一个加工机分别处理各位置，第二个会变成0，不会直接读第三个输入。"},
-      {"title": "分清两种加工", "goal": "解释逐位置变换与跨位置汇聚的区别。", "hint": "注意力跨位置汇聚；这里的FFN对各位置分别应用同一个函数。"}],
-      "discovery": "FFN（前馈网络）在标准Transformer块中对各位置分别应用相同的变换。跨位置的信息可已包含在它的输入中。", "boundary": "本关用单隐藏单元和ReLU简化，不展示完整宽度、偏置账本或现代门控变体。"},
-    {"id": "loss", "chapter": "learning", "title": "误差观测站", "concept": "均方误差", "kind": "main", "requires": ["position"], "entity_ids": ["entity-0014", "entity-0138"], "steps": [
-      {"title": "让预测靠近观测", "goal": "调节预测线的斜率，让三处预测与观测重合。", "hint": "观测是[2,4,6]，模型预测为w×[1,2,3]，试试w=2。"},
-      {"title": "从两边观察同一个误差", "goal": "分别在w=1和w=3记录一次观测，比较损失。", "hint": "两侧误差符号不同，但平方后相同。调到1记录，再调到3记录。"},
-      {"title": "把误差变成一个目标", "goal": "解释为什么三处误差要平方再平均。", "hint": "MSE是各处误差平方的平均，不是正负误差互相抵消。"}],
-      "discovery": "MSE（均方误差）把预测与观测的差平方后求平均，提供一个可优化的标量目标。", "boundary": "固定三点线性样本可完全拟合，不说明真实数据没有噪声或MSE适合所有任务。"},
-    {"id": "gradient", "chapter": "learning", "title": "坡度哨所", "concept": "梯度与局部方向", "kind": "main", "requires": ["loss"], "entity_ids": ["entity-0006"], "steps": [
-      {"title": "在左坡找下降方向", "goal": "从w=0朝损失更低处移动，到达1到2之间。", "hint": "比较当前位置左右两侧的损失，向右移动会接近谷底。"},
-      {"title": "到了右坡，换个方向", "goal": "从w=4朝损失更低处移动，到达2到3之间。", "hint": "右侧坡度为正，向左移动才会下降。"},
-      {"title": "停在谷底，看清坡度", "goal": "到达w=2，并说明坡度告诉你的是什么。", "hint": "本关抛物线的导数是2(w-2)。这是局部变化率；一般非凸函数的零梯度不保证全局最优。"}],
-      "discovery": "一维梯度就是导数，描述目标对参数的局部变化率。负梯度提供局部下降方向。", "boundary": "凸抛物线的谷底例子不能推广为所有神经网络都只有一个全局最优点。"},
-    {"id": "descent", "chapter": "learning", "title": "步长渡口", "concept": "梯度下降与学习率", "kind": "finale", "requires": ["gradient"], "entity_ids": ["entity-0022"], "steps": [
-      {"title": "让更新带你接近目标", "goal": "选择合适步长，执行至少两次更新，把损失降到0.01以下。", "hint": "学习率0.10适合这组三点样本。点击“走一步”两次。"},
-      {"title": "亲眼看看步子太大", "goal": "从头开始，用过大步长走至少两步，让损失超过初始的两倍。", "hint": "可试0.30，观察它越过谷底并越来越远。本关不是所有问题的统一步长界限。"},
-      {"title": "修好步长，再归航", "goal": "重设为稳定步长，在2到4次更新内接近目标，并说明更新方向。", "hint": "可设0.10，重新走两步。参数减去学习率乘梯度，而不是沿梯度越走越高。"}],
-      "discovery": "梯度下降用参数减去学习率乘梯度。方向与步长都影响优化轨迹，步长过大可能使损失上升。", "boundary": "这里是全批量的一维二次目标，不是SGD噪声、Adam或真实大模型训练。"},
-    {"id": "l2", "chapter": "learning", "title": "轻装支谷", "concept": "L2正则的权衡", "kind": "side", "requires": ["gradient"], "entity_ids": ["entity-0035"], "steps": [
-      {"title": "先只看拟合", "goal": "令正则强度为0，选择使单点训练误差最小的w。", "hint": "训练误差是(w-1)²；没有正则时最优w=1。"},
-      {"title": "给大参数加一点代价", "goal": "令正则强度为1，找到总目标最小的w。", "hint": "总目标是(w-1)²+w²，可试w=0.5。它牺牲一点训练拟合，减小参数。"},
-      {"title": "理解轻装的代价", "goal": "解释正则改变了什么，避免把它当万能加分项。", "hint": "L2在拟合与参数大小间权衡，不保证任何数据和强度下都提高测试表现。"}],
-      "discovery": "L2正则在训练目标中加入参数平方惩罚，改变拟合与参数大小的权衡。", "boundary": "本关目标采用λw²约定；不把Adam中的L2与AdamW解耦衰减无条件视为相同。"},
-    {"id": "temperature", "chapter": "generation", "title": "概率潮汐台", "concept": "logits与温度", "kind": "main", "requires": ["descent"], "entity_ids": ["entity-0146", "entity-0105"], "steps": [
-      {"title": "让偏好更集中", "goal": "降低温度，让第三个候选的概率超过95%。", "hint": "固定logits=[0,1,3]，用Softmax(logits/T)。可试T=0.5。"},
-      {"title": "让分布舒展开", "goal": "升高温度，让第三个候选的概率低于65%。", "hint": "可试T=2。候选名次不变，概率差距变小。"},
-      {"title": "温度改变了什么", "goal": "说明概率形状与知识正确性的区别。", "hint": "温度改变抽取分布，不重训模型参数，也不保证低温就更符合事实。"}],
-      "discovery": "logits是未归一化的输出分数；温度缩放再经Softmax可调整概率的集中程度。", "boundary": "这里只显示分布，不用单次随机结果证明概率，也不把低温当事实核查。"},
-    {"id": "entropy", "chapter": "generation", "title": "真值航标", "concept": "交叉熵看目标概率", "kind": "main", "requires": ["temperature"], "entity_ids": ["entity-0016"], "steps": [
-      {"title": "给正确航标更多概率", "goal": "真实目标是A，让它的单样本损失低于0.25。", "hint": "单样本损失为-ln(p目标)。把A的概率调到0.8或更高。"},
-      {"title": "自信地选错，会怎样", "goal": "把A的概率降到0.1，观察另一个候选最高分时的损失。", "hint": "即使B最高分，真实目标仍是A。A概率0.1时损失约2.30。"},
-      {"title": "判断该看哪一个数", "goal": "说明交叉熵关注的是哪一个候选的概率。", "hint": "看真实目标的概率，不是只看模型最喜欢的候选有多自信。"}],
-      "discovery": "硬标签、无额外加权的单样本交叉熵是目标类别概率的负对数。给真实目标更低概率会受到更大惩罚。", "boundary": "本关使用自然对数和概率演示；真实框架可直接从logits稳定计算，不需手动先Softmax。"},
-    {"id": "generation", "chapter": "generation", "title": "逐字出海口", "concept": "自回归生成", "kind": "finale", "requires": ["entropy"], "entity_ids": ["entity-0078"], "steps": [
-      {"title": "只决定下一个", "goal": "已有A，按当前玩具预测表追加概率最高的下一个符号。", "hint": "A之后B的概率最高。先追加B，不一次填满整句。"},
-      {"title": "把新符号接回历史", "goal": "从已有AB继续，逐步追加到ABCA。", "hint": "B之后选C，新的历史以C结尾时再选A。每步重新读取当前历史的预测。"},
-      {"title": "带着历史继续航行", "goal": "解释每次生成后，下一次预测使用什么。", "hint": "取最后位置的下一token预测，选出一个符号，追加到已有历史，再继续。"}],
-      "discovery": "自回归生成逐步预测下一个token，并将新token加入上下文，供下一步继续使用。", "boundary": "本关是只依赖最后符号的固定预测表，不是真实语言模型、完整上下文推理或预训练能力。"},
-    {"id": "cache", "chapter": "generation", "title": "记忆船坞", "concept": "KV cache复用历史", "kind": "side", "requires": ["generation"], "entity_ids": ["entity-0108"], "steps": [
-      {"title": "先确认结果没有变", "goal": "分别运行完整重算和复用缓存，对比最后位置的结果。", "hint": "依次点击两种运行。复用已经算过的K/V，不应该改掉这次示例的注意力输出。"},
-      {"title": "只为新货物准备新账本", "goal": "开启复用模式，观察新增token时需要新投影几个位置。", "hint": "两个旧位置的K/V已经准备好，这一步只为一个新位置计算新K/V。注意力仍读取三处。"},
-      {"title": "省下什么，没省下什么", "goal": "解释缓存节省的工作，避免把它说成没有计算或不再读取历史。", "hint": "复用历史K/V，仍需计算新token并让新查询读取可见历史，内存也会占用空间。"}],
-      "discovery": "KV cache在因果生成中复用已处理位置的键和值，避免重复投影历史；新查询仍会读取历史K/V。", "boundary": "固定单层示例不代表真实推理延迟、显存、量化缓存或所有架构的缓存策略。"}
+    {
+      "id": "token",
+      "chapter": "representation",
+      "title": "碎词码头",
+      "concept": "token与词表",
+      "kind": "main",
+      "requires": [
+        "beacon"
+      ],
+      "entity_ids": [
+        "entity-0144",
+        "entity-0145"
+      ],
+      "steps": [
+        {
+          "title": "把一句话装进小船",
+          "goal": "在字缝处切分，让每块都在玩具词表中。",
+          "hint": "切成 AI｜让｜学习｜发光。点击字缝可切开或合上。"
+        },
+        {
+          "title": "相同的货物，用同一张票",
+          "goal": "看看两处AI的编号，再选出这次发现的关系。",
+          "hint": "同一个词表里，相同token查到同一个编号。编号不表示语义远近。"
+        },
+        {
+          "title": "换一个词表，再装一次",
+          "goal": "词表加入“学习发光”，把原句装成3块。",
+          "hint": "试试 AI｜让｜学习发光。真实tokenizer使用自己的固定规则，本关是玩具词表。"
+        }
+      ],
+      "discovery": "token是文本处理的基本单位。切分和编号由词表及分词规则决定，不必等于一个字或一个词。",
+      "boundary": "本关是手工玩具词表，不模拟某个真实模型的完整tokenizer。"
+    },
+    {
+      "id": "embedding",
+      "chapter": "representation",
+      "title": "向量仓库",
+      "concept": "Embedding查表",
+      "kind": "main",
+      "requires": [
+        "token"
+      ],
+      "entity_ids": [
+        "entity-0073"
+      ],
+      "steps": [
+        {
+          "title": "按编号取出向量",
+          "goal": "为编号序列[2,0,2]依次选取表行。",
+          "hint": "每个编号查对应行：2、0、2。重复编号仍取同一行。"
+        },
+        {
+          "title": "换一批编号，仓库不变",
+          "goal": "为新序列[1,2]依次选取表行。",
+          "hint": "选1号行，再选2号行。向量来自表，不是把编号直接当坐标。"
+        },
+        {
+          "title": "编号大，就更有意义吗",
+          "goal": "保留正确取货结果，说明编号与向量的区别。",
+          "hint": "编号是查表地址；向量是表示。编号大小不能直接当语义距离。"
+        }
+      ],
+      "discovery": "Embedding（嵌入）按离散编号查出向量。同一张表中重复编号对应同一行，向量参数可在训练中学习。",
+      "boundary": "二维表为固定教学样本，不代表真实词向量的维度或语义。"
+    },
+    {
+      "id": "position",
+      "chapter": "representation",
+      "title": "时序信标",
+      "concept": "位置信息",
+      "kind": "finale",
+      "requires": [
+        "embedding"
+      ],
+      "entity_ids": [
+        "entity-0069"
+      ],
+      "steps": [
+        {
+          "title": "让相同货物带上位置",
+          "goal": "打开位置信号，让相同内容在三个位置产生不同表示。",
+          "hint": "内容都是2。加上位置0、1、2，就能区分它们所在的位置。"
+        },
+        {
+          "title": "调节位置的信号",
+          "goal": "保持内容为2，让第三个位置的表示变为6。",
+          "hint": "位置贡献是位置编号乘信号强度，第三个位置编号为2；强度可调到2。"
+        },
+        {
+          "title": "带走内容，也带走顺序",
+          "goal": "解释位置信号补充了什么，完成本章主线。",
+          "hint": "位置表示补充顺序线索，不代替token的内容表示。"
+        }
+      ],
+      "discovery": "位置编码为表示补充顺序信息。本关用内容表示加位置项演示，内容和位置承担不同职责。",
+      "boundary": "简单标量相加只是示意，不等同真实正弦编码、RoPE或全部位置机制。"
+    },
+    {
+      "id": "ffn",
+      "chapter": "representation",
+      "title": "逐点加工坊",
+      "concept": "FFN逐位置变换",
+      "kind": "side",
+      "requires": [
+        "embedding"
+      ],
+      "entity_ids": [
+        "entity-0148"
+      ],
+      "steps": [
+        {
+          "title": "只加工第一件货物",
+          "goal": "把第一个输入调到1或更大，观察其他位置是否改变。",
+          "hint": "固定加工规则是 max(0,2x-1)。第二、第三个输入先保持2、3。"
+        },
+        {
+          "title": "轮到第二个位置",
+          "goal": "保留第一件，将第二个输入调到0或更小。",
+          "hint": "同一个加工机分别处理各位置，第二个会变成0，不会直接读第三个输入。"
+        },
+        {
+          "title": "分清两种加工",
+          "goal": "解释逐位置变换与跨位置汇聚的区别。",
+          "hint": "注意力跨位置汇聚；这里的FFN对各位置分别应用同一个函数。"
+        }
+      ],
+      "discovery": "FFN（前馈网络）在标准Transformer块中对各位置分别应用相同的变换。跨位置的信息可已包含在它的输入中。",
+      "boundary": "本关用单隐藏单元和ReLU简化，不展示完整宽度、偏置账本或现代门控变体。"
+    },
+    {
+      "id": "loss",
+      "chapter": "learning",
+      "title": "误差观测站",
+      "concept": "均方误差",
+      "kind": "main",
+      "requires": [
+        "position"
+      ],
+      "entity_ids": [
+        "entity-0014",
+        "entity-0138"
+      ],
+      "steps": [
+        {
+          "title": "让预测靠近观测",
+          "goal": "调节预测线的斜率，让三处预测与观测重合。",
+          "hint": "观测是[2,4,6]，模型预测为w×[1,2,3]，试试w=2。"
+        },
+        {
+          "title": "从两边观察同一个误差",
+          "goal": "分别在w=1和w=3记录一次观测，比较损失。",
+          "hint": "两侧误差符号不同，但平方后相同。调到1记录，再调到3记录。"
+        },
+        {
+          "title": "把误差变成一个目标",
+          "goal": "解释为什么三处误差要平方再平均。",
+          "hint": "MSE是各处误差平方的平均，不是正负误差互相抵消。"
+        }
+      ],
+      "discovery": "MSE（均方误差）把预测与观测的差平方后求平均，提供一个可优化的标量目标。",
+      "boundary": "固定三点线性样本可完全拟合，不说明真实数据没有噪声或MSE适合所有任务。"
+    },
+    {
+      "id": "gradient",
+      "chapter": "learning",
+      "title": "坡度哨所",
+      "concept": "梯度与局部方向",
+      "kind": "main",
+      "requires": [
+        "loss"
+      ],
+      "entity_ids": [
+        "entity-0006"
+      ],
+      "steps": [
+        {
+          "title": "在左坡找下降方向",
+          "goal": "从w=0朝损失更低处移动，到达1到2之间。",
+          "hint": "比较当前位置左右两侧的损失，向右移动会接近谷底。"
+        },
+        {
+          "title": "到了右坡，换个方向",
+          "goal": "从w=4朝损失更低处移动，到达2到3之间。",
+          "hint": "右侧坡度为正，向左移动才会下降。"
+        },
+        {
+          "title": "停在谷底，看清坡度",
+          "goal": "到达w=2，并说明坡度告诉你的是什么。",
+          "hint": "本关抛物线的导数是2(w-2)。这是局部变化率；一般非凸函数的零梯度不保证全局最优。"
+        }
+      ],
+      "discovery": "一维梯度就是导数，描述目标对参数的局部变化率。负梯度提供局部下降方向。",
+      "boundary": "凸抛物线的谷底例子不能推广为所有神经网络都只有一个全局最优点。"
+    },
+    {
+      "id": "descent",
+      "chapter": "learning",
+      "title": "步长渡口",
+      "concept": "梯度下降与学习率",
+      "kind": "finale",
+      "requires": [
+        "gradient"
+      ],
+      "entity_ids": [
+        "entity-0022"
+      ],
+      "steps": [
+        {
+          "title": "让更新带你接近目标",
+          "goal": "选择合适步长，执行至少两次更新，把损失降到0.01以下。",
+          "hint": "学习率0.10适合这组三点样本。点击“走一步”两次。"
+        },
+        {
+          "title": "亲眼看看步子太大",
+          "goal": "从头开始，用过大步长走至少两步，让损失超过初始的两倍。",
+          "hint": "可试0.30，观察它越过谷底并越来越远。本关不是所有问题的统一步长界限。"
+        },
+        {
+          "title": "修好步长，再归航",
+          "goal": "重设为稳定步长，在2到4次更新内接近目标，并说明更新方向。",
+          "hint": "可设0.10，重新走两步。参数减去学习率乘梯度，而不是沿梯度越走越高。"
+        }
+      ],
+      "discovery": "梯度下降用参数减去学习率乘梯度。方向与步长都影响优化轨迹，步长过大可能使损失上升。",
+      "boundary": "这里是全批量的一维二次目标，不是SGD噪声、Adam或真实大模型训练。"
+    },
+    {
+      "id": "l2",
+      "chapter": "learning",
+      "title": "轻装支谷",
+      "concept": "L2正则的权衡",
+      "kind": "side",
+      "requires": [
+        "gradient"
+      ],
+      "entity_ids": [
+        "entity-0035"
+      ],
+      "steps": [
+        {
+          "title": "先只看拟合",
+          "goal": "令正则强度为0，选择使单点训练误差最小的w。",
+          "hint": "训练误差是(w-1)²；没有正则时最优w=1。"
+        },
+        {
+          "title": "给大参数加一点代价",
+          "goal": "令正则强度为1，找到总目标最小的w。",
+          "hint": "总目标是(w-1)²+w²，可试w=0.5。它牺牲一点训练拟合，减小参数。"
+        },
+        {
+          "title": "理解轻装的代价",
+          "goal": "解释正则改变了什么，避免把它当万能加分项。",
+          "hint": "L2在拟合与参数大小间权衡，不保证任何数据和强度下都提高测试表现。"
+        }
+      ],
+      "discovery": "L2正则在训练目标中加入参数平方惩罚，改变拟合与参数大小的权衡。",
+      "boundary": "本关目标采用λw²约定；不把Adam中的L2与AdamW解耦衰减无条件视为相同。"
+    },
+    {
+      "id": "temperature",
+      "chapter": "generation",
+      "title": "概率潮汐台",
+      "concept": "logits与温度",
+      "kind": "main",
+      "requires": [
+        "descent"
+      ],
+      "entity_ids": [
+        "entity-0146",
+        "entity-0105"
+      ],
+      "steps": [
+        {
+          "title": "让偏好更集中",
+          "goal": "降低温度，让第三个候选的概率超过95%。",
+          "hint": "固定logits=[0,1,3]，用Softmax(logits/T)。可试T=0.5。"
+        },
+        {
+          "title": "让分布舒展开",
+          "goal": "升高温度，让第三个候选的概率低于65%。",
+          "hint": "可试T=2。候选名次不变，概率差距变小。"
+        },
+        {
+          "title": "温度改变了什么",
+          "goal": "说明概率形状与知识正确性的区别。",
+          "hint": "温度改变抽取分布，不重训模型参数，也不保证低温就更符合事实。"
+        }
+      ],
+      "discovery": "logits是未归一化的输出分数；温度缩放再经Softmax可调整概率的集中程度。",
+      "boundary": "这里只显示分布，不用单次随机结果证明概率，也不把低温当事实核查。"
+    },
+    {
+      "id": "entropy",
+      "chapter": "generation",
+      "title": "真值航标",
+      "concept": "交叉熵看目标概率",
+      "kind": "main",
+      "requires": [
+        "temperature"
+      ],
+      "entity_ids": [
+        "entity-0016"
+      ],
+      "steps": [
+        {
+          "title": "给正确航标更多概率",
+          "goal": "真实目标是A，让它的单样本损失低于0.25。",
+          "hint": "单样本损失为-ln(p目标)。把A的概率调到0.8或更高。"
+        },
+        {
+          "title": "自信地选错，会怎样",
+          "goal": "把A的概率降到0.1，观察另一个候选最高分时的损失。",
+          "hint": "即使B最高分，真实目标仍是A。A概率0.1时损失约2.30。"
+        },
+        {
+          "title": "判断该看哪一个数",
+          "goal": "说明交叉熵关注的是哪一个候选的概率。",
+          "hint": "看真实目标的概率，不是只看模型最喜欢的候选有多自信。"
+        }
+      ],
+      "discovery": "硬标签、无额外加权的单样本交叉熵是目标类别概率的负对数。给真实目标更低概率会受到更大惩罚。",
+      "boundary": "本关使用自然对数和概率演示；真实框架可直接从logits稳定计算，不需手动先Softmax。"
+    },
+    {
+      "id": "generation",
+      "chapter": "generation",
+      "title": "逐字出海口",
+      "concept": "自回归生成",
+      "kind": "finale",
+      "requires": [
+        "entropy"
+      ],
+      "entity_ids": [
+        "entity-0078"
+      ],
+      "steps": [
+        {
+          "title": "只决定下一个",
+          "goal": "已有A，按当前玩具预测表追加概率最高的下一个符号。",
+          "hint": "A之后B的概率最高。先追加B，不一次填满整句。"
+        },
+        {
+          "title": "把新符号接回历史",
+          "goal": "从已有AB继续，逐步追加到ABCA。",
+          "hint": "B之后选C，新的历史以C结尾时再选A。每步重新读取当前历史的预测。"
+        },
+        {
+          "title": "带着历史继续航行",
+          "goal": "解释每次生成后，下一次预测使用什么。",
+          "hint": "取最后位置的下一token预测，选出一个符号，追加到已有历史，再继续。"
+        }
+      ],
+      "discovery": "自回归生成逐步预测下一个token，并将新token加入上下文，供下一步继续使用。",
+      "boundary": "本关是只依赖最后符号的固定预测表，不是真实语言模型、完整上下文推理或预训练能力。"
+    },
+    {
+      "id": "cache",
+      "chapter": "generation",
+      "title": "记忆船坞",
+      "concept": "KV cache复用历史",
+      "kind": "side",
+      "requires": [
+        "generation"
+      ],
+      "entity_ids": [
+        "entity-0108"
+      ],
+      "steps": [
+        {
+          "title": "先确认结果没有变",
+          "goal": "分别运行完整重算和复用缓存，对比最后位置的结果。",
+          "hint": "依次点击两种运行。复用已经算过的K/V，不应该改掉这次示例的注意力输出。"
+        },
+        {
+          "title": "只为新货物准备新账本",
+          "goal": "开启复用模式，观察新增token时需要新投影几个位置。",
+          "hint": "两个旧位置的K/V已经准备好，这一步只为一个新位置计算新K/V。注意力仍读取三处。"
+        },
+        {
+          "title": "省下什么，没省下什么",
+          "goal": "解释缓存节省的工作，避免把它说成没有计算或不再读取历史。",
+          "hint": "复用历史K/V，仍需计算新token并让新查询读取可见历史，内存也会占用空间。"
+        }
+      ],
+      "discovery": "KV cache在因果生成中复用已处理位置的键和值，避免重复投影历史；新查询仍会读取历史K/V。",
+      "boundary": "固定单层示例不代表真实推理延迟、显存、量化缓存或所有架构的缓存策略。"
+    },
+    {
+      "id": "residual",
+      "chapter": "tower",
+      "title": "回声栈桥",
+      "concept": "残差连接",
+      "kind": "main",
+      "requires": [
+        "generation"
+      ],
+      "entity_ids": [
+        "entity-0058"
+      ],
+      "steps": [
+        {
+          "title": "给原信号留一条路",
+          "goal": "接通原信号支路，比较只输出改变量与输出原信号加改变量。",
+          "hint": "原信号x=[1,2,3]，当前F(x)=[0.5,0.5,0.5]。接通后逐项相加。"
+        },
+        {
+          "title": "修正也可以向下",
+          "goal": "保留原信号支路，将改变量调到−1，观察输出如何变化。",
+          "hint": "残差不是只能变大。x加上−1，会得到[0,1,2]。"
+        },
+        {
+          "title": "没有修正，仍然通行",
+          "goal": "把改变量调回0，并解释此时输出为什么仍保留原信号。",
+          "hint": "F(x)=0时，x+F(x)=x；这不代表任意残差网络都不会梯度消失。"
+        }
+      ],
+      "discovery": "残差连接将原输入与子层变换结果相加。子层可以学习修正量；恒等支路提供额外的信息与梯度路径。",
+      "boundary": "固定三维向量和共享改变量只是加法示意。两路须维度匹配，必要时用投影；不保证任意深度都稳定。"
+    },
+    {
+      "id": "normalization",
+      "chapter": "tower",
+      "title": "刻度校准室",
+      "concept": "LayerNorm层归一化",
+      "kind": "main",
+      "requires": [
+        "residual"
+      ],
+      "entity_ids": [
+        "entity-0056"
+      ],
+      "steps": [
+        {
+          "title": "先给同一位置校准刻度",
+          "goal": "对一个token的三个特征启用归一化，比较输入与输出。",
+          "hint": "均值是三个特征的平均。减均值，再除以sqrt(方差+ε)。本关γ=1、β=0。"
+        },
+        {
+          "title": "整体抬高，形状还在吗",
+          "goal": "保持归一化，把三个输入一起增加2，比较输出形状。",
+          "hint": "[1,2,3]整体加2变成[3,4,5]；均值也加2，减均值后的差保持不变。"
+        },
+        {
+          "title": "三项相同，也要算得稳",
+          "goal": "让三个特征相同，观察零方差时的输出，再说明统计范围。",
+          "hint": "ε=0.00001使分母不为0。本关按同一token的特征维统计，不跨token或样本。"
+        }
+      ],
+      "discovery": "LayerNorm（层归一化）按指定特征维计算均值和方差，再归一化并应用可学习的缩放与平移。",
+      "boundary": "这里仅一处token、三维特征，固定γ=1、β=0、ε=1e−5；输出方差因ε不必恰好为1。它与RMSNorm不同。"
+    },
+    {
+      "id": "block",
+      "chapter": "tower",
+      "title": "模块拼装台",
+      "concept": "Pre-LN Transformer块",
+      "kind": "finale",
+      "requires": [
+        "normalization"
+      ],
+      "entity_ids": [
+        "entity-0065",
+        "entity-0152"
+      ],
+      "steps": [
+        {
+          "title": "先拼注意力这一层",
+          "goal": "按本关Pre-LN约定接好第一条分支：先归一化、再注意力、最后加回x。",
+          "hint": "依次选择LN₁、Attention、加回x。加法的另一条路仍是原始x。"
+        },
+        {
+          "title": "再接逐位置加工",
+          "goal": "保留第一条分支，继续接好FFN分支，并加回中间结果h。",
+          "hint": "h=x+Attention(LN₁(x))；再接LN₂、FFN、加回h。"
+        },
+        {
+          "title": "拼装顺序有自己的约定",
+          "goal": "解释本关归一化放在哪里，以及为什么不能把所有架构都当成这个顺序。",
+          "hint": "本关是Pre-LN：子层前归一化。原始Post-LN采用另一种位置，不能混称唯一正确架构。"
+        }
+      ],
+      "discovery": "本关Pre-LN块由h=x+Attention(LN₁(x))和y=h+FFN(LN₂(h))组成，串起跨位置汇聚、逐位置变换和两条残差支路。",
+      "boundary": "这是结构拼装而非真实模型前向执行；省略Dropout等细节，不包含所有Transformer变体或完整decoder的额外组件。"
+    },
+    {
+      "id": "backprop",
+      "chapter": "tower",
+      "title": "链式回廊",
+      "concept": "链式法则与反向传播",
+      "kind": "side",
+      "requires": [
+        "normalization"
+      ],
+      "entity_ids": [
+        "entity-0007",
+        "entity-0052"
+      ],
+      "steps": [
+        {
+          "title": "把误差的影响传回来",
+          "goal": "固定w=1，选出损失对预测z的局部导数，再乘上z对w的导数。",
+          "hint": "z=2w、L=(z−3)²。w=1时z=2，dL/dz=−2，dz/dw=2，乘积为−4。"
+        },
+        {
+          "title": "换个参数，梯度也换方向",
+          "goal": "把w调到2，重新选择局部导数，比较最终参数梯度的符号。",
+          "hint": "此时z=4，dL/dz=2；再乘dz/dw=2，得到dL/dw=4。"
+        },
+        {
+          "title": "在这个谷底核对整条链",
+          "goal": "把w调到1.5，选择此时的局部导数，并说明各段导数如何连接。",
+          "hint": "预测等于3，局部导数为0；沿链相乘得到0。多路径图还需要把各路径贡献相加。"
+        }
+      ],
+      "discovery": "反向传播按计算图反方向应用链式法则，将局部导数组合为参数梯度；参数更新是后续优化器的职责。",
+      "boundary": "本关只有标量单路径平方损失，不包含多路径累加、张量雅可比或自动微分引擎。零梯度的一般情形不保证全局最优。"
+    }
   ]
 }

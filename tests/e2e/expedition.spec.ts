@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import config from "../../data/games/expedition.json";
 import { expeditionFixture } from "./expedition-fixture";
 import { explanations, labMetrics, type ExpeditionIsland, type LabState } from "../../apps/web/src/lib/expedition";
+import { blockLabels, blockOrder } from "../../apps/web/src/lib/tower";
 
 async function enter(page: Page, id: string) {
   const node = config.nodes.find(node => node.id === id)!;
@@ -16,6 +17,19 @@ async function enter(page: Page, id: string) {
 }
 async function dial(page: Page, name: string, value: number) { await page.getByRole("slider", { name, exact: true }).fill(String(value)); }
 async function perform(page: Page, id: string, stage: number) {
+  if (id === "residual") {
+    if (stage === 0) await page.getByRole("button", { name: "接通原信号支路", exact: true }).click();
+    if (stage > 0) await dial(page, "子层改变量", stage === 1 ? -1 : 0);
+  } else if (id === "normalization") {
+    if (stage === 0) await page.getByRole("button", { name: "启用归一化", exact: true }).click();
+    if (stage === 1) await dial(page, "整体平移", 2);
+    if (stage === 2) await page.getByRole("button", { name: "让三个特征相同", exact: true }).click();
+  } else if (id === "block" && stage < 2) {
+    for (const item of stage === 0 ? blockOrder.slice(0, 3) : blockOrder.slice(3)) await page.getByRole("button", { name: blockLabels[item], exact: true }).click();
+  } else if (id === "backprop") {
+    if (stage === 2) await dial(page, "链路参数 w", 1.5);
+    await page.getByRole("button", { name: `局部导数${[-2, 2, 0][stage]}`, exact: true }).click();
+  }
   if (id === "token") {
     if (stage === 0) for (const key of [2, 3, 5]) await page.keyboard.press(String(key));
     if (stage === 2) await page.getByRole("button", { name: "切分位置5", exact: true }).click();
@@ -60,6 +74,10 @@ for (const chapter of config.chapters) test(`${chapter.title}的三处主线与�
       await page.getByRole("button", { name: stage === 2 ? "点亮这处发现" : "带着观察，继续", exact: true }).click();
     }
     await expect(page.getByRole("heading", { name: `${node.title}，亮起来了。`, exact: true })).toBeVisible();
+    if (node.id === "block") {
+      await page.getByText("展开机制、条件与反例", { exact: false }).click();
+      await expect(page.getByRole("heading", { name: "示例的条件", exact: true })).toBeVisible();
+    }
     await page.getByRole("button", { name: "带着发现，回到群岛", exact: true }).click();
     expect(fixture.stages[node.id]).toBe(3);
   }
@@ -121,7 +139,7 @@ test("向量支持乱序拖放，所有新场景在390像素宽无横向溢出�
       await expect(page.getByRole("heading", { name: node.steps[1].title, exact: true })).toBeVisible();
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    if (["embedding", "descent", "cache"].includes(node.id)) await page.screenshot({ path: `.runtime/screenshots/expedition-${node.id}-mobile.png`, fullPage: true, animations: "disabled" });
+    if (["embedding", "descent", "cache", "residual", "normalization", "block", "backprop"].includes(node.id)) await page.screenshot({ path: `.runtime/screenshots/expedition-${node.id}-mobile.png`, fullPage: true, animations: "disabled" });
     if (node.id === "loss") {
       await page.getByRole("slider", { name: "预测斜率 w", exact: true }).focus();
       await page.keyboard.press("Escape");

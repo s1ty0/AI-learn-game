@@ -11,9 +11,10 @@ from sqlalchemy import select
 from .chapter import attention, chapter_state, session_id
 from .content import DEMO_GRAPH
 from .models import AdventureSession, ContentRelease, now
+from .tower import BLOCK_ORDER, TOWER_IDS, tower_mechanics
 
 router = APIRouter(prefix="/api/v1/expedition")
-NEW_IDS = {"token", "embedding", "position", "ffn", "loss", "gradient", "descent", "l2", "temperature", "entropy", "generation", "cache"}
+NEW_IDS = {"token", "embedding", "position", "ffn", "loss", "gradient", "descent", "l2", "temperature", "entropy", "generation", "cache"} | TOWER_IDS
 
 
 class LabState(BaseModel):
@@ -33,6 +34,8 @@ class LabState(BaseModel):
     sequence: list[str] = Field(default_factory=lambda: ["A"], min_length=1, max_length=5)
     reuse: bool = False
     modes: list[str] = Field(default_factory=list, max_length=2)
+    chain: list[str] = Field(default_factory=list, max_length=6)
+    local_slope: float = Field(default=0, ge=-8, le=8, allow_inf_nan=False)
     reason: str | None = Field(default=None, max_length=50)
 
     @model_validator(mode="after")
@@ -49,6 +52,8 @@ class LabState(BaseModel):
             raise ValueError("Unknown toy symbol")
         if any(mode not in {"full", "cached"} for mode in self.modes):
             raise ValueError("Unknown cache mode")
+        if len(set(self.chain)) != len(self.chain) or any(item not in BLOCK_ORDER for item in self.chain):
+            raise ValueError("Unknown or repeated block component")
         return self
 
 
@@ -75,6 +80,8 @@ def loss(weight):
 def mechanics(node, stage, state):
     """Public toy mechanisms, never an independent mastery rubric."""
     s = state
+    if node in TOWER_IDS:
+        return tower_mechanics(node, stage, s)
     if node == "token":
         sentence = "AI让AI发光" if stage == 1 else "AI让学习发光"
         cuts = sorted(s.cuts)
@@ -164,10 +171,12 @@ def expedition_state(session, release_id):
                          "unlocked": opened, "completed": all(rows[node].stage == 3 for node in chapter["main_path"]),
                          "main_completed": sum(rows[node].stage == 3 for node in chapter["main_path"]), "all_explored": all(node["stage"] == 3 for node in group)})
     main_path = [node for chapter in config["chapters"] for node in chapter["main_path"]]
-    next_node = next((node for node in main_path if rows[node].stage < 3), "generation")
+    next_node = next((node for node in main_path if rows[node].stage < 3), main_path[-1])
     return {"id": config["id"], "version": config["version"], "release_id": release_id, "first_chapter": first,
             "chapters": chapters, "nodes": nodes, "next_node": next_node, "unlocked": first["completed"],
-            "main_completed": first["main_completed"] + sum(rows[node].stage == 3 for node in main_path), "main_total": 13,
+            "chapter_total": 1 + len(chapters), "node_total": len(first["nodes"]) + len(nodes),
+            "mechanism_total": len(first["nodes"]) * 3 + sum(len(node["steps"]) for node in config["nodes"]),
+            "main_completed": first["main_completed"] + sum(rows[node].stage == 3 for node in main_path), "main_total": first["main_total"] + len(main_path),
             "completed": first["completed"] and all(rows[node].stage == 3 for node in main_path),
             "all_explored": first["all_explored"] and all(row.stage == 3 for key, row in rows.items() if key in NEW_IDS), "mastery": "unverified"}
 
@@ -180,7 +189,7 @@ def current(request: Request):
 
 @router.get("/lessons/{chapter_id}")
 def lesson(chapter_id: str, request: Request):
-    if chapter_id not in {"representation", "learning", "generation"}:
+    if chapter_id not in {"representation", "learning", "generation", "tower"}:
         raise HTTPException(404, "Unknown chapter")
     with request.app.state.sessions() as session:
         state = expedition_state(session, request.app.state.release_id)

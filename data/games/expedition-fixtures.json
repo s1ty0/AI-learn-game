@@ -1,4 +1,94 @@
 {
+  "residual": [
+    {
+      "weight": 0.5,
+      "reuse": true
+    },
+    {
+      "weight": -1,
+      "reuse": true
+    },
+    {
+      "weight": 0,
+      "reuse": true,
+      "reason": "identity-path"
+    }
+  ],
+  "normalization": [
+    {
+      "inputs": [
+        1,
+        2,
+        3
+      ],
+      "amount": 0,
+      "position_enabled": true
+    },
+    {
+      "inputs": [
+        1,
+        2,
+        3
+      ],
+      "amount": 2,
+      "position_enabled": true
+    },
+    {
+      "inputs": [
+        2,
+        2,
+        2
+      ],
+      "amount": 0,
+      "position_enabled": true,
+      "reason": "feature-axis"
+    }
+  ],
+  "block": [
+    {
+      "chain": [
+        "norm-attention",
+        "attention",
+        "add-attention"
+      ]
+    },
+    {
+      "chain": [
+        "norm-attention",
+        "attention",
+        "add-attention",
+        "norm-ffn",
+        "ffn",
+        "add-ffn"
+      ]
+    },
+    {
+      "chain": [
+        "norm-attention",
+        "attention",
+        "add-attention",
+        "norm-ffn",
+        "ffn",
+        "add-ffn"
+      ],
+      "reason": "pre-norm"
+    }
+  ],
+  "backprop": [
+    {
+      "weight": 1,
+      "local_slope": -2
+    },
+    {
+      "weight": 2,
+      "local_slope": 2
+    },
+    {
+      "weight": 1.5,
+      "local_slope": 0,
+      "reason": "chain-product"
+    }
+  ],
   "token": [
     {
       "cuts": [

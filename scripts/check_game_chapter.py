@@ -33,7 +33,7 @@ def main():
     expedition = json.loads((ROOT / "data/games/expedition.json").read_text(encoding="utf-8"))
     fixtures = json.loads((ROOT / "data/games/expedition-fixtures.json").read_text(encoding="utf-8"))
     added = {node["id"]: node for node in expedition["nodes"]}
-    assert len(added) == 12 and not set(added).intersection(nodes)
+    assert len(added) == len(expedition["nodes"]) and not set(added).intersection(nodes)
     assert set(fixtures) == set(added) and all(len(stages) == 3 for stages in fixtures.values())
     combined = {**nodes, **added}
     seen = set()
@@ -54,7 +54,7 @@ def main():
         assert set(node["entity_ids"]) <= entities
         assert len(node["steps"]) == 3 and all(all(step.get(key) for key in ["title", "goal", "hint"]) for step in node["steps"])
         assert node["discovery"] and node["boundary"]
-    print("PASS: 4 chapters, 17 islands, 51 mechanisms; main route connected, optional branches do not block, all concepts and fixture stages present.")
+    print(f"PASS: {1+len(expedition['chapters'])} chapters, {len(combined)} islands, {3*len(combined)} mechanisms; connected main route, optional branches, known concepts and fixture stages.")
 
 
 if __name__ == "__main__":

@@ -1,10 +1,13 @@
 import { test, expect } from "@playwright/test";
-import path from "node:path";
+import { workbenchFixture } from "./workbench-fixture";
+
+test.beforeEach(async ({ context }) => { await workbenchFixture(context); });
 
 test("地图、实验、提交与历史恢复在浏览器中形成闭环", async ({ page, request }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
-  const initial = await (await request.get("/api/v1/learner-graph")).json();
+  const realBefore = await (await request.get("/api/v1/learner-graph")).json();
+  const initial = { revision: 0, payload: realBefore.payload };
   await page.goto("/workbench");
   await expect(page.getByRole("heading", { name: "让知识，连成你的理解。" })).toBeVisible();
   await expect(page.locator(".react-flow__node")).toHaveCount(initial.payload.nodes.length);
@@ -39,9 +42,10 @@ test("地图、实验、提交与历史恢复在浏览器中形成闭环", async
   await expect(page.locator(".preview-banner")).toContainText(`历史 v${initial.revision}`);
   await page.getByRole("button", { name: "恢复为新版本", exact: true }).click();
   await expect(page.locator(".preview-banner")).toHaveCount(0);
-  const restored = await (await request.get("/api/v1/learner-graph")).json();
+  const restored = await page.evaluate(async () => (await fetch("/api/v1/learner-graph")).json());
   expect(restored.payload).toEqual(initial.payload);
   expect(restored.revision).toBeGreaterThan(initial.revision + 1);
+  expect(await (await request.get("/api/v1/learner-graph")).json()).toEqual(realBefore);
   expect(errors).toEqual([]);
 });
 
@@ -55,8 +59,7 @@ test("知识搜索与窄屏阅读可用", async ({ page }) => {
   await page.screenshot({ path: ".runtime/screenshots/mobile.png", fullPage: true });
 });
 
-test("两个标签页发生冲突时保留草稿并可明确重新应用", async ({ page, context, request }) => {
-  const initial = await (await request.get("/api/v1/learner-graph")).json();
+test("两个标签页发生冲突时保留草稿并可明确重新应用", async ({ page, context }) => {
   const second = await context.newPage();
   const noteOne = `【开发验证样本】标签页一保存的关系解释。${Date.now()}`;
   const noteTwo = `【开发验证样本】标签页二尚未同步的关系解释。${Date.now()}`;
@@ -76,9 +79,8 @@ test("两个标签页发生冲突时保留草稿并可明确重新应用", async
   await second.getByRole("button", { name: "把草稿复制为新修订", exact: true }).click();
   await second.getByRole("button", { name: "保存解释", exact: true }).click();
   await expect(second.getByRole("button", { name: "保存地图", exact: true })).toBeDisabled();
-  const latest = await (await request.get("/api/v1/learner-graph")).json();
-  const restored = await request.post("/api/v1/learner-graph/restore", { data: { base_revision: latest.revision, operation_key: crypto.randomUUID(), revision: initial.revision } });
-  expect(restored.ok()).toBeTruthy();
+  const latest = await second.evaluate(async () => (await fetch("/api/v1/learner-graph")).json());
+  expect(latest.payload.nodes.find((node: { data: { note: string } }) => node.data.note === noteTwo)).toBeTruthy();
   await second.close();
 });
 

@@ -7,6 +7,10 @@ import json
 from pathlib import Path
 
 SOLUTIONS = {
+    "residual": [{"weight": .5, "reuse": True}, {"weight": -1, "reuse": True}, {"weight": 0, "reuse": True, "reason": "identity-path"}],
+    "normalization": [{"inputs": [1, 2, 3], "amount": 0, "position_enabled": True}, {"inputs": [1, 2, 3], "amount": 2, "position_enabled": True}, {"inputs": [2, 2, 2], "amount": 0, "position_enabled": True, "reason": "feature-axis"}],
+    "block": [{"chain": ["norm-attention", "attention", "add-attention"]}, {"chain": ["norm-attention", "attention", "add-attention", "norm-ffn", "ffn", "add-ffn"]}, {"chain": ["norm-attention", "attention", "add-attention", "norm-ffn", "ffn", "add-ffn"], "reason": "pre-norm"}],
+    "backprop": [{"weight": 1, "local_slope": -2}, {"weight": 2, "local_slope": 2}, {"weight": 1.5, "local_slope": 0, "reason": "chain-product"}],
     "token": [{"cuts": [2, 3, 5]}, {"cuts": [2, 3, 5], "reason": "same-id"}, {"cuts": [2, 3]}],
     "embedding": [{"rows": [2, 0, 2]}, {"rows": [1, 2]}, {"rows": [2, 0, 2], "reason": "address"}],
     "position": [{"position_enabled": True, "amount": 1}, {"position_enabled": True, "amount": 2}, {"position_enabled": True, "amount": 2, "reason": "order"}],
@@ -25,4 +29,4 @@ SOLUTIONS = {
 if __name__ == "__main__":
     root = Path(__file__).resolve().parents[1]
     (root / "data/games/expedition-fixtures.json").write_text(json.dumps(SOLUTIONS, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("Wrote 36 explicit practice configurations; these are not independent mastery evidence.")
+    print(f"Wrote {sum(len(stages) for stages in SOLUTIONS.values())} explicit practice configurations; these are not independent mastery evidence.")

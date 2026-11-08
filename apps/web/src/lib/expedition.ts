@@ -1,19 +1,21 @@
-export type ExpeditionIsland = "token" | "embedding" | "position" | "ffn" | "loss" | "gradient" | "descent" | "l2" | "temperature" | "entropy" | "generation" | "cache";
+import { blockOrder, towerIds, towerMetrics, towerSatisfied } from "./tower";
+
+export type ExpeditionIsland = "token" | "embedding" | "position" | "ffn" | "loss" | "gradient" | "descent" | "l2" | "temperature" | "entropy" | "generation" | "cache" | "residual" | "normalization" | "block" | "backprop";
 export type LabState = {
   cuts: number[]; rows: number[]; position_enabled: boolean; amount: number; inputs: number[]; weight: number; probes: number[];
-  rate: number; steps: number; lam: number; temperature: number; probability: number; sequence: string[]; reuse: boolean; modes: string[]; reason: string | null;
+  rate: number; steps: number; lam: number; temperature: number; probability: number; sequence: string[]; reuse: boolean; modes: string[]; reason: string | null; chain: string[]; local_slope: number;
 };
 export type ExpeditionNode = { id: ExpeditionIsland; chapter: string; title: string; concept: string; kind: string; requires: string[];
   entity_ids: string[]; steps: { title: string; goal: string; hint: string }[]; discovery: string; boundary: string;
   unlocked: boolean; stage: number; revision: number; release_id: string; trail: { stage: number; created_at: string; hint_used: boolean }[] };
 export type Expedition = { id: string; version: string; release_id: string; nodes: ExpeditionNode[];
   chapters: { id: string; title: string; theme: string; main_path: string[]; unlocked: boolean; completed: boolean; main_completed: number; all_explored: boolean }[];
-  next_node: ExpeditionIsland; main_completed: number; main_total: number; completed: boolean; all_explored: boolean; unlocked: boolean; mastery: "unverified" };
+  next_node: ExpeditionIsland; main_completed: number; main_total: number; chapter_total: number; node_total: number; mechanism_total: number; completed: boolean; all_explored: boolean; unlocked: boolean; mastery: "unverified" };
 
 export const table = [[1, 0], [0, 1], [1, 1]];
 export function initialLab(node: ExpeditionIsland, stage: number): LabState {
   const state: LabState = { cuts: [], rows: [], position_enabled: false, amount: 1, inputs: [-1, 2, 3], weight: 0, probes: [], rate: .1,
-    steps: 0, lam: 0, temperature: 1, probability: .4, sequence: ["A"], reuse: false, modes: [], reason: null };
+    steps: 0, lam: 0, temperature: 1, probability: .4, sequence: ["A"], reuse: false, modes: [], reason: null, chain: [], local_slope: 0 };
   if (node === "token" && stage > 0) state.cuts = [2, 3, 5];
   if (node === "embedding" && stage === 2) state.rows = [2, 0, 2];
   if (node === "position" && stage > 0) { state.position_enabled = true; if (stage === 2) state.amount = 2; }
@@ -26,6 +28,10 @@ export function initialLab(node: ExpeditionIsland, stage: number): LabState {
   if (node === "entropy" && stage > 0) state.probability = stage === 1 ? .8 : .1;
   if (node === "generation" && stage > 0) state.sequence = stage === 1 ? ["A", "B"] : ["A", "B", "C", "A"];
   if (node === "cache" && stage > 0) state.modes = ["full", "cached"];
+  if (node === "residual") { state.weight = stage === 2 ? -1 : .5; state.reuse = stage > 0; }
+  if (node === "normalization") { state.inputs = [1, 2, 3]; state.amount = 0; state.position_enabled = stage > 0; }
+  if (node === "block") state.chain = stage === 0 ? [] : stage === 1 ? blockOrder.slice(0, 3) : [...blockOrder];
+  if (node === "backprop") { state.weight = stage === 1 ? 2 : 1; state.local_slope = stage === 1 ? -2 : stage === 2 ? 2 : 0; }
   return state;
 }
 
@@ -43,6 +49,7 @@ export function trajectory(rate: number, steps: number) {
   return { weight, path };
 }
 export function labMetrics(node: ExpeditionIsland, stage: number, s: LabState): number[] {
+  if (towerIds.includes(node)) return towerMetrics(node, s);
   if (node === "token") { const parts = tokenParts(stage, s.cuts); return [parts.length, ...parts.map(part => vocabulary(stage).indexOf(part))]; }
   if (node === "embedding") return [s.rows.length, ...s.rows.flatMap(row => table[row] ?? [])];
   if (node === "position") return [0, 1, 2].map(index => 2 + (s.position_enabled ? index * s.amount : 0));
@@ -60,6 +67,7 @@ export function labMetrics(node: ExpeditionIsland, stage: number, s: LabState): 
 }
 
 export function labSatisfied(node: ExpeditionIsland, stage: number, s: LabState) {
+  if (towerIds.includes(node)) return towerSatisfied(node, stage, s);
   const metrics = labMetrics(node, stage, s);
   if (node === "token") return JSON.stringify(s.cuts.toSorted((a,b) => a-b)) === JSON.stringify(stage === 2 ? [2, 3] : [2, 3, 5]) && (stage !== 1 || s.reason === "same-id");
   if (node === "embedding") return JSON.stringify(s.rows) === JSON.stringify(stage === 1 ? [1, 2] : [2, 0, 2]) && (stage !== 2 || s.reason === "address");
@@ -76,6 +84,10 @@ export function labSatisfied(node: ExpeditionIsland, stage: number, s: LabState)
 }
 
 export const explanations: Record<ExpeditionIsland, { id: string; text: string }[]> = {
+  residual: [{ id: "identity-path", text: "零修正时仍保留原输入的恒等支路" }, { id: "always-grow", text: "残差只允许信号越来越大" }, { id: "no-gradient-loss", text: "任意深度的梯度都不会消失" }],
+  normalization: [{ id: "feature-axis", text: "本关在同一token的特征维统计" }, { id: "batch-axis", text: "本关把不同样本混合统计" }, { id: "token-axis", text: "本关把所有token平均为一个值" }],
+  block: [{ id: "pre-norm", text: "本关先归一化再进子层，另有Post-LN约定" }, { id: "only-order", text: "所有Transformer都只能采用这个顺序" }, { id: "replace-skip", text: "归一化会替代残差支路" }],
+  backprop: [{ id: "chain-product", text: "沿单条链组合局部导数，多路径还需累加" }, { id: "sum-factors", text: "任何计算图都只把局部导数相加" }, { id: "update-first", text: "先更新参数，再补算旧参数的梯度" }],
   token: [{ id: "same-id", text: "同一词表中相同token对应同一编号" }, { id: "position-id", text: "同一个token换位置就必须换编号" }, { id: "bigger-meaning", text: "编号越大语义越重要" }],
   embedding: [{ id: "address", text: "编号是查表地址，向量才是表示" }, { id: "raw-coordinate", text: "编号本身就是向量坐标" }, { id: "ordered-meaning", text: "编号差就是语义距离" }],
   position: [{ id: "order", text: "补充顺序线索，内容表示仍然保留" }, { id: "replace-content", text: "用位置编号替代全部内容" }, { id: "change-vocab", text: "重新给词表中的每个词编号" }],

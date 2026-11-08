@@ -76,16 +76,20 @@ def test_entire_connected_journey_has_more_chapters_and_optional_branches_withou
         assert response.status_code == 200
     first = client.get("/api/v1/chapter").json()
     assert client.get("/api/v1/expedition").json()["next_node"] == "token"
-    for node in ["token", "embedding", "position", "loss", "gradient", "descent", "temperature", "entropy", "generation"]:
+    for node in ["token", "embedding", "position", "loss", "gradient", "descent", "temperature", "entropy", "generation", "residual", "normalization", "block"]:
         for stage in range(3):
             response = client.post(f"/api/v1/expedition/{node}/moves", json=body(node, stage))
             assert response.status_code == 200, response.text
     final = client.get("/api/v1/expedition").json()
     assert final["completed"] is True and final["all_explored"] is False
-    assert final["main_completed"] == final["main_total"] == 13
+    assert final["main_completed"] == final["main_total"] == 16
+    assert (final["chapter_total"], final["node_total"], final["mechanism_total"]) == (5, 21, 63)
     assert all(chapter["completed"] for chapter in final["chapters"])
-    assert all(next(node for node in final["nodes"] if node["id"] == optional)["stage"] == 0 for optional in ["ffn", "l2", "cache"])
+    assert all(next(node for node in final["nodes"] if node["id"] == optional)["stage"] == 0 for optional in ["ffn", "l2", "cache", "backprop"])
     assert client.get("/api/v1/expedition/lessons/learning").status_code == 200
+    lesson = client.get("/api/v1/expedition/lessons/tower")
+    assert lesson.status_code == 200 and lesson.json()["status"] == "draft"
+    assert "Pre-LN" in lesson.json()["markdown"] and "1e−5" in lesson.json()["markdown"]
     assert client.get("/api/v1/chapter").json() == first
     assert client.get("/api/v1/learner-graph").json() == old_graph
 
@@ -120,3 +124,28 @@ def test_simultaneous_new_island_advancement_appends_one_step(client):
     assert sorted(response.status_code for response in responses) == [200, 409]
     node = next(node for node in client.get("/api/v1/expedition").json()["nodes"] if node["id"] == "token")
     assert node["stage"] == node["revision"] == len(node["trail"]) == 1
+
+
+def test_tower_normalization_and_chain_gradients_have_independent_numerical_references():
+    output = mechanics("normalization", 0, LabState(inputs=[1, 2, 3], amount=0, position_enabled=True))[0]
+    assert output == pytest.approx([2, 2/3, -1/math.sqrt(2/3+1e-5), 0, 1/math.sqrt(2/3+1e-5)])
+    shifted = mechanics("normalization", 1, LabState(inputs=[1, 2, 3], amount=2, position_enabled=True))[0]
+    assert shifted[2:] == pytest.approx(output[2:])
+    assert mechanics("normalization", 2, LabState(inputs=[2, 2, 2], amount=0, position_enabled=True))[0] == [2, 0, 0, 0, 0]
+    h = 1e-5
+    for w in [0, .5, 1, 1.5, 2, 3]:
+        gradient = mechanics("backprop", 0, LabState(weight=w))[0][4]
+        difference = (((2*(w+h)-3)**2) - ((2*(w-h)-3)**2)) / (2*h)
+        assert gradient == pytest.approx(difference, abs=1e-8)
+
+
+def test_tower_rejects_wrong_route_factor_and_zero_shortcut(client):
+    for node, changes in [("residual", {"reuse": False}), ("backprop", {"local_slope": 2}),
+                           ("block", {"chain": ["attention", "norm-attention", "add-attention"]})]:
+        open_for_test(client, node)
+        request = body(node, 0)
+        request["state"].update(changes)
+        request["observed"] = mechanics(node, 0, LabState(**request["state"]))[0]
+        assert client.post(f"/api/v1/expedition/{node}/moves", json=request).status_code == 422
+    request = body("block", 0); request["state"]["chain"] = ["attention", "attention"]
+    assert client.post("/api/v1/expedition/block/moves", json=request).status_code == 422
