@@ -35,7 +35,7 @@ def ledger(session,offset=0,source_id=None,goals=None,page_size=50,edge_id=None,
     answers={e["attempt_id"]:e for e in events if e["action"]=="submit"}
     items=[]
     for source in starts:
-        if source.get("kind")=="recheck" or source["attempt_id"] not in answers:continue
+        if source.get("kind") in {"recheck","revision_challenge"} or source["attempt_id"] not in answers:continue
         if source_id is not None and source["attempt_id"]!=source_id:continue
         if goals is not None and source["goal"] not in goals:continue
         if edge_id is not None and (not source.get("binding") or source["binding"]["edge"]["id"]!=edge_id):continue

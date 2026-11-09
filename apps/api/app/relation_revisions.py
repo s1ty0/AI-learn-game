@@ -14,6 +14,7 @@ from .relation_evidence import current_edge
 from .relation_tasks import signature
 from .reviewing import projection
 from .schemas import GraphPayload
+from . import revision_challenges
 
 router=APIRouter(prefix="/api/v1/relation-revisions")
 
@@ -38,6 +39,11 @@ def task_data(session,row,attempt_id):
         opinions=[{"reviewer":e["actor_name"],"review_id":e["id"],**i} for e in latest.values() for i in e["items"] if i["criterion"]==c["id"]]
         criteria.append({**c,"gap":not opinions or any(i["judgement"]!="met" for i in opinions),"disputed":c["id"] in summary["disagreements"],"opinions":opinions})
     history=[{k:e[k] for k in ("id","created_at","source_attempt","graph_before","graph_after","before","after","criteria","reason","counterexample","review_revision","source_reviews")} for e in row.events if e["action"]=="relation_revision" and e["source_attempt"]==attempt_id]
+    answers={e["attempt_id"]:e for e in row.events if e["action"]=="submit"}
+    for entry in history:
+        entry["challenges"]=[{"id":e["attempt_id"],"focus":e["revision_origin"]["focus"],"title":e["task"]["title"],"submitted":e["attempt_id"] in answers,
+                              "choice_matches":answers.get(e["attempt_id"],{}).get("choice_matches"),"explanation_status":"pending_review"}
+                             for e in row.events if e["action"]=="start" and e.get("revision_origin",{}).get("revision_id")==entry["id"]]
     return {"source_attempt":attempt_id,"title":"修订："+start["task"]["title"],"verification_revision":row.revision,"graph_revision":head.revision,"review_revision":summary["revision"],
             "binding":binding,"current":signature(edge),"answer":answer["explanation"],"prediction_matches":answer["choice_matches"],"criteria":criteria,
             "history":history,"mastery":"unverified","note":"复核意见是定位线索，不自动改写你的命题。保存后仍需验证新关系。"}
@@ -54,6 +60,16 @@ class Submit(BaseModel):
     criteria:list[str]=Field(min_length=1,max_length=3)
     reason:str=Field(min_length=1,max_length=2000)
     counterexample:str=Field(min_length=1,max_length=2000)
+
+
+@router.get("/challenge/{revision_id}")
+def challenge(revision_id:str,request:Request):
+    with request.app.state.sessions() as session:
+        row=session.get(VerificationSession,DEMO_GRAPH)
+        repair,binding=revision_challenges.context(session,row,revision_id,request.app.state.release_id)
+        return {"revision_id":repair["id"],"source_attempt":repair["source_attempt"],"graph_revision":binding["graph_revision"],"edge":binding["edge"],
+                "focuses":[{"id":focus,"title":revision_challenges.FOCI[focus]} for focus in repair["criteria"] if focus in revision_challenges.FOCI],
+                "mastery":"unverified","note":"一次只检查一个缺口；提交前隐藏参考与量规。挑战是修订练习，不计入候选或跳级。"}
 
 
 @router.get("/{attempt_id}")

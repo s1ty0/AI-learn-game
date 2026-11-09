@@ -155,9 +155,9 @@ def test_old_review_and_verification_operation_keys_remain_retryable(client):
     with client.app.state.sessions() as session,session.begin():
         row=session.get(VerificationSession,"local-demo");event=row.events[0]
         original=Action(base_revision=0,operation_key=event["key"],action="start",goal="mask")
-        event["hash"]=hashlib.sha256(original.model_dump_json(exclude={"parent_attempt","parent_review_revision","edge_id","graph_revision","relation_template"}).encode()).hexdigest()
+        event["hash"]=hashlib.sha256(original.model_dump_json(exclude={"parent_attempt","parent_review_revision","edge_id","graph_revision","relation_template","revision_id","revision_focus"}).encode()).hexdigest()
         row.events=[event]
-    assert client.post("/api/v1/verification/actions",json=original.model_dump(exclude={"parent_attempt","parent_review_revision","edge_id","graph_revision","relation_template"})).json()==state
+    assert client.post("/api/v1/verification/actions",json=original.model_dump(exclude={"parent_attempt","parent_review_revision","edge_id","graph_revision","relation_template","revision_id","revision_focus"})).json()==state
     report=act(client,state,"submit",attempt_id=state["active"]["id"],choice=0,explanation="固定条件，再解释影响路径。").json()["reports"][-1]
     access=actor(client,"alice");payload=body(read(client,report,access));response=post(client,report,access,payload).json()
     with client.app.state.sessions() as session,session.begin():

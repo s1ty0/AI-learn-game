@@ -235,10 +235,10 @@ export function Adventure() {
     {view === "expedition" && expedition && <ExpeditionIslandGame key={expeditionRun} island={expeditionIsland} expedition={expedition} onSaved={setExpedition} onBack={() => { setView("world"); showAtlas(); }}/>}
 
     {view === "stars" && <StarMap onBack={() => setView("world")} onOpenEvidence={intent=>{setVerificationIntent(intent);setVerificationFromStars(true);setView(intent.revise?"revision":"verification");}}/>}
-    {view === "revision" && verificationIntent?.revise && <RelationRevision source={verificationIntent.revise} onBack={()=>setView("stars")}/>}
+    {view === "revision" && verificationIntent?.revise && <RelationRevision source={verificationIntent.revise} onBack={()=>setView("stars")} onChallenge={id=>{setVerificationIntent({challenge:id,revise:verificationIntent.revise});setVerificationFromStars(true);setView("verification");}} onAttempt={id=>{setVerificationIntent({attempt:id});setVerificationFromStars(true);setView("verification");}}/>}
     {view === "intake" && <Intake onBack={() => setView("world")}/>}
     {view === "guidance" && <Guidance onBack={()=>setView("world")} onEnter={enterGuided}/>}
-    {view === "verification" && <Verification intent={verificationFromStars?verificationIntent:undefined} backLabel={verificationFromStars?"回到我的星图":"回到群岛"} onBack={()=>{setVerificationFromStars(false);setView(verificationFromStars?"stars":"world");}}/>}
+    {view === "verification" && <Verification onRepair={source=>{setVerificationIntent({revise:source});setView("revision");}} intent={verificationFromStars?verificationIntent:undefined} backLabel={verificationFromStars?"回到我的星图":"回到群岛"} onBack={()=>{setVerificationFromStars(false);setView(verificationFromStars?"stars":"world");}}/>}
     {view === "reviewing" && <ReviewBoard onBack={()=>setView("world")}/>}
 
     {view === "room" && <main className="island-room">
