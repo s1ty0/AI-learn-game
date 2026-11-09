@@ -17,6 +17,7 @@ const known: Discoveries={release_id:"current",status:"draft",mastery:"unverifie
 ],relations:[{id:"relation-0018",source:"entity-0144",target:"entity-0073",statement:"token按编号查找嵌入表示",conditions:"固定词表与嵌入表，不把编号差当语义距离",review_status:"proposed",source_ids:["source-025"],release_id:"current"}]};
 
 async function setup(page: Page, context: BrowserContext, discoveries=known) {
+  await page.route("**/api/v1/star-evidence{,/**}",route=>route.fulfill({json:{entities:[],entity_id:"fixture",goals:[],items:[],next_offset:null,total:0}}));
   const graph=await workbenchFixture(context,structuredClone(seed));
   await context.route("**/api/v1/discoveries",route=>route.fulfill({json:discoveries}));
   await voyage(page);return graph;

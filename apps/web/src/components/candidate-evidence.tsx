@@ -7,12 +7,12 @@ type Candidate={id:string;title:string;status:string;reason:string;due_at:string
 type Ledger={policy:string;server_time:string;interval_hours:number;items:Candidate[];total?:number;next_offset?:number|null};
 const labels:Record<string,string>={needs_evidence:"初次证据待补齐",waiting_interval:"等待延后复验",ready_for_recheck:"已到复验时间",recheck_in_progress:"复验进行中",recheck_needs_evidence:"复验证据待补齐",candidate_ready:"候选线索齐备，仍未认证掌握",needs_policy_review:"规则版本需重新核对"};
 
-export function CandidateEvidence({revision,busy,hasActive,onStart,onReload}:{revision:string;busy:boolean;hasActive:boolean;onStart:(id:string,reviewRevision:number)=>void;onReload:()=>void}){
+export function CandidateEvidence({revision,sourceId,busy,hasActive,onStart,onReload}:{revision:string;sourceId?:string;busy:boolean;hasActive:boolean;onStart:(id:string,reviewRevision:number)=>void;onReload:()=>void}){
   const [data,setData]=useState<Ledger|null>(null),[error,setError]=useState(""),[loading,setLoading]=useState(false);
   const [offset,setOffset]=useState(0);
   const sequence=useRef(0);
-  async function load(nextOffset=offset){const call=++sequence.current;setLoading(true);try{const next=await request<Ledger>(nextOffset?`/candidates?offset=${nextOffset}`:"/candidates");if(call===sequence.current){setData(next);setOffset(nextOffset);setError("");}}catch{if(call===sequence.current)setError("候选证据暂未读取成功；不影响原验证作答。");}finally{if(call===sequence.current)setLoading(false);}}
-  useEffect(()=>{void load(0);return()=>{sequence.current++;};},[revision]);
+  async function load(nextOffset=offset){const call=++sequence.current;setLoading(true);try{const query=new URLSearchParams();if(nextOffset)query.set("offset",String(nextOffset));if(sourceId)query.set("source_id",sourceId);const next=await request<Ledger>(`/candidates${query.size?`?${query}`:""}`);if(call===sequence.current){setData(next);setOffset(nextOffset);setError("");}}catch{if(call===sequence.current)setError("候选证据暂未读取成功；不影响原验证作答。");}finally{if(call===sequence.current)setLoading(false);}}
+  useEffect(()=>{void load(0);return()=>{sequence.current++;};},[revision,sourceId]);
   return <section className="intake-card candidate-evidence"><h2>候选证据与延后复验</h2><p>解释复核、独立性观察、帮助和题族分别检查。满足候选条件也不会自动解锁。</p><button disabled={loading||busy} onClick={()=>{void load();}}>刷新候选证据</button>
     {error&&<p className="intake-error">{error}</p>}
     {data&&!data.items.length&&<p>先提交一个新情境，证据缺口会在这里显示。</p>}

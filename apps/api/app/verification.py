@@ -42,7 +42,7 @@ class Action(BaseModel):
     parent_review_revision: int | None = Field(default=None,ge=0)
 
 
-def state(session,row=None):
+def state(session,row=None,report_id=None):
     events=row.events if row else []
     submitted={e["attempt_id"]:e for e in events if e["action"]=="submit"}
     starts=[e for e in events if e["action"]=="start"]
@@ -52,7 +52,7 @@ def state(session,row=None):
         progress=session.get(AdventureSession,session_id(task["node"]))
         if progress and progress.stage==3: goals.append({"id":key,"title":task["title"]})
     reports=[]
-    for start in starts[-10:]:
+    for start in ([s for s in starts if s["attempt_id"]==report_id] if report_id else starts[-10:]):
         answer=submitted.get(start["attempt_id"])
         if not answer: continue
         reviews=[{k:e[k] for k in ("created_at","review")} for e in events if e["action"]=="self_review" and e["attempt_id"]==start["attempt_id"]]
@@ -73,6 +73,14 @@ def state(session,row=None):
 def current(request:Request):
     with request.app.state.sessions() as session:
         return state(session,session.get(VerificationSession,DEMO_GRAPH))
+
+
+@router.get("/attempts/{attempt_id}")
+def historical_attempt(attempt_id:str,request:Request):
+    with request.app.state.sessions() as session:
+        result=state(session,session.get(VerificationSession,DEMO_GRAPH),report_id=attempt_id)
+        if not result["reports"]:raise HTTPException(404,"未找到已提交作答，未提交题的答案和量规仍隐藏。")
+        return result["reports"][0]
 
 
 @router.post("/actions")

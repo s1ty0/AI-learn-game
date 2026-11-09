@@ -1,17 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { ReactFlow, Background, Controls, Handle, Position, type NodeProps, type NodeChange, applyNodeChanges } from "@xyflow/react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, GitBranch, History, Move, Plus, Save, Sparkles } from "lucide-react";
 import { request, ApiError, type ConceptNode, type GraphPayload, type Snapshot, type Version } from "@/lib/api";
 import { loadDraft, writeDraft } from "@/lib/draft-store";
 import { addDiscoveries, addRelation, graphDifference, visibleGraph, type Discoveries, type PersonalEdge } from "@/lib/star-map";
+import { badge,type EvidenceIntent,type EvidenceSummary } from "@/lib/star-evidence";
+import { StarEvidencePanel } from "@/components/star-evidence-panel";
 
 type Draft = { baseRevision: number; payload: GraphPayload; note: string; operationKey?: string };
 const emptyGraph: GraphPayload = { nodes: [], edges: [] };
-function Star({ data, selected }: NodeProps<ConceptNode>) {
-  return <div className={`personal-star ${selected ? "star-selected" : ""}`}><Handle type="target" position={Position.Left}/><span className="personal-star-light"/><strong>{data.label}</strong><small>{data.note ? "已有我的解释" : "写下我的理解"}</small><Handle type="source" position={Position.Right}/></div>;
+const EvidenceContext=createContext<Record<string,EvidenceSummary>>({});
+function Star({ id,data, selected }: NodeProps<ConceptNode>) {
+  const summary=useContext(EvidenceContext)[id];
+  return <div className={`personal-star ${selected ? "star-selected" : ""}`}><Handle type="target" position={Position.Left}/><span className="personal-star-light"/><strong>{data.label}</strong><small>{data.note ? "已有我的解释" : "写下我的理解"}</small>{summary&&<small className="star-evidence-badge">{badge(summary)}</small>}<Handle type="source" position={Position.Right}/></div>;
 }
 const nodeTypes = { knowledge: Star };
 
@@ -19,7 +23,7 @@ function ChangeList({ changes }: { changes: ReturnType<typeof graphDifference> }
   return <ul>{changes.map((item, index) => <li key={index}>{item.kind}：{item.label}{item.before !== undefined && <details className="star-change-text"><summary>查看原文与修改</summary><p>比较前</p><pre>{item.before}</pre><p>比较后</p><pre>{item.after}</pre></details>}</li>)}</ul>;
 }
 
-export function StarMap({ onBack }: { onBack: () => void }) {
+export function StarMap({ onBack,onOpenEvidence }: { onBack: () => void;onOpenEvidence?:(intent:EvidenceIntent)=>void }) {
   const [discoveries, setDiscoveries] = useState<Discoveries | null>(null);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [graph, setGraph] = useState<GraphPayload>(emptyGraph);
@@ -42,6 +46,18 @@ export function StarMap({ onBack }: { onBack: () => void }) {
   const restoring = useRef<{ revision: number; base: number; key: string } | null>(null);
   const loading = useRef(0);
   const heading = useRef<HTMLHeadingElement>(null);
+  const [evidence,setEvidence]=useState<Record<string,EvidenceSummary>>({});
+  const [evidenceError,setEvidenceError]=useState("");
+  const [openingEvidence,setOpeningEvidence]=useState(false);
+  async function loadEvidence(){try{const value=await request<{entities:EvidenceSummary[]}>("/star-evidence");setEvidence(Object.fromEntries(value.entities.map(e=>[e.id,e])));setEvidenceError("");}catch{setEvidenceError("当前证据未同步，星图编辑和保存仍可继续。");}}
+  useEffect(()=>{void loadEvidence();},[]);
+  async function openEvidence(intent:EvidenceIntent){
+    if(!onOpenEvidence||saving||fetching||recovery||openingEvidence)return;
+    setOpeningEvidence(true);
+    try{if(dirty&&pending.current)await writeDraft(pending.current,"stars");onOpenEvidence(intent);}
+    catch{setError("本机草稿未暂存成功，请先保存星图再前往验证。");}
+    finally{setOpeningEvidence(false);}
+  }
 
   function keepDraft(value: Draft | undefined) {
     void writeDraft(value, "stars").catch(() => setError("本机草稿暂存不可用。当前操作仍在屏幕上，请保存到星图。"));
@@ -138,6 +154,7 @@ export function StarMap({ onBack }: { onBack: () => void }) {
   return <main className="star-map-room">
     <div className="star-map-top"><button className="voyage-back" disabled={saving || fetching} onClick={onBack}><ArrowLeft size={16}/>回到群岛</button><span>{status}</span><button className="voyage-secondary" disabled={!dirty || frozen} onClick={() => { void save(); }}><Save size={15}/>{saving ? "正在保存…" : "保存星图"}</button></div>
     <div className="star-map-intro"><span className="voyage-eyebrow">把发现，连成自己的理解</span><h1 ref={heading} tabIndex={-1}>我的星图</h1><p>只展开已经遇见的知识。写解释、接关系，每次保存都留下一个版本。</p></div>
+    {evidenceError&&<div className="star-evidence-notice" role="status">{evidenceError}<button onClick={()=>{void loadEvidence();}}>重新同步证据</button></div>}
     {error && <div className="star-map-error" role="alert">{error}<button disabled={saving} onClick={() => { void load(true); }}>查看最新版本</button></div>}
     {recovery && <div className="star-recovery"><p>找回一份未同步草稿（基于v{recovery.baseRevision}）。{recovery.baseRevision !== snapshot?.revision && "服务器已有更新，先比较，再决定是否完整复制草稿。"}</p><button onClick={() => {
       if (!snapshot) return; const draft = { ...recovery, baseRevision: snapshot.revision, operationKey: recovery.baseRevision === snapshot.revision ? recovery.operationKey ?? crypto.randomUUID() : crypto.randomUUID() };
@@ -147,14 +164,14 @@ export function StarMap({ onBack }: { onBack: () => void }) {
       <div className="star-map-toolbar"><label>展开范围<select aria-label="星图范围" value={chapter} onChange={event => { setChapter(event.target.value); setSelected(null); setEdgeId(null); setFrom(""); setTo(""); }}><option value="all">全部已发现</option>{discoveries.chapters.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select></label><span>{visible.nodes.length}个已接入 · {missing.length}个可接入</span><button disabled={frozen || !missing.length} onClick={joinDiscoveries}><Plus size={15}/>接入本章发现</button><button disabled={frozen || !visible.nodes.length} onClick={tidy}><Move size={15}/>整理布局</button></div>
       {preview && <div className="star-history-banner"><span>正在回看v{preview.revision} · 只读</span><button disabled={saving} onClick={() => setPreview(null)}>回到当前星图</button></div>}
       <div className="star-map-layout"><section className="star-map-canvas" aria-label="已发现知识的个人星图">
-        {visible.nodes.length ? <ReactFlow key={`${chapter}:${preview?.revision ?? "current"}:${visible.nodes.length}`} nodes={visible.nodes.map(node => ({ ...node, selected: node.id === selected }))} edges={visible.edges.map(item => ({ ...item, selected: item.id === edgeId }))} nodeTypes={nodeTypes} nodesDraggable={!frozen} nodesConnectable={!frozen} elementsSelectable={!saving} onNodesChange={nodesChanged} onConnect={connection => connect(connection.source, connection.target)} onNodeClick={(_,node) => { setSelected(node.id); setEdgeId(null); setPanel("understanding"); }} onEdgeClick={(_,item) => { setEdgeId(item.id); setSelected(null); setPanel("understanding"); }} deleteKeyCode={null} fitView fitViewOptions={{ padding:.25 }} minZoom={.2} maxZoom={1.5} defaultEdgeOptions={{ type:"smoothstep", style:{ stroke:"#a9c88f",strokeWidth:1.4 }, labelStyle:{fill:"#d3d5a9",fontSize:10},labelBgStyle:{fill:"#203a37"},labelBgPadding:[8,5] }}><Background color="#8aa68a55" gap={25}/><Controls showInteractive={false}/></ReactFlow> : <div className="star-empty-local"><Sparkles size={30}/><p>这些发现还没有接进图里。</p><button className="voyage-secondary" disabled={frozen} onClick={joinDiscoveries}>接入本章发现</button></div>}
+        {visible.nodes.length ? <EvidenceContext.Provider value={evidence}><ReactFlow key={`${chapter}:${preview?.revision ?? "current"}:${visible.nodes.length}`} nodes={visible.nodes.map(node => ({ ...node, selected: node.id === selected }))} edges={visible.edges.map(item => ({ ...item, selected: item.id === edgeId }))} nodeTypes={nodeTypes} nodesDraggable={!frozen} nodesConnectable={!frozen} elementsSelectable={!saving} onNodesChange={nodesChanged} onConnect={connection => connect(connection.source, connection.target)} onNodeClick={(_,node) => { setSelected(node.id); setEdgeId(null); setPanel("understanding"); }} onEdgeClick={(_,item) => { setEdgeId(item.id); setSelected(null); setPanel("understanding"); }} deleteKeyCode={null} fitView fitViewOptions={{ padding:.25 }} minZoom={.2} maxZoom={1.5} defaultEdgeOptions={{ type:"smoothstep", style:{ stroke:"#a9c88f",strokeWidth:1.4 }, labelStyle:{fill:"#d3d5a9",fontSize:10},labelBgStyle:{fill:"#203a37"},labelBgPadding:[8,5] }}><Background color="#8aa68a55" gap={25}/><Controls showInteractive={false}/></ReactFlow></EvidenceContext.Provider> : <div className="star-empty-local"><Sparkles size={30}/><p>这些发现还没有接进图里。</p><button className="voyage-secondary" disabled={frozen} onClick={joinDiscoveries}>接入本章发现</button></div>}
         <small className="star-canvas-guide">拖动节点整理 · 拖接端点连线 · 也可使用右侧选择框</small>
       </section><aside className="star-map-inspector"><div className="star-panel-tabs"><button aria-pressed={panel === "understanding"} onClick={() => setPanel("understanding")}><BookOpen size={14}/>我的理解</button><button aria-pressed={panel === "suggestions"} onClick={() => setPanel("suggestions")}><GitBranch size={14}/>关系线索</button><button aria-pressed={panel === "history"} onClick={() => setPanel("history")}><History size={14}/>历史版本</button></div>
         {panel === "understanding" && <>
           <label className="star-field">选择知识点<select aria-label="选择星图知识点" value={focused?.id ?? ""} onChange={event => { setSelected(event.target.value); setEdgeId(null); }}><option value="">点一颗星，或在这里选择</option>{visible.nodes.map(node => <option key={node.id} value={node.id}>{node.data.label}</option>)}</select></label>
-          {focused && <div className="star-understanding"><h2>{focused.data.label}</h2><label className="star-field">我的解释<textarea aria-label="星图里的我的解释" rows={5} maxLength={3000} disabled={frozen} value={focused.data.note} onChange={event => edit({ ...graph, nodes:graph.nodes.map(node => node.id === focused.id ? {...node,data:{...node.data,note:event.target.value}} : node) },"修订知识解释")}/></label><small>探索发现 · 理解仍待独立验证</small><details><summary>回看这颗星的来处</summary>{focusedOrigin?.origins.map(origin => <p key={origin.node_id}>{origin.title}{origin.hint_used ? " · 用过线索" : " · 探索完成"}<small>内容版本 {origin.release_id}</small></p>)}</details></div>}
+          {focused && <div className="star-understanding"><h2>{focused.data.label}</h2><label className="star-field">我的解释<textarea aria-label="星图里的我的解释" rows={5} maxLength={3000} disabled={frozen} value={focused.data.note} onChange={event => edit({ ...graph, nodes:graph.nodes.map(node => node.id === focused.id ? {...node,data:{...node.data,note:event.target.value}} : node) },"修订知识解释")}/></label><small>探索发现 · 理解仍待独立验证</small><details><summary>回看这颗星的来处</summary>{focusedOrigin?.origins.map(origin => <p key={origin.node_id}>{origin.title}{origin.hint_used ? " · 用过线索" : " · 探索完成"}<small>内容版本 {origin.release_id}</small></p>)}</details>{onOpenEvidence&&<StarEvidencePanel key={focused.id} entityId={focused.id} historical={!!preview} disabled={saving||fetching||!!recovery||openingEvidence} onOpen={intent=>{void openEvidence(intent);}}/>}</div>}
           <label className="star-field">选择已有连接<select aria-label="选择星图连接" value={edge?.id ?? ""} onChange={event => { setEdgeId(event.target.value); setSelected(null); }}><option value="">点一条线，或在这里选择</option>{visible.edges.map(item => <option key={item.id} value={item.id}>{String(item.label)}</option>)}</select></label>
-          {edge && <div className="star-relationship"><label className="star-field">关系怎么说<input aria-label="星图关系名称" disabled={frozen} maxLength={200} value={String(edge.label ?? "")} onChange={event => edit({ ...graph, edges:graph.edges.map(item => item.id === edge.id ? {...item,label:event.target.value} : item) },"修订关系命题")}/></label><label className="star-field">我的理由与条件<textarea aria-label="星图关系的理由与条件" rows={4} disabled={frozen} maxLength={3000} value={edge.note ?? ""} onChange={event => edit({ ...graph, edges:graph.edges.map(item => item.id === edge.id ? {...item,note:event.target.value} : item) },"修订关系解释与条件")}/></label>{edge.reference_id && <small>从草稿线索 {edge.reference_id} 接入；个人解释不代表已验证。</small>}<button className="star-text-button" disabled={frozen} onClick={() => { edit({ ...graph, edges:graph.edges.filter(item => item.id !== edge.id) },"移除一条当前连接"); setEdgeId(null); }}>移除这条连接</button></div>}
+          {edge && <div className="star-relationship"><p className="star-evidence-edge-note">连线是你的关系表达；两端证据不会自动认证这条线。</p><div className="star-evidence-endpoints">{[edge.source,edge.target].map(id=><button key={id} onClick={()=>{setSelected(id);setEdgeId(null);}}>查看{shown.nodes.find(n=>n.id===id)?.data.label}的证据</button>)}</div><label className="star-field">关系怎么说<input aria-label="星图关系名称" disabled={frozen} maxLength={200} value={String(edge.label ?? "")} onChange={event => edit({ ...graph, edges:graph.edges.map(item => item.id === edge.id ? {...item,label:event.target.value} : item) },"修订关系命题")}/></label><label className="star-field">我的理由与条件<textarea aria-label="星图关系的理由与条件" rows={4} disabled={frozen} maxLength={3000} value={edge.note ?? ""} onChange={event => edit({ ...graph, edges:graph.edges.map(item => item.id === edge.id ? {...item,note:event.target.value} : item) },"修订关系解释与条件")}/></label>{edge.reference_id && <small>从草稿线索 {edge.reference_id} 接入；个人解释不代表已验证。</small>}<button className="star-text-button" disabled={frozen} onClick={() => { edit({ ...graph, edges:graph.edges.filter(item => item.id !== edge.id) },"移除一条当前连接"); setEdgeId(null); }}>移除这条连接</button></div>}
           {!frozen && visible.nodes.length > 1 && <details className="star-new-connection"><summary>连接两个发现</summary><label className="star-field">从<select aria-label="连接起点" value={from} onChange={event => setFrom(event.target.value)}><option value="">选择起点</option>{visible.nodes.map(node => <option key={node.id} value={node.id}>{node.data.label}</option>)}</select></label><label className="star-field">到<select aria-label="连接终点" value={to} onChange={event => setTo(event.target.value)}><option value="">选择终点</option>{visible.nodes.map(node => <option key={node.id} value={node.id}>{node.data.label}</option>)}</select></label><label className="star-field">连接含义<input aria-label="新连接含义" value={relationship} maxLength={200} onChange={event => setRelationship(event.target.value)}/></label><button className="voyage-secondary" onClick={() => connect(from,to,relationship.trim() || "待解释的关系")}>接上这条关系<ArrowRight size={14}/></button></details>}
           {!focused && !edge && <p className="star-inspector-tip">选一个知识写解释，或连接两颗星，说明它们怎样相关。</p>}
         </>}

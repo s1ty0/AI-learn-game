@@ -27,7 +27,7 @@ def admission(session,start,answer):
     return {"eligible":all(c["ok"] for c in checks),"checks":checks,"review_revision":summary["revision"],"review_status":summary["status"]}
 
 
-def ledger(session,offset=0,source_id=None):
+def ledger(session,offset=0,source_id=None,goals=None,page_size=50):
     clock=now()
     row=session.get(VerificationSession,DEMO_GRAPH)
     events=row.events if row else []
@@ -37,6 +37,7 @@ def ledger(session,offset=0,source_id=None):
     for source in starts:
         if source.get("kind")=="recheck" or source["attempt_id"] not in answers:continue
         if source_id is not None and source["attempt_id"]!=source_id:continue
+        if goals is not None and source["goal"] not in goals:continue
         answer=answers[source["attempt_id"]]
         initial=admission(session,source,answer)
         due=datetime.fromisoformat(answer["created_at"])+INTERVAL
@@ -57,11 +58,12 @@ def ledger(session,offset=0,source_id=None):
         items.append({"id":source["attempt_id"],"goal":source["goal"],"title":source["task"]["title"],"status":status,"reason":reason,"due_at":due.isoformat(),
                       "initial":initial,"recheck":child_admission,"active_recheck":active["attempt_id"] if active else None,
                       "recheck_attempt":child["attempt_id"] if child else None,"mastery":"unverified"})
-    end=max(0,len(items)-offset);begin=max(0,end-50)
-    return {"policy":POLICY,"server_time":clock.isoformat(),"interval_hours":72,"items":items[begin:end],"total":len(items),"next_offset":offset+50 if begin>0 else None,"mastery":"unverified"}
+    end=max(0,len(items)-offset);begin=max(0,end-page_size) if page_size is not None else 0
+    return {"policy":POLICY,"server_time":clock.isoformat(),"interval_hours":72,"items":items[begin:end],"total":len(items),"next_offset":offset+page_size if begin>0 else None,"mastery":"unverified"}
 
 
 @router.get("")
-def current(request:Request,offset:int=0):
+def current(request:Request,offset:int=0,source_id:str|None=None):
     if not 0<=offset<=10000:raise HTTPException(422,"候选记录位置超出范围。")
-    with request.app.state.sessions() as session:return ledger(session,offset=offset)
+    if source_id is not None and not 1<=len(source_id)<=100:raise HTTPException(422,"来源ID无效。")
+    with request.app.state.sessions() as session:return ledger(session,offset=offset,source_id=source_id)
