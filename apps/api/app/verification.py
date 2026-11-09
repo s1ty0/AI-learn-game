@@ -13,9 +13,12 @@ from .content import DEMO_GRAPH
 from .models import AdventureSession, LearnerGraph, VerificationSession, ReviewCase, now
 from .reviewing import projection
 from .verification_content import TASKS
+from .recheck_content import RECHECK_TASKS
+from .candidates import ledger,admission,POLICY
 
 router = APIRouter(prefix="/api/v1/verification")
 VERSION = "transfer-v1-" + hashlib.sha256(json.dumps(TASKS,ensure_ascii=False).encode()).hexdigest()[:12]
+RECHECK_VERSION="recheck-v1-"+hashlib.sha256(json.dumps(RECHECK_TASKS,ensure_ascii=False).encode()).hexdigest()[:12]
 
 
 class ReviewItem(BaseModel):
@@ -28,13 +31,15 @@ class ReviewItem(BaseModel):
 class Action(BaseModel):
     base_revision: int = Field(ge=0)
     operation_key: str = Field(min_length=8,max_length=120)
-    action: Literal["start","submit","self_review"]
+    action: Literal["start","start_recheck","submit","self_review"]
     goal: str | None = Field(default=None,max_length=50)
     attempt_id: str | None = Field(default=None,max_length=100)
     choice: int | None = Field(default=None,ge=0,le=2)
     explanation: str = Field(default="",max_length=5000)
     used_help: bool = False
     review: list[ReviewItem] = Field(default_factory=list,max_length=3)
+    parent_attempt: str | None = Field(default=None,max_length=100)
+    parent_review_revision: int | None = Field(default=None,ge=0)
 
 
 def state(session,row=None):
@@ -57,9 +62,10 @@ def state(session,row=None):
             "independence":answer["independence"],"status":"pending_review","created_at":answer["created_at"],
             "task_version":start["version"],"release_id":start["release_id"],"graph_revision":start["graph_revision"],
             "rubric":start["task"]["criteria"],"rationale":start["task"]["rationale"],"self_reviews":reviews,
-            "review_state":projection(session.get(ReviewCase,start["attempt_id"]),answer["choice_matches"])})
+            "review_state":projection(session.get(ReviewCase,start["attempt_id"]),answer["choice_matches"]),
+            "kind":start.get("kind","transfer"),"parent_attempt":start.get("parent_attempt"),"evidence_policy":start.get("evidence_policy")})
     return {"revision":row.revision if row else 0,"version":VERSION,"goals":goals,"mastery":"unverified",
-        "active": {"id":active["attempt_id"],"goal":active["goal"],"title":active["task"]["title"],"prompt":active["task"]["prompt"],"options":active["task"]["options"],"repeat_family":active["repeat_family"],"version":active["version"]} if active else None,
+        "active": {"id":active["attempt_id"],"goal":active["goal"],"title":active["task"]["title"],"prompt":active["task"]["prompt"],"options":active["task"]["options"],"repeat_family":active["repeat_family"],"version":active["version"],"kind":active.get("kind","transfer"),"parent_attempt":active.get("parent_attempt")} if active else None,
         "reports":reports}
 
 
@@ -72,23 +78,38 @@ def current(request:Request):
 @router.post("/actions")
 def act(body:Action,request:Request):
     digest=hashlib.sha256(body.model_dump_json().encode()).hexdigest()
+    legacy_digest=hashlib.sha256(body.model_dump_json(exclude={"parent_attempt","parent_review_revision"}).encode()).hexdigest()
     with request.app.state.sessions() as session,session.begin():
         session.execute(insert(VerificationSession).values(id=DEMO_GRAPH,revision=0,events=[]).on_conflict_do_nothing())
         row=session.scalar(select(VerificationSession).where(VerificationSession.id==DEMO_GRAPH).with_for_update())
         for e in row.events:
             if e["key"]==body.operation_key:
-                if e["hash"]!=digest: raise HTTPException(409,"操作键对应的内容已改变。")
+                legacy_match=body.parent_attempt is None and body.parent_review_revision is None and e["hash"]==legacy_digest
+                if e["hash"]!=digest and not legacy_match: raise HTTPException(409,"操作键对应的内容已改变。")
                 return e["result"]
         if row.revision!=body.base_revision: raise HTTPException(409,"验证记录已在另一处更新，请先读取最新记录。")
         if len(row.events)>=1000: raise HTTPException(409,"本地记录达到上限，需保留历史后扩容。")
         current=state(session,row)
         event={"key":body.operation_key,"hash":digest,"action":body.action,"created_at":now().isoformat()}
-        if body.action=="start":
+        if body.action in {"start","start_recheck"}:
             if current["active"]: raise HTTPException(409,"先完成当前情境，不覆盖未完成作答。")
-            if body.goal not in {g["id"] for g in current["goals"]}: raise HTTPException(409,"先完成对应知识的探索，再开始这个验证。")
-            task=TASKS[body.goal]
+            if body.action=="start_recheck":
+                source=next((s for s in row.events if s["action"]=="start" and s["attempt_id"]==body.parent_attempt and s.get("kind")!="recheck"),None)
+                if not source:raise HTTPException(404,"未找到初次验证来源。")
+                parent_case=session.scalar(select(ReviewCase).where(ReviewCase.attempt_id==body.parent_attempt).with_for_update().execution_options(populate_existing=True))
+                if not parent_case or parent_case.revision!=body.parent_review_revision:raise HTTPException(409,"来源复核已变化，请刷新候选证据。")
+                snapshot=ledger(session,source_id=body.parent_attempt)
+                candidate=next((c for c in snapshot["items"] if c["id"]==body.parent_attempt),None)
+                if not candidate or candidate["status"]!="ready_for_recheck":raise HTTPException(409,"初次证据、72小时间隔或当前复验状态尚不满足，不能提前开始。")
+                task=RECHECK_TASKS[source["goal"]]
+                event.update(parent_attempt=source["attempt_id"],parent_review_revision=parent_case.revision,evidence_policy=POLICY,due_at=candidate["due_at"],created_at=snapshot["server_time"])
+                goal=source["goal"]
+            else:
+                if body.parent_attempt is not None or body.parent_review_revision is not None:raise HTTPException(422,"普通验证不能伪造复验来源。")
+                if body.goal not in {g["id"] for g in current["goals"]}: raise HTTPException(409,"先完成对应知识的探索，再开始这个验证。")
+                task=TASKS[body.goal];goal=body.goal
             repeat=any(e["action"]=="start" and e["task"]["family"]==task["family"] for e in row.events)
-            event.update(attempt_id=str(uuid4()),goal=body.goal,task=task,version=VERSION,
+            event.update(action="start",kind="recheck" if body.action=="start_recheck" else "transfer",attempt_id=str(uuid4()),goal=goal,task=task,version=RECHECK_VERSION if body.action=="start_recheck" else VERSION,
                 repeat_family=repeat,release_id=request.app.state.release_id,
                 graph_revision=session.get(LearnerGraph,DEMO_GRAPH).revision)
         else:

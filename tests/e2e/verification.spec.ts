@@ -3,6 +3,7 @@ import {expeditionFixture} from "./expedition-fixture";
 
 async function fixture(page:Page){
   await expeditionFixture(page,"representation");
+  await page.route("**/api/v1/candidates",route=>route.fulfill({json:{policy:"fixture",server_time:"2026-11-09T00:00:00Z",interval_hours:72,items:[]}}));
   let revision=0,active:Record<string,unknown>|null=null,next=1,fail=false,conflict=false;
   const reports:Record<string,unknown>[]=[],keys:string[]=[];
   const rubric=[{id:"path",title:"说明影响路径",requirement:"说明被排除的信息。"},{id:"conditions",title:"说清成立条件",requirement:"说明其他量保持固定。"},{id:"boundary",title:"给出有效边界",requirement:"指出规则变化时需重算。"}];

@@ -16,7 +16,7 @@ async function fixture(page:Page){
       const body=req.postDataJSON();keys.push(body.operation_key);
       if(fail){fail=false;await route.fulfill({status:503,json:{detail:"保存未确认，草稿保留。"}});return;}
       if(conflict){conflict=false;revision++;await route.fulfill({status:409,json:{detail:"stale"}});return;}
-      revision++;own=true;history.push({id:`review-${revision}`,actor:"reviewer-a",actor_name:"测试复核者",created_at:"2026-11-09T00:00:00Z",items:body.items,correction_reason:body.correction_reason,supersedes:body.supersedes});
+      revision++;own=true;history.push({id:`review-${revision}`,actor:"reviewer-a",actor_name:"测试复核者",created_at:"2026-11-09T00:00:00Z",items:body.items,correction_reason:body.correction_reason,supersedes:body.supersedes,observation:body.observation});
     }
     await route.fulfill({json:detail()});
   });
@@ -31,11 +31,13 @@ test("访问身份控制队列，逐项复核、追加纠正和旧意见都可�
   await fixture(page);await open(page);await login(page,"wrong");await expect(page.locator(".intake-error")).toContainText("访问钥匙无效");
   await login(page);await expect(page.locator(".verification-room")).toContainText("当前身份：测试复核者");
   await select(page);await expect(page.locator(".verification-room")).toContainText("不展示他人的逐项意见");await fill(page);
+  await page.getByLabel("独立性观察判断").selectOption("observed_no_help");await page.getByLabel("独立性观察依据").fill("现场观察了作答过程，没有提供资料、答案或线索。");
   await page.getByRole("button",{name:"提交本人的逐项复核",exact:true}).click();await expect(page.locator(".verification-room")).toContainText("已有一位复核者");
   await expect(page.getByRole("button").filter({hasText:"读取边界的新情境"})).toContainText("我已复核");
   await expect(page.getByRole("button").filter({hasText:"读取边界的新情境"})).toContainText("1位复核者");
   await page.getByLabel("复核纠正原因").fill("重新核对条件后明确边界，保留原判断。");await page.getByRole("button",{name:"追加纠正并保留旧意见",exact:true}).click();
   await page.getByText("回看复核历史与逐项依据",{exact:true}).click();await expect(page.locator(".verification-room")).toContainText("重新核对条件后明确边界");
+  await expect(page.locator(".verification-room")).toContainText("现场观察了作答过程");
   await page.screenshot({path:".runtime/screenshots/review-board-desktop.png",fullPage:true});
   await page.getByRole("button",{name:"退出复核身份",exact:true}).click();await expect(page.getByLabel("复核访问钥匙")).toHaveValue("");
 });

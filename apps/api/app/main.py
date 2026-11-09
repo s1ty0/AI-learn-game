@@ -18,6 +18,7 @@ from .intake import router as intake_router
 from .guidance import router as guidance_router
 from .verification import router as verification_router
 from .reviewing import router as reviewing_router
+from .candidates import router as candidates_router
 
 
 def fingerprint(value):
@@ -41,6 +42,7 @@ def create_app(database_engine=None):
     app.include_router(guidance_router)
     app.include_router(verification_router)
     app.include_router(reviewing_router)
+    app.include_router(candidates_router)
 
     def session_dep():
         with app.state.sessions() as session:
