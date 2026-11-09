@@ -16,6 +16,7 @@ from .expedition import router as expedition_router
 from .discoveries import router as discoveries_router
 from .intake import router as intake_router
 from .guidance import router as guidance_router
+from .verification import router as verification_router
 
 
 def fingerprint(value):
@@ -37,6 +38,7 @@ def create_app(database_engine=None):
     app.include_router(discoveries_router)
     app.include_router(intake_router)
     app.include_router(guidance_router)
+    app.include_router(verification_router)
 
     def session_dep():
         with app.state.sessions() as session:
