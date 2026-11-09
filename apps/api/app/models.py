@@ -75,6 +75,21 @@ class Attempt(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class ReviewActor(Base):
+    __tablename__ = "review_actors"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String)
+    token_hash: Mapped[str] = mapped_column(String, unique=True)
+    enabled: Mapped[int] = mapped_column(Integer, default=1)
+
+
+class ReviewCase(Base):
+    __tablename__ = "review_cases"
+    attempt_id: Mapped[str] = mapped_column(String, primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer, default=0)
+    events: Mapped[list] = mapped_column(JSONB, default=list)
+
+
 class VerificationSession(Base):
     __tablename__ = "verification_sessions"
     id: Mapped[str] = mapped_column(String, primary_key=True)

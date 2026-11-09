@@ -1,8 +1,8 @@
 # 首版数据模型
 
-日期：2026-11-07。状态：完整逻辑设计；首个子集已建立Alembic迁移并在PostgreSQL运行，未全部实现。
+更新日期：2026-11-09。状态：完整逻辑设计；首个子集已建立Alembic迁移并在PostgreSQL运行，未全部实现。
 
-当前已建立11张表：content_releases、entity_revisions、relation_revisions、learner_graphs、graph_snapshots、graph_operations、attempts、adventure_sessions、intake_sessions、guidance_sessions、verification_sessions。实际定义见apps/api/app/models.py与migrations/versions/0001_initial.py、0002_adventure.py、0003_intake.py、0004_guidance.py、0005_verification.py。其余表仍为后续设计。
+当前已建立13张表：content_releases、entity_revisions、relation_revisions、learner_graphs、graph_snapshots、graph_operations、attempts、adventure_sessions、intake_sessions、guidance_sessions、verification_sessions、review_actors、review_cases。实际定义见apps/api/app/models.py与migrations/versions/0001_initial.py、0002_adventure.py、0003_intake.py、0004_guidance.py、0005_verification.py、0006_reviewing.py。其余表仍为后续设计。
 
 adventure_sessions单独保存小岛探索阶段、修订、内容版本及带操作键/条件/提示/规则版本的追加事件。探索发现使用现有公共实体ID，不创建重复概念；探索奖励不等同掌握证据，也不覆写旧地图。
 

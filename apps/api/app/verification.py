@@ -10,7 +10,8 @@ from sqlalchemy.dialects.postgresql import insert
 
 from .chapter import session_id
 from .content import DEMO_GRAPH
-from .models import AdventureSession, LearnerGraph, VerificationSession, now
+from .models import AdventureSession, LearnerGraph, VerificationSession, ReviewCase, now
+from .reviewing import projection
 from .verification_content import TASKS
 
 router = APIRouter(prefix="/api/v1/verification")
@@ -55,7 +56,8 @@ def state(session,row=None):
             "explanation":answer["explanation"],"used_help":answer["used_help"],"choice_matches":answer["choice_matches"],
             "independence":answer["independence"],"status":"pending_review","created_at":answer["created_at"],
             "task_version":start["version"],"release_id":start["release_id"],"graph_revision":start["graph_revision"],
-            "rubric":start["task"]["criteria"],"rationale":start["task"]["rationale"],"self_reviews":reviews})
+            "rubric":start["task"]["criteria"],"rationale":start["task"]["rationale"],"self_reviews":reviews,
+            "review_state":projection(session.get(ReviewCase,start["attempt_id"]),answer["choice_matches"])})
     return {"revision":row.revision if row else 0,"version":VERSION,"goals":goals,"mastery":"unverified",
         "active": {"id":active["attempt_id"],"goal":active["goal"],"title":active["task"]["title"],"prompt":active["task"]["prompt"],"options":active["task"]["options"],"repeat_family":active["repeat_family"],"version":active["version"]} if active else None,
         "reports":reports}

@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { ApiError, request } from "@/lib/api";
 import { loadDraft, writeDraft } from "@/lib/draft-store";
+import { reviewLabels, judgementLabels, type ReviewSummary } from "@/lib/reviewing";
 
 type Task={id:string;goal:string;title:string;prompt:string;options:string[];repeat_family:boolean};
 type Criterion={id:string;title:string;requirement:string};
 type Review={criterion:string;judgement:string;quote:string;reason:string};
-type Report={id:string;title:string;prompt:string;options:string[];choice:number|null;explanation:string;used_help:boolean;choice_matches:boolean|null;independence:string;status:string;rubric:Criterion[];rationale:string;task_version:string;graph_revision:number;self_reviews:{created_at:string;review:Review[]}[]};
+type Report={id:string;title:string;prompt:string;options:string[];choice:number|null;explanation:string;used_help:boolean;choice_matches:boolean|null;independence:string;status:string;rubric:Criterion[];rationale:string;task_version:string;graph_revision:number;self_reviews:{created_at:string;review:Review[]}[];review_state?:ReviewSummary};
 type State={revision:number;goals:{id:string;title:string}[];active:Task|null;reports:Report[]};
 type Draft={choice:number|null;explanation:string;used_help:boolean};
 const empty:Draft={choice:null,explanation:"",used_help:false};
@@ -64,7 +65,7 @@ export function Verification({onBack}:{onBack:()=>void}){
       {report&&<><p>{report.prompt}</p><p>我的判断：{report.choice===null?"不知道":report.options[report.choice]}</p><pre className="verification-original">{report.explanation}</pre><p>选择检查：{report.choice_matches===null?"待验证":report.choice_matches?"符合本题规则":"与本题规则不符"} · 解释：待独立复核</p><p className="intake-muted">{report.independence==="supported"?"本次标记使用帮助":report.independence==="repeat_family"?"同题族重做":"未标记帮助，独立性仍未确认"}；不自动授予掌握或解锁。</p>
         <details><summary>对照关系与量规，复盘自己的解释</summary><p>{report.rationale}</p><p>这是本人复盘。判断会留痕，不能代替独立评价。</p>{report.rubric.map(c=>{const entry=review.find(i=>i.criterion===c.id);return <section className="verification-criterion" key={c.id}><h3>{c.title}</h3><p>{c.requirement}</p><label className="intake-reason">我的判断<select aria-label={`${c.title}判断`} disabled={busy||blocked} value={entry?.judgement??"unsure"} onChange={e=>editReview(c.id,"judgement",e.target.value)}><option value="unsure">不确定</option><option value="met">满足</option><option value="partial">部分满足</option><option value="missing">缺失</option></select></label><label className="intake-reason">引用我的原文<input aria-label={`${c.title}原文`} disabled={busy||blocked} maxLength={1000} value={entry?.quote??""} onChange={e=>editReview(c.id,"quote",e.target.value)}/></label><label className="intake-reason">判断理由<textarea aria-label={`${c.title}理由`} disabled={busy||blocked} maxLength={1000} rows={2} value={entry?.reason??""} onChange={e=>editReview(c.id,"reason",e.target.value)}/></label></section>})}<button disabled={busy||blocked||review.length!==3} onClick={()=>{void send("self_review",{attempt_id:report.id,review});}}>保存本人复盘</button></details>
         {!!report.self_reviews.length&&<details><summary>回看已保存复盘（{report.self_reviews.length}次）</summary>{report.self_reviews.map((r,i)=><div key={i}><p>{new Date(r.created_at).toLocaleString("zh-CN")}</p>{r.review.map(item=><p key={item.criterion}>{report.rubric.find(c=>c.id===item.criterion)?.title}：{({met:"满足",partial:"部分满足",missing:"缺失",unsure:"不确定"} as Record<string,string>)[item.judgement]} · {item.quote} · {item.reason}</p>)}</div>)}</details>}
-        <small>任务版本 {report.task_version} · 开始时星图版本 v{report.graph_revision} · 仅展示最近至多10次提交，旧记录仍保留。</small>
+        {report.review_state&&<details><summary>查看复核意见：{reviewLabels[report.review_state.status]}</summary><button disabled={busy} onClick={()=>{void load();}}>更新验证与复核记录</button><p>{report.review_state.reviewer_count}位复核者；分歧按条保留，不自动授予掌握。</p>{report.review_state.history.map(e=><section className="verification-criterion" key={e.id}><h3>{e.actor_name}</h3>{e.items.map(item=><p key={item.criterion}>{report.rubric.find(c=>c.id===item.criterion)?.title}：{judgementLabels[item.judgement]} · {item.quote} · {item.reason}</p>)}{e.supersedes&&<p>追加纠正：{e.correction_reason}</p>}</section>)}</details>}<small>任务版本 {report.task_version} · 开始时星图版本 v{report.graph_revision} · 仅展示最近至多10次提交，旧记录仍保留。</small>
       </>}
     </section>}
   </main>;
