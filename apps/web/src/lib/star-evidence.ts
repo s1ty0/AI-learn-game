@@ -1,4 +1,4 @@
-export type EvidenceIntent={goal?:string;attempt?:string;source?:string;edge?:string;template?:string;graphRevision?:number};
+export type EvidenceIntent={goal?:string;attempt?:string;source?:string;edge?:string;template?:string;graphRevision?:number;revise?:string};
 export type EvidenceSummary={id:string;covered:boolean;counts:Record<string,number>};
 export const evidenceLabels:Record<string,string>={needs_evidence:"待补证据",waiting_interval:"等待复验",ready_for_recheck:"可做复验",recheck_in_progress:"复验进行中",recheck_needs_evidence:"复验待补",candidate_ready:"候选齐备，未认证",needs_policy_review:"规则待核对",relation_changed:"原关系已改变，需重新核对"};
 export function badge(summary:EvidenceSummary|undefined){

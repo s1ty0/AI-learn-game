@@ -17,6 +17,7 @@ import { Intake } from "@/components/intake";
 import { Guidance } from "@/components/guidance";
 import { Verification } from "@/components/verification";
 import { ReviewBoard } from "@/components/review-board";
+import { RelationRevision } from "@/components/relation-revision";
 import type { EvidenceIntent } from "@/lib/star-evidence";
 
 type Journey = {
@@ -24,7 +25,7 @@ type Journey = {
   trail: { stage: number; created_at: string; hint_used: boolean }[];
 };
 type Move = { base_revision: number; operation_key: string; stage: number; mask_enabled: boolean; future_value: number; reason: string | null; hint_used: boolean };
-type View = "world" | "room" | "reward" | "prism" | "chapter" | "expedition" | "stars" | "intake" | "guidance" | "verification" | "reviewing";
+type View = "world" | "room" | "reward" | "prism" | "chapter" | "expedition" | "stars" | "intake" | "guidance" | "verification" | "reviewing" | "revision";
 
 function Modal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -233,7 +234,8 @@ export function Adventure() {
     {view === "chapter" && chapter && <ChapterIslandGame key={chapterRun} node={chapterNode} chapter={chapter} onSaved={setChapter} onBack={() => { setView("world"); showMap(); }}/>}
     {view === "expedition" && expedition && <ExpeditionIslandGame key={expeditionRun} island={expeditionIsland} expedition={expedition} onSaved={setExpedition} onBack={() => { setView("world"); showAtlas(); }}/>}
 
-    {view === "stars" && <StarMap onBack={() => setView("world")} onOpenEvidence={intent=>{setVerificationIntent(intent);setVerificationFromStars(true);setView("verification");}}/>}
+    {view === "stars" && <StarMap onBack={() => setView("world")} onOpenEvidence={intent=>{setVerificationIntent(intent);setVerificationFromStars(true);setView(intent.revise?"revision":"verification");}}/>}
+    {view === "revision" && verificationIntent?.revise && <RelationRevision source={verificationIntent.revise} onBack={()=>setView("stars")}/>}
     {view === "intake" && <Intake onBack={() => setView("world")}/>}
     {view === "guidance" && <Guidance onBack={()=>setView("world")} onEnter={enterGuided}/>}
     {view === "verification" && <Verification intent={verificationFromStars?verificationIntent:undefined} backLabel={verificationFromStars?"回到我的星图":"回到群岛"} onBack={()=>{setVerificationFromStars(false);setView(verificationFromStars?"stars":"world");}}/>}

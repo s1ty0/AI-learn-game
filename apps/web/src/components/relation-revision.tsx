@@ -1,0 +1,43 @@
+"use client";
+import {useEffect,useRef,useState} from "react";
+import {ApiError,request} from "@/lib/api";
+import {loadDraft,writeDraft} from "@/lib/draft-store";
+import {judgementLabels} from "@/lib/reviewing";
+
+type Edge={id:string;label:string;note:string};
+type Opinion={reviewer:string;review_id:string;judgement:string;quote:string;reason:string};
+type History={id:string;created_at:string;graph_before:number;graph_after:number;before:Edge;after:Edge;criteria:string[];reason:string;counterexample:string;review_revision:number;source_reviews:{id:string;actor_name:string;items:{criterion:string;judgement:string;quote:string;reason:string}[]}[]};
+type Task={title:string;source_attempt:string;graph_revision:number;review_revision:number;verification_revision:number;binding:{edge:Edge;graph_revision:number};current:Edge;answer:string;criteria:{id:string;title:string;requirement:string;gap:boolean;disputed:boolean;opinions:Opinion[]}[];history:History[]};
+type Form={label:string;note:string;criteria:string[];reason:string;counterexample:string};
+type Draft={graphRevision:number;form:Form};
+const empty:Form={label:"",note:"",criteria:[],reason:"",counterexample:""};
+
+export function RelationRevision({source,onBack}:{source:string;onBack:()=>void}){
+ const [task,setTask]=useState<Task|null>(null),[form,setForm]=useState<Form>(empty),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[blocked,setBlocked]=useState(false),[recovery,setRecovery]=useState<Draft|null>(null);
+ const pending=useRef<Record<string,unknown>|null>(null),seq=useRef(0),scope=`relation-revision:${source}`;
+ function store(value:Draft|undefined){void writeDraft(value,scope).catch(()=>setError("本机修订草稿暂存不可用，离开前请确认是否保存。"));}
+ function edit(next:Form){setForm(next);pending.current=null;if(task)store({graphRevision:task.graph_revision,form:next});}
+ async function load(){const call=++seq.current;setBusy(true);try{
+  const [value,draft]=await Promise.all([request<Task>(`/relation-revisions/${encodeURIComponent(source)}`),loadDraft<Draft>(scope).catch(()=>undefined)]);
+  if(call!==seq.current)return;
+  setTask(value);setForm({label:value.current.label,note:value.current.note,criteria:[],reason:"",counterexample:""});setRecovery(draft??null);setError("");setBlocked(false);pending.current=null;
+  setNotice(draft?"找回未提交修订草稿，请先比较再应用。":"先核对原绑定、当前命题和复核意见；不自动填标准答案。");
+ }catch(err){if(call===seq.current)setError(err instanceof ApiError?err.message:"修订任务暂未连接；原关系和作答仍保留。");}finally{if(call===seq.current)setBusy(false);}}
+ useEffect(()=>{void load();return()=>{seq.current++;};},[source]);
+ async function save(){if(!task||busy||blocked||recovery)return;const candidate={graph_revision:task.graph_revision,review_revision:task.review_revision,verification_revision:task.verification_revision,...form};const old=pending.current;const body=old&&JSON.stringify({...old,operation_key:undefined})===JSON.stringify({...candidate,operation_key:undefined})?old:{...candidate,operation_key:crypto.randomUUID()};pending.current=body;store({graphRevision:task.graph_revision,form});setBusy(true);setError("");try{
+  const result=await request<{graph_revision:number}>(`/relation-revisions/${encodeURIComponent(source)}`,body);
+  pending.current=null;await writeDraft(undefined,scope).catch(()=>setError("修订已保存，但本机旧草稿清除未确认。"));setNotice(`修订已保存到星图v${result.graph_revision}，尚未验证。旧作答和旧复核保留。`);
+  try{const next=await request<Task>(`/relation-revisions/${encodeURIComponent(source)}`);setTask(next);setForm({label:next.current.label,note:next.current.note,criteria:[],reason:"",counterexample:""});}catch{setBlocked(true);setError("修订已保存，新任务详情暂未读取成功。请刷新，不必重复提交。");}
+ }catch(err){const conflict=err instanceof ApiError&&err.status===409;setBlocked(conflict);setError(conflict?"星图、验证或复核记录已变化。草稿保留，请先对照最新任务。":err instanceof ApiError?err.message:"保存未确认，原文和草稿仍在。原样重试不会重复建版本。");}finally{setBusy(false);}}
+ const frozen=busy||blocked||!!recovery;
+ return <main className="intake-room verification-room relation-revision-room"><div className="intake-top"><button disabled={busy} onClick={onBack}>回到我的星图</button><span>修订任务 · {task?`星图v${task.graph_revision}`:"连接中"}</span></div><h1>修好这条关系</h1><p className="intake-muted">把具体缺口改进到自己的命题里。保存修订不等于通过验证。</p>
+ {error&&<div className="intake-error" role="alert"><p>{error}</p><button disabled={busy} onClick={()=>{void load();}}>读取最新修订任务</button></div>}{notice&&<p role="status" className="intake-muted">{notice}</p>}
+ {recovery&&task&&<section className="intake-card revision-recovery"><h2>未提交修订草稿</h2><p>草稿基于v{recovery.graphRevision}，当前为v{task.graph_revision}。先比较当前命题，再决定是否应用全部草稿。</p><details><summary>比较草稿与当前关系</summary><p>当前命题：{task.current.label}</p><p>当前条件：{task.current.note}</p><p>草稿命题：{recovery.form.label}</p><p>草稿条件：{recovery.form.note}</p><p>草稿理由：{recovery.form.reason}</p><p>草稿反例：{recovery.form.counterexample}</p></details><button disabled={busy} onClick={()=>{setForm(recovery.form);store({graphRevision:task.graph_revision,form:recovery.form});setRecovery(null);}}>对照后应用这份草稿</button><button disabled={busy} onClick={()=>{setRecovery(null);store(undefined);}}>保留当前关系，放弃本机草稿</button></section>}
+ {task&&<>
+ <section className="intake-card"><h2>原绑定与当前关系</h2><p>原绑定星图v{task.binding.graph_revision}</p><pre className="verification-original">{task.binding.edge.label}{"\n"}{task.binding.edge.note}</pre><p>当前星图v{task.graph_revision}</p><pre className="verification-original">{task.current.label}{"\n"}{task.current.note}</pre><details><summary>回看当时的解释作答</summary><p>{task.answer}</p></details></section>
+ <section className="intake-card"><h2>本次要修哪一处？</h2><p>选择要澄清的条目。意见是定位依据，不会替你改写；没有复核时保持未知。</p>{task.criteria.map(c=><section className="verification-criterion" key={c.id}><label className="intake-option"><input type="checkbox" disabled={frozen} checked={form.criteria.includes(c.id)} onChange={e=>edit({...form,criteria:e.target.checked?[...form.criteria,c.id]:form.criteria.filter(i=>i!==c.id)})}/>{c.title} · {c.disputed?"有分歧":c.gap?"待澄清":"当前意见满足"}</label><p>{c.requirement}</p>{!c.opinions.length&&<small>暂无复核意见，不直接判不会。</small>}{c.opinions.map((op,i)=><p key={i}>{op.reviewer}：{judgementLabels[op.judgement]} · 原文依据：{op.quote||"未引用"} · {op.reason}</p>)}</section>)}</section>
+ <section className="intake-card"><h2>写下你的修订</h2><label className="intake-reason">修订后的命题<input aria-label="修订后的关系命题" maxLength={200} disabled={frozen} value={form.label} onChange={e=>edit({...form,label:e.target.value})}/></label><label className="intake-reason">理由与成立条件<textarea aria-label="修订后的关系条件" maxLength={3000} rows={5} disabled={frozen} value={form.note} onChange={e=>edit({...form,note:e.target.value})}/></label><label className="intake-reason">为什么这样改？对应哪个缺口？<textarea aria-label="关系修订理由" maxLength={2000} rows={3} disabled={frozen} value={form.reason} onChange={e=>edit({...form,reason:e.target.value})}/></label><label className="intake-reason">给一个反例或不成立的情境<textarea aria-label="关系修订反例" maxLength={2000} rows={3} disabled={frozen} value={form.counterexample} onChange={e=>edit({...form,counterexample:e.target.value})}/></label><button disabled={frozen||!form.criteria.length||![form.label,form.note,form.reason,form.counterexample].every(v=>v.trim())||(form.label===task.current.label&&form.note===task.current.note)} onClick={()=>{void save();}}>保存修订，生成星图新版本</button><small>只有当前连线的命题和条件会改变，其他节点、连线和原历史保留。文本正确性仍待独立复核。</small></section>
+ {!!task.history.length&&<section className="intake-card"><h2>这次来源的修订足迹</h2>{task.history.map(h=><details key={h.id}><summary>星图v{h.graph_before} → v{h.graph_after} · {new Date(h.created_at).toLocaleString("zh-CN")}</summary><p>修改前：{h.before.label} · {h.before.note}</p><p>修改后：{h.after.label} · {h.after.note}</p><p>理由：{h.reason}</p><p>反例：{h.counterexample}</p><p>依据复核修订v{h.review_revision} · {h.source_reviews.length}位配置身份的当时意见</p>{h.source_reviews.map(r=><p key={r.id}>{r.actor_name}：{r.items.map(i=>`${judgementLabels[i.judgement]} ${i.quote} ${i.reason}`).join("；")}</p>)}</details>)}</section>}
+ </>}
+ </main>;
+}
