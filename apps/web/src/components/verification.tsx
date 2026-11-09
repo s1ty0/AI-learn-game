@@ -46,7 +46,7 @@ export function Verification({onBack,intent,backLabel="回到群岛"}:{onBack:()
     try{
       const next=await request<State>("/verification/actions",body);setState(next);pending.current=null;
       if(action==="submit"&&state.active){draftEpoch.current++;void writeDraft(undefined,`verification:${state.active.id}`).catch(()=>setNotice("作答已提交，本机旧草稿清除尚未确认。"));setForm(empty);setReportId(state.active.id);setReview([]);setNotice("作答原文已保存，解释仍待独立复核。");}
-      if(action==="start"||action==="start_recheck"){setForm(empty);setNotice("先独立尝试；提交后才展示参考关系与量规。使用过资料请如实标记。");}
+      if(action==="start"||action==="start_relation"||action==="start_recheck"){setForm(empty);setNotice("先独立尝试；提交后才展示参考关系与量规。使用过资料请如实标记。");}
       if(action==="self_review"){
         setNotice("复盘已保存。本人复盘不会替代独立复核，解释仍待复核。");
         if(targetReport&&targetReport.id===extra.attempt_id&&!next.reports.some(r=>r.id===targetReport.id)){
@@ -67,6 +67,7 @@ export function Verification({onBack,intent,backLabel="回到群岛"}:{onBack:()
     {error&&<div className="intake-error" role="alert"><p>{error}</p><button disabled={busy} onClick={()=>{void load();}}>读取最新验证记录</button></div>}
     {notice&&<p className="intake-muted" role="status">{notice}</p>}
     {intent?.goal&&state&&<p className="verification-target">从星图定位的验证目标：{state.goals.find(g=>g.id===intent.goal)?.title??"对应目标尚未开放，请先完成探索。"}。已有进行中情境会保留，不自动另开。</p>}
+    {intent?.edge&&state&&<section className="intake-card"><h2>确认绑定当前已保存关系</h2><p>这次作答将引用星图v{intent.graphRevision}中的指定连线、原命题与条件，保留原文，之后改写不会自动继承证据。绑定只限定评价对象，不代表原命题正确。</p><button disabled={busy||blocked||!!state.active} onClick={()=>{void send("start_relation",{edge_id:intent.edge,graph_revision:intent.graphRevision,relation_template:intent.template});}}>确认关系绑定并开始</button>{state.active&&<p>已有情境继续保留，先完成它，不覆盖当前作答。</p>}</section>}
     {targetError&&<div className="intake-error"><p>{targetError}</p><button disabled={busy} onClick={()=>{void load();}}>重新读取指定作答</button></div>}
     {previousDraft&&<details className="intake-feedback"><summary>上一情境未提交的本机解释</summary><pre className="verification-original">{previousDraft}</pre></details>}
     {!state?<button disabled={busy} onClick={()=>{void load();}}>重新连接</button>:state.active?<section className="intake-card"><span>{state.active.kind==="recheck"?"延后复验：先尝试新关系，再提交解释":state.active.repeat_family?"同题族重做：保留练习记录，不新增独立证据":"新情境尝试：独立性仍待确认"}</span><h2>{state.active.title}</h2><p>{state.active.prompt}</p>

@@ -5,7 +5,7 @@ import {request} from "@/lib/api";
 type Admission={eligible:boolean;review_revision:number;checks:{id:string;ok:boolean;label:string}[]};
 type Candidate={id:string;title:string;status:string;reason:string;due_at:string;initial:Admission;recheck:Admission|null;active_recheck:string|null};
 type Ledger={policy:string;server_time:string;interval_hours:number;items:Candidate[];total?:number;next_offset?:number|null};
-const labels:Record<string,string>={needs_evidence:"初次证据待补齐",waiting_interval:"等待延后复验",ready_for_recheck:"已到复验时间",recheck_in_progress:"复验进行中",recheck_needs_evidence:"复验证据待补齐",candidate_ready:"候选线索齐备，仍未认证掌握",needs_policy_review:"规则版本需重新核对"};
+const labels:Record<string,string>={needs_evidence:"初次证据待补齐",waiting_interval:"等待延后复验",ready_for_recheck:"已到复验时间",recheck_in_progress:"复验进行中",recheck_needs_evidence:"复验证据待补齐",candidate_ready:"候选线索齐备，仍未认证掌握",needs_policy_review:"规则版本需重新核对",relation_changed:"绑定的关系已改变，原证据待重新核对"};
 
 export function CandidateEvidence({revision,sourceId,busy,hasActive,onStart,onReload}:{revision:string;sourceId?:string;busy:boolean;hasActive:boolean;onStart:(id:string,reviewRevision:number)=>void;onReload:()=>void}){
   const [data,setData]=useState<Ledger|null>(null),[error,setError]=useState(""),[loading,setLoading]=useState(false);

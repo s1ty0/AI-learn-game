@@ -27,7 +27,7 @@ def admission(session,start,answer):
     return {"eligible":all(c["ok"] for c in checks),"checks":checks,"review_revision":summary["revision"],"review_status":summary["status"]}
 
 
-def ledger(session,offset=0,source_id=None,goals=None,page_size=50):
+def ledger(session,offset=0,source_id=None,goals=None,page_size=50,edge_id=None,unbound_only=False):
     clock=now()
     row=session.get(VerificationSession,DEMO_GRAPH)
     events=row.events if row else []
@@ -38,6 +38,8 @@ def ledger(session,offset=0,source_id=None,goals=None,page_size=50):
         if source.get("kind")=="recheck" or source["attempt_id"] not in answers:continue
         if source_id is not None and source["attempt_id"]!=source_id:continue
         if goals is not None and source["goal"] not in goals:continue
+        if edge_id is not None and (not source.get("binding") or source["binding"]["edge"]["id"]!=edge_id):continue
+        if unbound_only and source.get("binding"):continue
         answer=answers[source["attempt_id"]]
         initial=admission(session,source,answer)
         due=datetime.fromisoformat(answer["created_at"])+INTERVAL
@@ -55,6 +57,9 @@ def ledger(session,offset=0,source_id=None,goals=None,page_size=50):
                 else:status="recheck_needs_evidence";reason="复验还缺证据。错误、帮助和同题重做不能靠多刷一次清除。"
             elif clock<due:status="waiting_interval";reason="初次记录条件已齐，等服务器计时满72小时后做新情境复验。"
             else:status="ready_for_recheck";reason="已到复验时间。先独立尝试新情境，再对照量规与复核。"
+        if source.get("binding"):
+            from .relation_evidence import unchanged
+            if not unchanged(session,source["binding"]):status="relation_changed";reason="这条连线的命题、条件、端点或方向已改变/移除；旧作答保留，不能套用为当前关系证据。"
         items.append({"id":source["attempt_id"],"goal":source["goal"],"title":source["task"]["title"],"status":status,"reason":reason,"due_at":due.isoformat(),
                       "initial":initial,"recheck":child_admission,"active_recheck":active["attempt_id"] if active else None,
                       "recheck_attempt":child["attempt_id"] if child else None,"mastery":"unverified"})

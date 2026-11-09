@@ -9,6 +9,7 @@ const seed:Snapshot={revision:0,release_id:"fixture",created_at:"2026-11-09T00:0
 ],edges:[{id:"own-edge",source:"entity-0144",target:"entity-0073",label:"我的查表连接"}]}};
 async function fixture(page:Page,context:BrowserContext){
   const graph=await workbenchFixture(context,structuredClone(seed));await expeditionFixture(page,"representation");
+  await page.route("**/api/v1/relation-evidence/*",route=>route.fulfill({json:{graph_revision:0,edge:{id:"none",source:"",target:"",label:"",note:""},templates:[],items:[]}}));
   await page.route("**/api/v1/discoveries",route=>route.fulfill({json:{release_id:"current",status:"draft",mastery:"unverified",chapters:[{id:"representation",title:"表征工坊"}],entities:[{id:"entity-0144",name:"token",chapters:["representation"],origins:[]},{id:"entity-0073",name:"词嵌入",chapters:["representation"],origins:[]}],relations:[]}}));
   let fail=false,detailFail=false,goalFail=false,status="ready_for_recheck";
   const item={id:"old-source",goal:"lookup",title:"很早的换表验证",reason:"先检查这次来源的证据，再安排复验。",due_at:"2026-11-09T00:00:00Z",initial:{review_revision:7,checks:[{id:"criteria",ok:false,label:"逐项解释复核"}]},recheck:null,active_recheck:null,recheck_attempt:null,mastery:"unverified"};

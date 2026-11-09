@@ -18,6 +18,7 @@ const known: Discoveries={release_id:"current",status:"draft",mastery:"unverifie
 
 async function setup(page: Page, context: BrowserContext, discoveries=known) {
   await page.route("**/api/v1/star-evidence{,/**}",route=>route.fulfill({json:{entities:[],entity_id:"fixture",goals:[],items:[],next_offset:null,total:0}}));
+  await page.route("**/api/v1/relation-evidence/*",route=>route.fulfill({json:{graph_revision:0,edge:{id:"none",source:"",target:"",label:"",note:""},templates:[],items:[]}}));
   const graph=await workbenchFixture(context,structuredClone(seed));
   await context.route("**/api/v1/discoveries",route=>route.fulfill({json:discoveries}));
   await voyage(page);return graph;

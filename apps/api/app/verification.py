@@ -15,6 +15,8 @@ from .reviewing import projection
 from .verification_content import TASKS
 from .recheck_content import RECHECK_TASKS
 from .candidates import ledger,admission,POLICY
+from .relation_evidence import binding_for,unchanged
+from .relation_tasks import TEMPLATES,task_for
 
 router = APIRouter(prefix="/api/v1/verification")
 VERSION = "transfer-v1-" + hashlib.sha256(json.dumps(TASKS,ensure_ascii=False).encode()).hexdigest()[:12]
@@ -31,7 +33,7 @@ class ReviewItem(BaseModel):
 class Action(BaseModel):
     base_revision: int = Field(ge=0)
     operation_key: str = Field(min_length=8,max_length=120)
-    action: Literal["start","start_recheck","submit","self_review"]
+    action: Literal["start","start_relation","start_recheck","submit","self_review"]
     goal: str | None = Field(default=None,max_length=50)
     attempt_id: str | None = Field(default=None,max_length=100)
     choice: int | None = Field(default=None,ge=0,le=2)
@@ -40,6 +42,9 @@ class Action(BaseModel):
     review: list[ReviewItem] = Field(default_factory=list,max_length=3)
     parent_attempt: str | None = Field(default=None,max_length=100)
     parent_review_revision: int | None = Field(default=None,ge=0)
+    edge_id: str | None = Field(default=None,min_length=1,max_length=120)
+    graph_revision: int | None = Field(default=None,ge=0)
+    relation_template: str | None = Field(default=None,max_length=100)
 
 
 def state(session,row=None,report_id=None):
@@ -63,7 +68,7 @@ def state(session,row=None,report_id=None):
             "task_version":start["version"],"release_id":start["release_id"],"graph_revision":start["graph_revision"],
             "rubric":start["task"]["criteria"],"rationale":start["task"]["rationale"],"self_reviews":reviews,
             "review_state":projection(session.get(ReviewCase,start["attempt_id"]),answer["choice_matches"]),
-            "kind":start.get("kind","transfer"),"parent_attempt":start.get("parent_attempt"),"evidence_policy":start.get("evidence_policy")})
+            "kind":start.get("kind","transfer"),"parent_attempt":start.get("parent_attempt"),"evidence_policy":start.get("evidence_policy"),**({"binding":start["binding"]} if start.get("binding") else {})})
     return {"revision":row.revision if row else 0,"version":VERSION,"goals":goals,"mastery":"unverified",
         "active": {"id":active["attempt_id"],"goal":active["goal"],"title":active["task"]["title"],"prompt":active["task"]["prompt"],"options":active["task"]["options"],"repeat_family":active["repeat_family"],"version":active["version"],"kind":active.get("kind","transfer"),"parent_attempt":active.get("parent_attempt")} if active else None,
         "reports":reports}
@@ -85,21 +90,25 @@ def historical_attempt(attempt_id:str,request:Request):
 
 @router.post("/actions")
 def act(body:Action,request:Request):
-    digest=hashlib.sha256(body.model_dump_json().encode()).hexdigest()
-    legacy_digest=hashlib.sha256(body.model_dump_json(exclude={"parent_attempt","parent_review_revision"}).encode()).hexdigest()
+    new_fields={"edge_id","graph_revision","relation_template"}
+    has_binding_input=any(getattr(body,k) is not None for k in new_fields)
+    digest=hashlib.sha256(body.model_dump_json(exclude=new_fields if not has_binding_input else set()).encode()).hexdigest()
+    legacy_digest=hashlib.sha256(body.model_dump_json(exclude=new_fields|{"parent_attempt","parent_review_revision"}).encode()).hexdigest()
     with request.app.state.sessions() as session,session.begin():
         session.execute(insert(VerificationSession).values(id=DEMO_GRAPH,revision=0,events=[]).on_conflict_do_nothing())
         row=session.scalar(select(VerificationSession).where(VerificationSession.id==DEMO_GRAPH).with_for_update())
         for e in row.events:
             if e["key"]==body.operation_key:
-                legacy_match=body.parent_attempt is None and body.parent_review_revision is None and e["hash"]==legacy_digest
+                legacy_match=not has_binding_input and body.parent_attempt is None and body.parent_review_revision is None and e["hash"]==legacy_digest
                 if e["hash"]!=digest and not legacy_match: raise HTTPException(409,"操作键对应的内容已改变。")
                 return e["result"]
         if row.revision!=body.base_revision: raise HTTPException(409,"验证记录已在另一处更新，请先读取最新记录。")
         if len(row.events)>=1000: raise HTTPException(409,"本地记录达到上限，需保留历史后扩容。")
+        if has_binding_input and body.action!="start_relation":raise HTTPException(422,"关系绑定字段只能用于明确开始关系验证。")
+        if body.action=="start_relation" and (body.parent_attempt is not None or body.parent_review_revision is not None):raise HTTPException(422,"首次关系验证不能伪造复验来源。")
         current=state(session,row)
         event={"key":body.operation_key,"hash":digest,"action":body.action,"created_at":now().isoformat()}
-        if body.action in {"start","start_recheck"}:
+        if body.action in {"start","start_relation","start_recheck"}:
             if current["active"]: raise HTTPException(409,"先完成当前情境，不覆盖未完成作答。")
             if body.action=="start_recheck":
                 source=next((s for s in row.events if s["action"]=="start" and s["attempt_id"]==body.parent_attempt and s.get("kind")!="recheck"),None)
@@ -109,15 +118,29 @@ def act(body:Action,request:Request):
                 snapshot=ledger(session,source_id=body.parent_attempt)
                 candidate=next((c for c in snapshot["items"] if c["id"]==body.parent_attempt),None)
                 if not candidate or candidate["status"]!="ready_for_recheck":raise HTTPException(409,"初次证据、72小时间隔或当前复验状态尚不满足，不能提前开始。")
-                task=RECHECK_TASKS[source["goal"]]
+                if source.get("binding"):
+                    # Keep graph lock order consistent with initial bound attempts.
+                    binding=binding_for(session,request.app.state.release_id,source["binding"]["edge"]["id"],session.get(LearnerGraph,DEMO_GRAPH).revision,source["binding"]["template"],lock=True)
+                    if binding["edge"]!=source["binding"]["edge"]:raise HTTPException(409,"关系已改变，旧来源不能作为当前关系复验。")
+                    event["binding"]=binding
+                    task=task_for(binding["template"],binding,recheck=True)
+                else:task=RECHECK_TASKS[source["goal"]]
                 event.update(parent_attempt=source["attempt_id"],parent_review_revision=parent_case.revision,evidence_policy=POLICY,due_at=candidate["due_at"],created_at=snapshot["server_time"])
                 goal=source["goal"]
+            elif body.action=="start_relation":
+                if body.edge_id is None or body.graph_revision is None or body.relation_template is None:raise HTTPException(422,"请选择保存后的关系与明确验证目标。")
+                binding=binding_for(session,request.app.state.release_id,body.edge_id,body.graph_revision,body.relation_template,lock=True)
+                goal=TEMPLATES[body.relation_template]["goal"]
+                if goal not in {g["id"] for g in current["goals"]}:raise HTTPException(409,"对应探索尚未完成，关系验证不绕过前置。")
+                task=task_for(body.relation_template,binding)
+                event["binding"]=binding
             else:
                 if body.parent_attempt is not None or body.parent_review_revision is not None:raise HTTPException(422,"普通验证不能伪造复验来源。")
                 if body.goal not in {g["id"] for g in current["goals"]}: raise HTTPException(409,"先完成对应知识的探索，再开始这个验证。")
                 task=TASKS[body.goal];goal=body.goal
             repeat=any(e["action"]=="start" and e["task"]["family"]==task["family"] for e in row.events)
-            event.update(action="start",kind="recheck" if body.action=="start_recheck" else "transfer",attempt_id=str(uuid4()),goal=goal,task=task,version=RECHECK_VERSION if body.action=="start_recheck" else VERSION,
+            bound_version="relation-v1-"+hashlib.sha256(json.dumps(task,ensure_ascii=False,sort_keys=True).encode()).hexdigest()[:12] if event.get("binding") else None
+            event.update(action="start",kind="recheck" if body.action=="start_recheck" else "transfer",attempt_id=str(uuid4()),goal=goal,task=task,version=bound_version or (RECHECK_VERSION if body.action=="start_recheck" else VERSION),
                 repeat_family=repeat,release_id=request.app.state.release_id,
                 graph_revision=session.get(LearnerGraph,DEMO_GRAPH).revision)
         else:

@@ -20,6 +20,7 @@ from .verification import router as verification_router
 from .reviewing import router as reviewing_router
 from .candidates import router as candidates_router
 from .star_evidence import router as star_evidence_router
+from .relation_evidence import router as relation_evidence_router
 
 
 def fingerprint(value):
@@ -45,6 +46,7 @@ def create_app(database_engine=None):
     app.include_router(reviewing_router)
     app.include_router(candidates_router)
     app.include_router(star_evidence_router)
+    app.include_router(relation_evidence_router)
 
     def session_dep():
         with app.state.sessions() as session:
