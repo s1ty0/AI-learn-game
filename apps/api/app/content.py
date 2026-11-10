@@ -3,8 +3,9 @@ import json
 from pathlib import Path
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 
-from .models import ContentRelease, EntityRevision, RelationRevision, LearnerGraph, GraphSnapshot, AdventureSession
+from .models import ContentRelease, EntityRevision, RelationRevision, LearnerGraph, GraphSnapshot, AdventureSession, Account
 
 ROOT = Path(__file__).resolve().parents[3]
 DEMO_GRAPH = "local-demo"
@@ -35,12 +36,22 @@ def seed(session):
         session.add_all(EntityRevision(release_id=release_id, entity_id=e["id"], data=e) for e in catalog["items"])
         session.add_all(RelationRevision(release_id=release_id, relation_id=r["id"], source_id=r["from_id"], target_id=r["to_id"], data=r) for r in relations["items"])
         session.flush()
-    if session.get(LearnerGraph, DEMO_GRAPH) is None:
+    seed_learner(session,release_id,DEMO_GRAPH,"local-demo")
+    for graph_id in session.scalars(select(Account.graph_id).where(Account.graph_id!=DEMO_GRAPH)):
+        seed_progress(session,release_id,graph_id,expedition)
+    session.commit()
+    return release_id
+
+
+def seed_learner(session,release_id,graph_id,owner):
+    expedition=session.get(ContentRelease,release_id).manifest["expedition"]
+    if session.get(LearnerGraph, graph_id) is None:
         wanted = [("token", 0, 30, "输入单位", "input"), ("词嵌入", 245, 30, "向量表示", "input"),
                   ("Transformer", 490, 185, "计算主干", "model"), ("因果掩码", 245, 230, "信息边界", "focus"),
                   ("logits", 490, 380, "输出分数", "output"), ("交叉熵", 245, 435, "训练目标", "output"),
                   ("梯度下降", 0, 435, "参数更新", "training")]
-        by_name = {e["name"]: e for e in catalog["items"]}
+        entities=session.scalars(select(EntityRevision).where(EntityRevision.release_id==release_id)).all()
+        by_name = {row.data["name"]:row.data for row in entities}
         nodes = [{"id": by_name[name]["id"], "type": "knowledge", "position": {"x": x, "y": y},
                   "data": {"label": name, "subtitle": subtitle, "category": category, "note": ""}}
                  for name, x, y, subtitle, category in wanted]
@@ -49,16 +60,15 @@ def seed(session):
                              ("因果掩码", "Transformer", "限制访问"), ("Transformer", "logits", "输出"),
                              ("logits", "交叉熵", "参与计算"), ("交叉熵", "梯度下降", "目标经梯度影响更新")]:
             edges.append({"id": f"seed-{len(edges)+1}", "source": by_name[a]["id"], "target": by_name[b]["id"], "label": label})
-        session.add(LearnerGraph(id=DEMO_GRAPH, owner="local-demo", revision=0))
+        session.add(LearnerGraph(id=graph_id, owner=owner, revision=0))
         session.flush()
-        session.add(GraphSnapshot(graph_id=DEMO_GRAPH, revision=0, release_id=release_id,
+        session.add(GraphSnapshot(graph_id=graph_id, revision=0, release_id=release_id,
                                   payload={"nodes": nodes, "edges": edges}, note="初始探索图 · 关系待学习验证"))
-    if session.get(AdventureSession, DEMO_GRAPH) is None:
-        session.add(AdventureSession(id=DEMO_GRAPH, release_id=release_id, revision=0, stage=0, events=[]))
-    if session.get(AdventureSession, DEMO_GRAPH + ":prism") is None:
-        session.add(AdventureSession(id=DEMO_GRAPH + ":prism", release_id=release_id, revision=0, stage=0, events=[]))
-    for node in ["query", "heads", "beacon", *[item["id"] for item in expedition["nodes"]]]:
-        if session.get(AdventureSession, DEMO_GRAPH + ":" + node) is None:
-            session.add(AdventureSession(id=DEMO_GRAPH + ":" + node, release_id=release_id, revision=0, stage=0, events=[]))
-    session.commit()
-    return release_id
+    seed_progress(session,release_id,graph_id,expedition)
+
+
+def seed_progress(session,release_id,graph_id,expedition):
+    nodes=["mask","prism","query","heads","beacon",*[item["id"] for item in expedition["nodes"]]]
+    rows=[{"id":graph_id if node=="mask" else f"{graph_id}:{node}","release_id":release_id,
+           "revision":0,"stage":0,"events":[]} for node in nodes]
+    session.execute(insert(AdventureSession).values(rows).on_conflict_do_nothing())

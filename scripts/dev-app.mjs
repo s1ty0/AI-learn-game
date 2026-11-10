@@ -9,6 +9,10 @@ import { createConnection } from "node:net";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const runtime = path.join(root, ".runtime");
+const webPort=Number(process.env.LEARN_WEB_PORT??3000),apiPort=Number(process.env.LEARN_API_PORT??8000);
+if(![webPort,apiPort].every(p=>Number.isInteger(p)&&p>=1024&&p<=65535)||webPort===apiPort)throw new Error("Web/API端口必须不同，且在1024至65535之间。");
+const database=process.env.LEARN_LOCAL_DATABASE??"learnai";
+if(!/^learnai(?:_[a-z0-9_]{1,45})?$/.test(database))throw new Error("本机数据库名须为learnai或learnai_开头的测试名称。");
 await mkdir(runtime, { recursive: true });
 const secretPath = path.join(runtime, "db-secret.json");
 let secret;
@@ -79,7 +83,7 @@ async function portInUse(port) {
 
 try {
   if (!process.argv.includes("--test-api")) {
-    const ports = process.argv.includes("--api-only") ? [8000] : [8000, 3000];
+    const ports = process.argv.includes("--api-only") ? [apiPort] : [apiPort,webPort];
     for (const port of ports) {
       if (await portInUse(port)) throw new Error(`本机${port}端口已有服务，请复用当前预览或先停止旧进程；未修改已有服务。`);
     }
@@ -96,24 +100,24 @@ try {
     await once(pg_ctl, ["-D", dataDir, "-l", path.join(runtime, "postgres-server.log"), "-o", "-p 54329 -h 127.0.0.1", "-w", "start"]);
     startedDatabase = true;
   }
-  const env = { ...process.env, DATABASE_URL: `postgresql+psycopg://learnai:${secret.password}@127.0.0.1:54329/learnai`, NEXT_TELEMETRY_DISABLED: "1" };
+  const env = { ...process.env, DATABASE_URL: `postgresql+psycopg://learnai:${secret.password}@127.0.0.1:54329/${database}`, NEXT_TELEMETRY_DISABLED: "1", LEARN_LOCAL_DEMO: "1",LEARN_WEB_ORIGIN:`http://127.0.0.1:${webPort}`,LEARN_API_ORIGIN:`http://127.0.0.1:${apiPort}` };
   const python = path.join(root, "apps/api/.venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
-  const adminEnv = { ...env, DB_ADMIN_URL: `postgresql://learnai:${secret.password}@127.0.0.1:54329/postgres` };
-  await once(python, ["-c", "import os,psycopg; c=psycopg.connect(os.environ['DB_ADMIN_URL'],autocommit=True); exists=c.execute(\"SELECT 1 FROM pg_database WHERE datname='learnai'\").fetchone(); c.execute('CREATE DATABASE learnai') if not exists else None; c.close()"], { env: adminEnv });
+  const adminEnv = { ...env, DB_ADMIN_URL: `postgresql://learnai:${secret.password}@127.0.0.1:54329/postgres`,LEARN_LOCAL_DATABASE:database };
+  await once(python, ["-c", "import os,psycopg; from psycopg import sql; name=os.environ['LEARN_LOCAL_DATABASE']; c=psycopg.connect(os.environ['DB_ADMIN_URL'],autocommit=True); exists=c.execute('SELECT 1 FROM pg_database WHERE datname=%s',(name,)).fetchone(); c.execute(sql.SQL('CREATE DATABASE {}').format(sql.Identifier(name))) if not exists else None; c.close()"], { env: adminEnv });
   await once(python, ["-m", "alembic", "-c", path.join(root, "apps/api/alembic.ini"), "upgrade", "head"], { cwd: path.join(root, "apps/api"), env });
   if (process.argv.includes("--test-api")) {
     await once(python, ["-m", "pytest", "-q"], { cwd: path.join(root, "apps/api"), env });
     await stop();
   } else {
-    children.push(service("api", python, ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8000"], { cwd: path.join(root, "apps/api"), env }));
+    children.push(service("api", python, ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", String(apiPort)], { cwd: path.join(root, "apps/api"), env }));
     if (!process.argv.includes("--api-only")) {
       const require = createRequire(path.join(root, "apps/web/package.json"));
-      children.push(service("web", process.execPath, [require.resolve("next/dist/bin/next"), "dev", "--hostname", "127.0.0.1", "--port", "3000"], { cwd: path.join(root, "apps/web"), env }));
+      children.push(service("web", process.execPath, [require.resolve("next/dist/bin/next"), "dev", "--hostname", "127.0.0.1", "--port", String(webPort)], { cwd: path.join(root, "apps/web"), env }));
     }
     for (const child of children) child.on("exit", code => { if (!stopping) { console.error(`服务退出 (${code})`); stop().then(() => process.exit(1)); } });
-    await ready("http://127.0.0.1:8000/api/v1/adventure");
-    if (!process.argv.includes("--api-only")) await ready("http://127.0.0.1:3000");
-    console.log(process.argv.includes("--api-only") ? "LearnAI API已就绪：http://127.0.0.1:8000 · 日志：.runtime/api.log" : "LearnAI 本地预览已就绪：http://127.0.0.1:3000 · 日志：.runtime/api.log、.runtime/web.log");
+    await ready(`http://127.0.0.1:${apiPort}/api/v1/health`);
+    if (!process.argv.includes("--api-only")) await ready(`http://127.0.0.1:${webPort}`);
+    console.log(process.argv.includes("--api-only") ? `LearnAI API已就绪：http://127.0.0.1:${apiPort} · 日志：.runtime/api.log` : `LearnAI 本地预览已就绪：http://127.0.0.1:${webPort} · 日志：.runtime/api.log、.runtime/web.log`);
   }
 } catch (error) {
   console.error(error?.message ?? "PostgreSQL启动失败，查看 .runtime/postgres-start.log");

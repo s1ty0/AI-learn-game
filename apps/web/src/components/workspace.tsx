@@ -68,13 +68,10 @@ function StudyApp() {
 
   useEffect(() => {
     if (!ready || !dirty || preview) return;
-    const timer = setTimeout(() => {
-      const pending = pendingSave.current;
-      const draft: Draft = { baseRevision: revision, payload: graph, note };
-      if (pending && pending.baseRevision === revision && JSON.stringify(pending.payload) === JSON.stringify(graph) && pending.note === note) draft.operationKey = pending.operationKey;
-      writeDraft(draft).catch(() => setError("浏览器草稿缓存不可用，请及时保存。"));
-    }, 250);
-    return () => clearTimeout(timer);
+    const pending = pendingSave.current;
+    const draft: Draft = { baseRevision: revision, payload: graph, note };
+    if (pending && pending.baseRevision === revision && JSON.stringify(pending.payload) === JSON.stringify(graph) && pending.note === note) draft.operationKey = pending.operationKey;
+    writeDraft(draft).catch(() => setError("浏览器草稿缓存不可用，请及时保存。"));
   }, [graph, note, revision, dirty, ready, preview]);
 
   useEffect(() => {

@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Request
 from sqlalchemy import select
 
+from .learner_context import learner_id
 from .chapter import session_id
 from .models import AdventureSession, ContentRelease, EntityRevision, RelationRevision
 
@@ -15,12 +16,12 @@ def discovery_state(session, release_id):
     chapters = [{"id": "information-sea", "title": "信息之海"},
                 *[{"id": c["id"], "title": c["title"]} for c in config["expedition"]["chapters"]]]
     definitions = [{**node, "chapter": "information-sea"} for node in config["chapter"]["nodes"]] + config["expedition"]["nodes"]
-    rows = {row.id: row for row in session.scalars(select(AdventureSession)).all()}
+    rows = {row.id: row for row in session.scalars(select(AdventureSession).where(AdventureSession.id.in_([session_id(n["id"],learner_id(session)) for n in definitions]))).all()}
     entities = {row.entity_id: row.data for row in session.scalars(select(EntityRevision).where(EntityRevision.release_id == release_id)).all()}
     found = {}
     opened = set()
     for node in definitions:
-        row = rows.get(session_id(node["id"]))
+        row = rows.get(session_id(node["id"],learner_id(session)))
         if row is None or row.stage != 3:
             continue
         opened.add(node["chapter"])

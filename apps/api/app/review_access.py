@@ -6,7 +6,8 @@ import re
 import secrets
 
 from .db import engine_for, session_factory
-from .models import ReviewActor
+from .models import ReviewActor,Account
+from sqlalchemy import select
 
 ROOT=Path(__file__).resolve().parents[3]
 
@@ -16,6 +17,7 @@ def main():
     parser.add_argument("action",choices=["create","rotate","revoke"])
     parser.add_argument("id")
     parser.add_argument("name",nargs="?")
+    parser.add_argument("--learner",help="绑定的学习账号用户名；有账号后创建身份必须明确指定。")
     args=parser.parse_args()
     if not re.fullmatch(r"[a-z][a-z0-9_-]{2,39}",args.id) or args.id=="local-demo":
         parser.error("ID须为3至40位小写字母/数字/下划线/短横线，且不能是学习者ID。")
@@ -32,7 +34,10 @@ def main():
             actor=session.get(ReviewActor,args.id,with_for_update=True)
             if args.action=="create":
                 if actor or path.exists():raise ValueError("该ID或凭据文件已存在，未覆盖；需要换钥匙时用rotate。")
-                actor=ReviewActor(id=args.id,name=args.name.strip(),token_hash="",enabled=1);session.add(actor)
+                target=session.scalar(select(Account).where(Account.username==args.learner.lower())) if args.learner else None
+                if args.learner and not target:raise ValueError("未找到要绑定的学习账号。")
+                if not args.learner and session.scalar(select(Account.id).limit(1)):raise ValueError("已有学习账号，创建复核身份须用--learner明确绑定，不自动指向旧档案。")
+                actor=ReviewActor(id=args.id,name=args.name.strip(),token_hash="",enabled=1,learner_id=target.graph_id if target else "local-demo");session.add(actor)
             elif not actor:raise ValueError("未找到这个复核者ID。")
             if args.action=="revoke":actor.enabled=0;token=None
             else:

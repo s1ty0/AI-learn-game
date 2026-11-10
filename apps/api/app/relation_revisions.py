@@ -1,4 +1,5 @@
 """Explicit learner repair tasks. A saved revision is not verified mastery."""
+from .learner_context import learner_id
 import hashlib
 import json
 from uuid import uuid4
@@ -8,7 +9,6 @@ from pydantic import BaseModel,ConfigDict,Field
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
-from .content import DEMO_GRAPH
 from .models import VerificationSession,ReviewCase,GraphSnapshot,GraphOperation,now
 from .relation_evidence import current_edge
 from .relation_tasks import signature
@@ -65,7 +65,7 @@ class Submit(BaseModel):
 @router.get("/challenge/{revision_id}")
 def challenge(revision_id:str,request:Request):
     with request.app.state.sessions() as session:
-        row=session.get(VerificationSession,DEMO_GRAPH)
+        row=session.get(VerificationSession,learner_id(session))
         repair,binding=revision_challenges.context(session,row,revision_id,request.app.state.release_id)
         return {"revision_id":repair["id"],"source_attempt":repair["source_attempt"],"graph_revision":binding["graph_revision"],"edge":binding["edge"],
                 "focuses":[{"id":focus,"title":revision_challenges.FOCI[focus]} for focus in repair["criteria"] if focus in revision_challenges.FOCI],
@@ -74,14 +74,14 @@ def challenge(revision_id:str,request:Request):
 
 @router.get("/{attempt_id}")
 def read(attempt_id:str,request:Request):
-    with request.app.state.sessions() as session:return task_data(session,session.get(VerificationSession,DEMO_GRAPH),attempt_id)
+    with request.app.state.sessions() as session:return task_data(session,session.get(VerificationSession,learner_id(session)),attempt_id)
 
 
 @router.post("/{attempt_id}")
 def save_revision(attempt_id:str,body:Submit,request:Request):
     digest=hashlib.sha256(json.dumps({"source_attempt":attempt_id,**body.model_dump()},sort_keys=True,ensure_ascii=False).encode()).hexdigest()
     with request.app.state.sessions() as session,session.begin():
-        row=session.scalar(select(VerificationSession).where(VerificationSession.id==DEMO_GRAPH).with_for_update())
+        row=session.scalar(select(VerificationSession).where(VerificationSession.id==learner_id(session)).with_for_update())
         if not row:raise HTTPException(404,"没有关系作答记录。")
         for e in row.events:
             if e["key"]==body.operation_key:
@@ -100,13 +100,13 @@ def save_revision(attempt_id:str,body:Submit,request:Request):
         if len(set(body.criteria))!=len(body.criteria) or not set(body.criteria)<=allowed:raise HTTPException(422,"修订条目不可重复或伪造。")
         if not all(value.strip() for value in (body.label,body.note,body.reason,body.counterexample)):raise HTTPException(422,"请写清新命题、条件、修订理由和反例，不能只填空白。")
         if body.label==edge["label"] and body.note==edge.get("note",""):raise HTTPException(422,"当前命题和条件尚未变化；需要澄清时请写入明确条件，不虚构已修订。")
-        if session.scalar(select(GraphOperation).where(GraphOperation.graph_id==DEMO_GRAPH,GraphOperation.operation_key=="relation-revision:"+body.operation_key)):raise HTTPException(409,"此图操作键已经使用，请先读取最新记录。")
+        if session.scalar(select(GraphOperation).where(GraphOperation.graph_id==learner_id(session),GraphOperation.operation_key=="relation-revision:"+body.operation_key)):raise HTTPException(409,"此图操作键已经使用，请先读取最新记录。")
         before=signature(edge)
         payload={**snapshot.payload,"edges":[{**item,"label":body.label,"note":body.note} if item["id"]==edge["id"] else item for item in snapshot.payload["edges"]]}
         GraphPayload.model_validate(payload)
         graph_before=head.revision;head.revision+=1
-        session.add(GraphSnapshot(graph_id=DEMO_GRAPH,revision=head.revision,release_id=snapshot.release_id,payload=payload,note="关系修订任务："+body.reason[:100],restored_from=None))
-        session.add(GraphOperation(id=str(uuid4()),graph_id=DEMO_GRAPH,operation_key="relation-revision:"+body.operation_key,base_revision=graph_before,result_revision=head.revision,request_hash=digest))
+        session.add(GraphSnapshot(graph_id=learner_id(session),revision=head.revision,release_id=snapshot.release_id,payload=payload,note="关系修订任务："+body.reason[:100],restored_from=None))
+        session.add(GraphOperation(id=str(uuid4()),graph_id=learner_id(session),operation_key="relation-revision:"+body.operation_key,base_revision=graph_before,result_revision=head.revision,request_hash=digest))
         summary=projection(case,answer["choice_matches"])
         latest={e["actor"]:e for e in summary["history"]}
         event={"action":"relation_revision","id":str(uuid4()),"key":body.operation_key,"hash":digest,"created_at":now().isoformat(),"source_attempt":attempt_id,

@@ -64,8 +64,9 @@ class GraphOperation(Base):
 
 class Attempt(Base):
     __tablename__ = "attempts"
+    __table_args__ = (UniqueConstraint("owner","operation_key",name="uq_attempt_owner_operation"),)
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    operation_key: Mapped[str] = mapped_column(String, unique=True)
+    operation_key: Mapped[str] = mapped_column(String)
     request_hash: Mapped[str] = mapped_column(String)
     task_id: Mapped[str] = mapped_column(String)
     task_version: Mapped[str] = mapped_column(String)
@@ -81,6 +82,7 @@ class ReviewActor(Base):
     name: Mapped[str] = mapped_column(String)
     token_hash: Mapped[str] = mapped_column(String, unique=True)
     enabled: Mapped[int] = mapped_column(Integer, default=1)
+    learner_id: Mapped[str] = mapped_column(String,default="local-demo",server_default="local-demo")
 
 
 class ReviewCase(Base):
@@ -119,3 +121,31 @@ class AdventureSession(Base):
     revision: Mapped[int] = mapped_column(Integer, default=0)
     stage: Mapped[int] = mapped_column(Integer, default=0)
     events: Mapped[list] = mapped_column(JSONB, default=list)
+
+
+class Account(Base):
+    __tablename__="accounts"
+    id:Mapped[str]=mapped_column(String,primary_key=True)
+    username:Mapped[str]=mapped_column(String(40),unique=True)
+    password_hash:Mapped[str]=mapped_column(String)
+    graph_id:Mapped[str]=mapped_column(ForeignKey("learner_graphs.id"),unique=True)
+    enabled:Mapped[int]=mapped_column(Integer,default=1)
+    created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=now)
+    legacy_claimed_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True),nullable=True)
+    previous_graph_id:Mapped[str|None]=mapped_column(String,nullable=True)
+
+
+class AuthSession(Base):
+    __tablename__="auth_sessions"
+    token_hash:Mapped[str]=mapped_column(String,primary_key=True)
+    account_id:Mapped[str]=mapped_column(ForeignKey("accounts.id"),index=True)
+    expires_at:Mapped[datetime]=mapped_column(DateTime(timezone=True))
+    created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=now)
+
+
+class AuthInvite(Base):
+    __tablename__="auth_invites"
+    token_hash:Mapped[str]=mapped_column(String,primary_key=True)
+    expires_at:Mapped[datetime]=mapped_column(DateTime(timezone=True))
+    used_by:Mapped[str|None]=mapped_column(ForeignKey("accounts.id"),nullable=True)
+    created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=now)

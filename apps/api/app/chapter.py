@@ -1,4 +1,5 @@
 """A bounded exploration chapter; discovery never updates mastery evidence."""
+from .learner_context import learner_id
 
 import hashlib
 import json
@@ -8,7 +9,6 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import select
 
-from .content import DEMO_GRAPH
 from .models import AdventureSession, ContentRelease, now
 
 router = APIRouter(prefix="/api/v1/chapter")
@@ -28,14 +28,14 @@ def attention(query, mask=False, future=10):
     return {"weights": all_weights, "outputs": outputs}
 
 
-def session_id(node):
-    return DEMO_GRAPH if node == "mask" else DEMO_GRAPH + ":" + node
+def session_id(node,owner="local-demo"):
+    return owner if node == "mask" else owner + ":" + node
 
 
 def chapter_state(session, release_id):
     release = session.get(ContentRelease, release_id)
     config = release.manifest["chapter"]
-    rows = {node["id"]: session.get(AdventureSession, session_id(node["id"])) for node in config["nodes"]}
+    rows = {node["id"]: session.get(AdventureSession, session_id(node["id"],learner_id(session))) for node in config["nodes"]}
     nodes = []
     for node in config["nodes"]:
         row = rows[node["id"]]
@@ -86,11 +86,11 @@ def chapter_move(node: str, body: ChapterMove, request: Request):
         raise HTTPException(404, "Unknown chapter island")
     with request.app.state.sessions() as session:
         # Chapter moves share one lock order, preventing duplicate or stale advancement.
-        session.scalar(select(AdventureSession).where(AdventureSession.id == session_id("mask")).with_for_update())
-        row = session.scalar(select(AdventureSession).where(AdventureSession.id == session_id(node)).with_for_update())
+        session.scalar(select(AdventureSession).where(AdventureSession.id == session_id("mask",learner_id(session))).with_for_update())
+        row = session.scalar(select(AdventureSession).where(AdventureSession.id == session_id(node,learner_id(session))).with_for_update())
         config = session.get(ContentRelease, request.app.state.release_id).manifest["chapter"]
         definition = next(item for item in config["nodes"] if item["id"] == node)
-        if any(session.get(AdventureSession, session_id(previous)).stage != 3 for previous in definition["requires"]):
+        if any(session.get(AdventureSession, session_id(previous,learner_id(session))).stage != 3 for previous in definition["requires"]):
             raise HTTPException(403, "这条航路还没有接通，先探索相邻的光点。")
         digest = hashlib.sha256(json.dumps(body.model_dump(), sort_keys=True).encode()).hexdigest()
         prior = next((e for e in row.events if e["operation_key"] == body.operation_key), None)

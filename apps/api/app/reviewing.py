@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
-from .content import DEMO_GRAPH
+from .learner_context import learner_id
 from .models import ReviewActor, ReviewCase, VerificationSession, now
 
 router=APIRouter(prefix="/api/v1/reviewing")
@@ -22,12 +22,12 @@ def authenticate(request:Request,credentials:HTTPAuthorizationCredentials|None=D
     digest=hashlib.sha256(credentials.credentials.encode()).hexdigest()
     with request.app.state.sessions() as session:
         actor=session.scalar(select(ReviewActor).where(ReviewActor.token_hash==digest,ReviewActor.enabled==1))
-        if not actor or actor.id==DEMO_GRAPH:raise HTTPException(401,"访问钥匙无效或已停用。")
+        if not actor or (actor.id=="local-demo" or actor.learner_id!=learner_id(session)):raise HTTPException(401,"访问钥匙无效或已停用。")
         return {"id":actor.id,"name":actor.name}
 
 
 def attempts(session):
-    row=session.get(VerificationSession,DEMO_GRAPH)
+    row=session.get(VerificationSession,learner_id(session))
     events=row.events if row else []
     starts={e["attempt_id"]:e for e in events if e["action"]=="start"}
     return [(starts[e["attempt_id"]],e) for e in events if e["action"]=="submit"]

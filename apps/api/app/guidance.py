@@ -1,4 +1,5 @@
 """Explainable navigation and scoped support. Never grants exploration or mastery."""
+from .learner_context import learner_id
 import hashlib
 import json
 from typing import Literal
@@ -65,7 +66,7 @@ def state(session, release_id, row=None):
         message = "换一个固定小情境，只检查当前这一条关系。两个例子轮换，不算新的独立题族。"
     if mode and not family and cause != "operation":
         message += " 当前机制尚无专属补桥样本，已记录覆盖缺口；可以继续原机关，不临时编造题目。"
-    profile = intake_state(session.get(IntakeSession, "local-demo"))
+    profile = intake_state(session.get(IntakeSession, learner_id(session)))
     if task and last_answer:
         message = ("这次判断仍待核查，先补当前关系，再回机关尝试；不据此整章降级。" if last_answer["outcome"] in {"needs_check","unknown"}
                    else "这次选择符合规则，可以回到原机关继续。已有帮助和判断留痕保留，仍不构成正式掌握。")
@@ -86,15 +87,15 @@ def state(session, release_id, row=None):
 @router.get("")
 def current(request: Request):
     with request.app.state.sessions() as session:
-        return state(session, request.app.state.release_id, session.get(GuidanceSession, "local-demo"))
+        return state(session, request.app.state.release_id, session.get(GuidanceSession, learner_id(session)))
 
 
 @router.post("/actions")
 def act(body: Action, request: Request):
     digest = hashlib.sha256(body.model_dump_json().encode()).hexdigest()
     with request.app.state.sessions() as session, session.begin():
-        session.execute(insert(GuidanceSession).values(id="local-demo", revision=0, events=[]).on_conflict_do_nothing())
-        row = session.scalar(select(GuidanceSession).where(GuidanceSession.id == "local-demo").with_for_update())
+        session.execute(insert(GuidanceSession).values(id=learner_id(session), revision=0, events=[]).on_conflict_do_nothing())
+        row = session.scalar(select(GuidanceSession).where(GuidanceSession.id == learner_id(session)).with_for_update())
         for event in row.events:
             if event["key"] == body.operation_key:
                 if event["hash"] != digest: raise HTTPException(409, "操作键内容不一致。")

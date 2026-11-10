@@ -22,7 +22,7 @@ def client():
     engine = create_engine(url, connect_args={"options": f"-csearch_path={schema}"})
     Base.metadata.create_all(engine)
     try:
-        with TestClient(create_app(engine)) as current:
+        with TestClient(create_app(engine,allow_local_demo=True)) as current:
             yield current
     finally:
         engine.dispose()

@@ -1,3 +1,4 @@
+from .learner_context import learner_id
 import hashlib
 import json
 from typing import Literal
@@ -9,7 +10,6 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
 from .chapter import session_id
-from .content import DEMO_GRAPH
 from .models import AdventureSession, LearnerGraph, VerificationSession, ReviewCase, now
 from .reviewing import projection
 from .verification_content import TASKS
@@ -62,7 +62,7 @@ def state(session,row=None,report_id=None):
     active=next((e for e in reversed(starts) if e["attempt_id"] not in submitted),None)
     goals=[]
     for key,task in TASKS.items():
-        progress=session.get(AdventureSession,session_id(task["node"]))
+        progress=session.get(AdventureSession,session_id(task["node"],learner_id(session)))
         if progress and progress.stage==3: goals.append({"id":key,"title":task["title"]})
     reports=[]
     for start in ([s for s in starts if s["attempt_id"]==report_id] if report_id else starts[-10:]):
@@ -85,13 +85,13 @@ def state(session,row=None,report_id=None):
 @router.get("")
 def current(request:Request):
     with request.app.state.sessions() as session:
-        return state(session,session.get(VerificationSession,DEMO_GRAPH))
+        return state(session,session.get(VerificationSession,learner_id(session)))
 
 
 @router.get("/attempts/{attempt_id}")
 def historical_attempt(attempt_id:str,request:Request):
     with request.app.state.sessions() as session:
-        result=state(session,session.get(VerificationSession,DEMO_GRAPH),report_id=attempt_id)
+        result=state(session,session.get(VerificationSession,learner_id(session)),report_id=attempt_id)
         if not result["reports"]:raise HTTPException(404,"未找到已提交作答，未提交题的答案和量规仍隐藏。")
         return result["reports"][0]
 
@@ -106,8 +106,8 @@ def act(body:Action,request:Request):
     digest=hashlib.sha256(body.model_dump_json(exclude=excluded).encode()).hexdigest()
     legacy_digest=hashlib.sha256(body.model_dump_json(exclude=new_fields|challenge_fields|{"parent_attempt","parent_review_revision"}).encode()).hexdigest()
     with request.app.state.sessions() as session,session.begin():
-        session.execute(insert(VerificationSession).values(id=DEMO_GRAPH,revision=0,events=[]).on_conflict_do_nothing())
-        row=session.scalar(select(VerificationSession).where(VerificationSession.id==DEMO_GRAPH).with_for_update())
+        session.execute(insert(VerificationSession).values(id=learner_id(session),revision=0,events=[]).on_conflict_do_nothing())
+        row=session.scalar(select(VerificationSession).where(VerificationSession.id==learner_id(session)).with_for_update())
         for e in row.events:
             if e["key"]==body.operation_key:
                 legacy_match=not has_binding_input and not has_challenge_input and body.parent_attempt is None and body.parent_review_revision is None and e["hash"]==legacy_digest
@@ -140,7 +140,7 @@ def act(body:Action,request:Request):
                 if not candidate or candidate["status"]!="ready_for_recheck":raise HTTPException(409,"初次证据、72小时间隔或当前复验状态尚不满足，不能提前开始。")
                 if source.get("binding"):
                     # Keep graph lock order consistent with initial bound attempts.
-                    binding=binding_for(session,request.app.state.release_id,source["binding"]["edge"]["id"],session.get(LearnerGraph,DEMO_GRAPH).revision,source["binding"]["template"],lock=True)
+                    binding=binding_for(session,request.app.state.release_id,source["binding"]["edge"]["id"],session.get(LearnerGraph,learner_id(session)).revision,source["binding"]["template"],lock=True)
                     if binding["edge"]!=source["binding"]["edge"]:raise HTTPException(409,"关系已改变，旧来源不能作为当前关系复验。")
                     event["binding"]=binding
                     task=task_for(binding["template"],binding,recheck=True)
@@ -162,7 +162,7 @@ def act(body:Action,request:Request):
             bound_version="relation-v1-"+hashlib.sha256(json.dumps(task,ensure_ascii=False,sort_keys=True).encode()).hexdigest()[:12] if event.get("binding") else None
             event.update(action="start",kind="revision_challenge" if body.action=="start_revision_challenge" else "recheck" if body.action=="start_recheck" else "transfer",attempt_id=str(uuid4()),goal=goal,task=task,version=bound_version or (RECHECK_VERSION if body.action=="start_recheck" else VERSION),
                 repeat_family=repeat,release_id=request.app.state.release_id,
-                graph_revision=session.get(LearnerGraph,DEMO_GRAPH).revision)
+                graph_revision=session.get(LearnerGraph,learner_id(session)).revision)
         else:
             start=next((e for e in row.events if e["action"]=="start" and e["attempt_id"]==body.attempt_id),None)
             if not start: raise HTTPException(404,"未找到对应作答。")

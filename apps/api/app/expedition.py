@@ -1,4 +1,5 @@
 """Versioned multi-chapter practice with bounded, independently computed mechanics."""
+from .learner_context import learner_id
 
 import hashlib
 import json
@@ -10,7 +11,6 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy import select
 
 from .chapter import attention, chapter_state, session_id
-from .content import DEMO_GRAPH
 from .models import AdventureSession, ContentRelease, now
 from .tower import BLOCK_ORDER, TOWER_IDS, tower_mechanics
 from .voyage import VOYAGE_IDS, voyage_mechanics
@@ -185,7 +185,7 @@ def expedition_state(session, release_id):
     config = session.get(ContentRelease, release_id).manifest["expedition"]
     first = chapter_state(session, release_id)
     all_ids = NEW_IDS | {"beacon"}
-    rows = {node: session.get(AdventureSession, session_id(node)) for node in all_ids}
+    rows = {node: session.get(AdventureSession, session_id(node,learner_id(session))) for node in all_ids}
     nodes = []
     for definition in config["nodes"]:
         row = rows[definition["id"]]
@@ -237,11 +237,11 @@ def move(node: str, body: ExpeditionMove, request: Request):
         raise HTTPException(404, "Unknown expedition island")
     with request.app.state.sessions() as session:
         # One chapter lock order; no new tables or mutation of the old personal map.
-        session.scalar(select(AdventureSession).where(AdventureSession.id == DEMO_GRAPH).with_for_update())
-        row = session.scalar(select(AdventureSession).where(AdventureSession.id == session_id(node)).with_for_update())
+        session.scalar(select(AdventureSession).where(AdventureSession.id == learner_id(session)).with_for_update())
+        row = session.scalar(select(AdventureSession).where(AdventureSession.id == session_id(node,learner_id(session))).with_for_update())
         pinned = session.get(ContentRelease, row.release_id).manifest["expedition"]
         definition = next(item for item in pinned["nodes"] if item["id"] == node)
-        if any(session.get(AdventureSession, session_id(previous)).stage != 3 for previous in definition["requires"]):
+        if any(session.get(AdventureSession, session_id(previous,learner_id(session))).stage != 3 for previous in definition["requires"]):
             raise HTTPException(403, "这片光路还没接通，请先完成相邻主线。")
         digest = hashlib.sha256(json.dumps(body.model_dump(), sort_keys=True).encode()).hexdigest()
         prior = next((event for event in row.events if event["operation_key"] == body.operation_key), None)

@@ -1,7 +1,7 @@
+from .learner_context import learner_id
 from fastapi import APIRouter,Request,HTTPException
 from sqlalchemy import select
 
-from .content import DEMO_GRAPH
 from .models import LearnerGraph,GraphSnapshot,VerificationSession
 from .discoveries import discovery_state
 from .candidates import ledger
@@ -11,10 +11,10 @@ router=APIRouter(prefix="/api/v1/relation-evidence")
 
 
 def current_edge(session,edge_id,lock=False):
-    query=select(LearnerGraph).where(LearnerGraph.id==DEMO_GRAPH)
+    query=select(LearnerGraph).where(LearnerGraph.id==learner_id(session))
     if lock:query=query.with_for_update().execution_options(populate_existing=True)
     head=session.scalar(query)
-    snapshot=session.get(GraphSnapshot,(DEMO_GRAPH,head.revision))
+    snapshot=session.get(GraphSnapshot,(learner_id(session),head.revision))
     edge=next((e for e in snapshot.payload["edges"] if e["id"]==edge_id),None)
     if not edge:raise HTTPException(404,"当前图中未找到这条连线，旧作答仍可在验证室回看。")
     return head,snapshot,edge
@@ -45,7 +45,7 @@ def detail(edge_id:str,request:Request,offset:int=0):
         found=discovery_state(session,request.app.state.release_id)
         if not {edge["source"],edge["target"]}<={e["id"] for e in found["entities"]}:raise HTTPException(404,"这条连线端点尚未发现，不能提前展开关系验证。")
         templates=[{"id":key,"title":value["title"]} for key,value in TEMPLATES.items() if value["source"]==edge["source"] and value["target"]==edge["target"]]
-        row=session.get(VerificationSession,DEMO_GRAPH)
+        row=session.get(VerificationSession,learner_id(session))
         starts=[e for e in row.events if e["action"]=="start" and e.get("binding") and e["binding"]["edge"]["id"]==edge_id and e.get("kind")!="recheck"] if row else []
         result=ledger(session,edge_id=edge_id,offset=offset,page_size=30)
         bindings={e["attempt_id"]:e["binding"] for e in starts}

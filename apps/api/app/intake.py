@@ -1,3 +1,4 @@
+from .learner_context import learner_id
 import hashlib
 import json
 from typing import Literal
@@ -48,7 +49,7 @@ def state(row):
 @router.get("")
 def current(request: Request):
     with request.app.state.sessions() as session:
-        return state(session.get(IntakeSession, "local-demo"))
+        return state(session.get(IntakeSession, learner_id(session)))
 
 
 @router.post("/actions")
@@ -57,8 +58,8 @@ def act(body: Action, request: Request):
     with request.app.state.sessions() as session, session.begin():
         # Serialize first creation as well as subsequent writes for this local owner.
         from sqlalchemy.dialects.postgresql import insert
-        session.execute(insert(IntakeSession).values(id="local-demo", revision=0, finished=0, events=[]).on_conflict_do_nothing())
-        row = session.scalar(select(IntakeSession).where(IntakeSession.id == "local-demo").with_for_update())
+        session.execute(insert(IntakeSession).values(id=learner_id(session), revision=0, finished=0, events=[]).on_conflict_do_nothing())
+        row = session.scalar(select(IntakeSession).where(IntakeSession.id == learner_id(session)).with_for_update())
         for event in row.events:
             if event["key"] == body.operation_key:
                 if event["hash"] != digest:

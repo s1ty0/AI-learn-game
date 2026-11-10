@@ -12,10 +12,12 @@ import "./voyage-labs.css";
 import "./frontier.css";
 import "./star-map.css";
 import "./intake.css";
+import "./auth.css";
+import {AuthBoundary} from "@/components/auth-boundary";
 
 export const metadata: Metadata = { title: "知行 · 迷雾群岛", description: "从一束光出发，在探索中发现 AI 的秘密。" };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   // Some browser extensions inject attributes into body before React hydrates.
   // Keep this escape hatch on body only; mismatches in game content remain visible.
-  return <html lang="zh-CN"><body suppressHydrationWarning>{children}</body></html>;
+  return <html lang="zh-CN"><body suppressHydrationWarning><AuthBoundary>{children}</AuthBoundary></body></html>;
 }

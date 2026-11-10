@@ -1,8 +1,8 @@
 """Read-only candidate projection. Recorded observations are claims, not proof."""
+from .learner_context import learner_id
 from datetime import datetime,timedelta
 from fastapi import APIRouter,Request,HTTPException
 
-from .content import DEMO_GRAPH
 from .models import ReviewCase,VerificationSession,now
 from .reviewing import projection
 
@@ -29,7 +29,7 @@ def admission(session,start,answer):
 
 def ledger(session,offset=0,source_id=None,goals=None,page_size=50,edge_id=None,unbound_only=False):
     clock=now()
-    row=session.get(VerificationSession,DEMO_GRAPH)
+    row=session.get(VerificationSession,learner_id(session))
     events=row.events if row else []
     starts=[e for e in events if e["action"]=="start"]
     answers={e["attempt_id"]:e for e in events if e["action"]=="submit"}

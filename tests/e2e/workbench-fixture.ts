@@ -7,7 +7,7 @@ import type { Snapshot } from "../../apps/web/src/lib/api";
 export async function workbenchFixture(context: BrowserContext, supplied?: Snapshot) {
   let initial = supplied;
   if (!initial) {
-    const seed = await context.request.get("http://127.0.0.1:3000/api/v1/learner-graph");
+    const seed = await context.request.get(`${process.env.LEARN_TEST_BASE_URL??"http://127.0.0.1:3000"}/api/v1/learner-graph`);
     if (!seed.ok()) throw new Error("Workbench seed unavailable");
     initial = await seed.json() as Snapshot;
   }
