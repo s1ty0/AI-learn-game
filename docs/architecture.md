@@ -14,7 +14,7 @@
 
 关系修订独立路由复用verification_sessions追加relation_revision事件。提交依次锁验证室、来源复核和图头，检查三份修订并在同一事务生成图快照/操作与足迹，只改边的label/note。任务读当前意见，足迹固定当时依据；本人修订不改变候选/解锁，见[修订任务](./relation-revisions.md)。
 
-修订挑战复用验证室start/submit/self_review事件，kind=revision_challenge，追加revision_origin固定修订ID、原来源、聚焦条目和修订图版本。两模板各三种情境，每轮只选一处。预读不泄露答案/量规，开始再次锁验证室/图头核对当前命题；提交后按固定任务给选择反馈，自由解释走原逐项复核。候选账本排除这类练习，也拒绝把它当复验来源；无新表或迁移，见[修订挑战](./revision-challenges.md)。
+修订挑战复用验证室start/submit/self_review事件，kind=revision_challenge，追加revision_origin固定修订ID、原来源、聚焦条目和修订图版本。四模板各三种情境，每轮只选一处；新注意力模板可按需展开比例/光路补桥，服务端记录support事件并在提交时强制标记帮助。预读不泄露答案/量规，开始再次锁验证室/图头核对当前命题；提交后按固定任务给选择反馈，自由解释走原逐项复核。候选账本排除这类练习，也拒绝把它当复验来源；无新表或迁移，见[修订挑战](./revision-challenges.md)。
 
 关系验证在verification开始事件固定原连线五字段、图修订与模板副本，不给图中连线写可信掌握字段。relation-evidence只读对照当前命题；candidates在关系变更时标为待重新核对，节点星图摘要排除关系绑定作答。原文引用进入题面和量规，由复核者核查语义，见[关系绑定](./relation-evidence.md)。
 

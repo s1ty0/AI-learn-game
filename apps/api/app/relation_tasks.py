@@ -2,10 +2,13 @@
 from copy import deepcopy
 from .verification_content import TASKS
 from .recheck_content import RECHECK_TASKS
+from .attention_relation_content import INITIAL,RECHECK
 
 TEMPLATES={
  "lookup-map":{"title":"编号与嵌入查表关系","source":"entity-0144","target":"entity-0073","goal":"lookup"},
  "mse-example":{"title":"均方误差作为损失选择","source":"entity-0138","target":"entity-0014","goal":"loss"},
+ "softmax-aggregation":{"title":"Softmax与加权汇聚","source":"entity-0142","target":"entity-0147","goal":"weights"},
+ "causal-attention":{"title":"因果掩码与注意力读取","source":"entity-0068","target":"entity-0143","goal":"mask"},
 }
 
 
@@ -16,6 +19,10 @@ def signature(edge):
 def task_for(template,binding,recheck=False):
     definition=TEMPLATES[template]
     task=deepcopy((RECHECK_TASKS if recheck else TASKS)[definition["goal"]])
+    content=(RECHECK if recheck else INITIAL).get(template)
+    if content:
+        task.update({k:deepcopy(v) for k,v in content.items() if k!="requirements"})
+        for c,r in zip(task["criteria"],content["requirements"]):c["requirement"]=r
     task["family"]="relation-"+template+("-retention" if recheck else "-transfer")+"-v1"
     task["title"]="关系复验："+definition["title"] if recheck else "关系验证："+definition["title"]
     task["prompt"]=("以下是你保存的个人关系原文，可能正确也可能存在误解，不是标准答案。\n"

@@ -5,14 +5,18 @@ import type {Snapshot} from "../../apps/web/src/lib/api";
 
 const edge={id:"repair-edge",source:"entity-0144",target:"entity-0073",label:"编号越接近语义越接近",note:"原先的理由，尚需检查。"};
 const seed:Snapshot={revision:0,release_id:"fixture",created_at:"2026-11-09T00:00:00Z",restored_from:null,note:"图",payload:{nodes:[{id:"entity-0144",type:"knowledge",position:{x:0,y:0},data:{label:"token",subtitle:"",category:"custom",note:""}},{id:"entity-0073",type:"knowledge",position:{x:200,y:0},data:{label:"词嵌入",subtitle:"",category:"custom",note:""}}],edges:[edge]}};
-export async function fixture(page:Page,context:BrowserContext){
- await workbenchFixture(context,structuredClone(seed));await expeditionFixture(page,"representation");
- await page.route("**/api/v1/discoveries",route=>route.fulfill({json:{chapters:[{id:"representation",title:"表征工坊"}],entities:seed.payload.nodes.map(n=>({id:n.id,name:n.data.label,chapters:["representation"],origins:[]})),relations:[]}}));
+export async function fixture(page:Page,context:BrowserContext,attention?:"softmax-aggregation"|"causal-attention"){
+ const definition=attention==="softmax-aggregation"?{source:"entity-0142",target:"entity-0147",names:["Softmax","注意力权重"],label:"分数直接当权重相乘",title:"计算关系"}:attention==="causal-attention"?{source:"entity-0068",target:"entity-0143",names:["因果掩码","缩放点积注意力"],label:"把未来值清零就能保证全部因果",title:"读取路径"}:null;
+ const edge=definition?{...seed.payload.edges[0],source:definition.source,target:definition.target,label:definition.label}:seed.payload.edges[0];
+ const chosen=definition?{...seed,payload:{nodes:seed.payload.nodes.map((n,i)=>({...n,id:i?definition.target:definition.source,data:{...n.data,label:definition.names[i]}})),edges:[edge]}}:structuredClone(seed);
+ await workbenchFixture(context,chosen);await expeditionFixture(page,"representation");
+ await page.route("**/api/v1/discoveries",route=>route.fulfill({json:{chapters:[{id:"representation",title:"表征工坊"}],entities:chosen.payload.nodes.map(n=>({id:n.id,name:n.data.label,chapters:["representation"],origins:[]})),relations:[]}}));
  await page.route("**/api/v1/star-evidence{,/**}",route=>route.fulfill({json:{entities:[],goals:[],items:[],total:0,next_offset:null}}));
- await page.route("**/api/v1/relation-evidence/*",route=>route.fulfill({json:{graph_revision:0,edge,templates:[],items:[{id:"source-repair",status:"needs_evidence",reason:"原关系需要澄清。",binding:{template:"lookup-map",graph_revision:0,edge},matches_current:true,initial:{checks:[{id:"conditions",ok:false,label:"查表条件需明确"}]}}]}}));
+ await page.route("**/api/v1/relation-evidence/*",route=>route.fulfill({json:{graph_revision:0,edge,templates:attention?[{id:attention,title:attention==="softmax-aggregation"?"Softmax与加权汇聚":"因果掩码与注意力读取"}]:[],items:[{id:"source-repair",status:"needs_evidence",reason:"原关系需要澄清。",binding:{template:attention??"lookup-map",graph_revision:0,edge},matches_current:true,initial:{checks:[{id:"conditions",ok:false,label:"成立条件需明确"}]}}]}}));
  let graphRevision=0,reviewRevision=1,verificationRevision=4,fail=false,conflict=false;
  let current={...edge};const history:Record<string,unknown>[]=[],keys:string[]=[];
  const criteria=[{id:"path",title:"查表关系",requirement:"核查原命题是否成立。",gap:true,disputed:false,opinions:[{reviewer:"复核者甲",review_id:"r1",judgement:"partial",quote:"编号越接近",reason:"编号是地址，不能用编号差判断语义距离。"}]},{id:"conditions",title:"成立条件",requirement:"说明固定映射。",gap:true,disputed:true,opinions:[]},{id:"boundary",title:"边界反例",requirement:"给出反例。",gap:true,disputed:false,opinions:[]}];
+ if(definition){criteria[0].title=definition.title;criteria[0].opinions=[];criteria[1].requirement="检查允许项、归一化和其他路径。";}
  function state(){return {title:"修订查表关系",source_attempt:"source-repair",graph_revision:graphRevision,review_revision:reviewRevision,verification_revision:verificationRevision,binding:{edge,graph_revision:0},current,answer:"原来对编号距离的解释。",criteria,history};}
  await page.route("**/api/v1/relation-revisions/*",async route=>{
   if(route.request().method()==="POST"){
@@ -26,7 +30,7 @@ export async function fixture(page:Page,context:BrowserContext){
   }
   await route.fulfill({json:state()});
  });
- return {keys,history,fail:()=>{fail=true;},conflict:()=>{conflict=true;}};
+ return {keys,history,current:()=>current,fail:()=>{fail=true;},conflict:()=>{conflict=true;}};
 }
 export async function open(page:Page){await page.goto("/");await page.getByRole("button",{name:"更多",exact:true}).click();await page.getByRole("button").filter({hasText:"我的星图"}).click();await page.getByLabel("选择星图连接").selectOption("repair-edge");await page.locator(".relation-evidence-panel summary").click();await page.getByRole("button",{name:"把缺口变成修订任务",exact:true}).click();await expect(page.getByRole("heading",{name:"修好这条关系",exact:true})).toBeVisible();}
 export async function fill(page:Page){await page.getByLabel("查表关系 · 待澄清").check();await page.getByLabel("修订后的关系命题").fill("token通过固定编号对应到嵌入表行");await page.getByLabel("修订后的关系条件").fill("词表编号与表行映射保持一致，编号本身不表示语义距离。");await page.getByLabel("关系修订理由").fill("补上原来遗漏的映射条件，纠正用编号差推断语义的错误。");await page.getByLabel("关系修订反例").fill("只换词表编号、不改表行会造成错配。");}

@@ -34,7 +34,7 @@ class ReviewItem(BaseModel):
 class Action(BaseModel):
     base_revision: int = Field(ge=0)
     operation_key: str = Field(min_length=8,max_length=120)
-    action: Literal["start","start_relation","start_recheck","start_revision_challenge","submit","self_review"]
+    action: Literal["start","start_relation","start_recheck","start_revision_challenge","support","submit","self_review"]
     goal: str | None = Field(default=None,max_length=50)
     attempt_id: str | None = Field(default=None,max_length=100)
     choice: int | None = Field(default=None,ge=0,le=2)
@@ -48,6 +48,11 @@ class Action(BaseModel):
     relation_template: str | None = Field(default=None,max_length=100)
     revision_id: str | None = Field(default=None,min_length=1,max_length=100)
     revision_focus: Literal["path","conditions","boundary"] | None = None
+
+
+def support_state(events,start):
+    used=any(e["action"]=="support" and e["attempt_id"]==start["attempt_id"] for e in events)
+    return {"support_available":bool(start["task"].get("support")),"help_used":used,**({"support":start["task"]["support"]} if used else {})}
 
 
 def state(session,row=None,report_id=None):
@@ -71,9 +76,9 @@ def state(session,row=None,report_id=None):
             "task_version":start["version"],"release_id":start["release_id"],"graph_revision":start["graph_revision"],
             "rubric":start["task"]["criteria"],"rationale":start["task"]["rationale"],"self_reviews":reviews,
             "review_state":projection(session.get(ReviewCase,start["attempt_id"]),answer["choice_matches"]),
-            "kind":start.get("kind","transfer"),"parent_attempt":start.get("parent_attempt"),"evidence_policy":start.get("evidence_policy"),**({"binding":start["binding"]} if start.get("binding") else {}),**revision_challenges.feedback(start,answer)})
+            "kind":start.get("kind","transfer"),"parent_attempt":start.get("parent_attempt"),"evidence_policy":start.get("evidence_policy"),**({"binding":start["binding"]} if start.get("binding") else {}),**revision_challenges.feedback(start,answer),**support_state(events,start)})
     return {"revision":row.revision if row else 0,"version":VERSION,"goals":goals,"mastery":"unverified",
-        "active": {"id":active["attempt_id"],"goal":active["goal"],"title":active["task"]["title"],"prompt":active["task"]["prompt"],"options":active["task"]["options"],"repeat_family":active["repeat_family"],"version":active["version"],"kind":active.get("kind","transfer"),"parent_attempt":active.get("parent_attempt"),**({"revision_origin":active["revision_origin"]} if active.get("revision_origin") else {})} if active else None,
+        "active": {"id":active["attempt_id"],"goal":active["goal"],"title":active["task"]["title"],"prompt":active["task"]["prompt"],"options":active["task"]["options"],"repeat_family":active["repeat_family"],"version":active["version"],"kind":active.get("kind","transfer"),"parent_attempt":active.get("parent_attempt"),**({"revision_origin":active["revision_origin"]} if active.get("revision_origin") else {}),**support_state(events,active)} if active else None,
         "reports":reports}
 
 
@@ -162,12 +167,18 @@ def act(body:Action,request:Request):
             start=next((e for e in row.events if e["action"]=="start" and e["attempt_id"]==body.attempt_id),None)
             if not start: raise HTTPException(404,"未找到对应作答。")
             event["attempt_id"]=body.attempt_id
-            if body.action=="submit":
+            if body.action=="support":
+                if not current["active"] or current["active"]["id"]!=body.attempt_id:raise HTTPException(409,"只有当前未提交挑战可以展开补桥。")
+                if start.get("kind")!="revision_challenge" or not start["task"].get("support"):raise HTTPException(422,"这类任务尚无专属补桥，不临时编造内容。")
+                if current["active"]["help_used"]:raise HTTPException(409,"本题补桥已经记录，请继续原作答。")
+                event["support_kind"]=start["task"]["support"]["kind"]
+            elif body.action=="submit":
                 if not current["active"] or current["active"]["id"]!=body.attempt_id: raise HTTPException(409,"此作答已提交，原文保留；重做请另开一次。")
                 if not body.explanation.strip(): raise HTTPException(422,"请留下自己的解释；不确定时也可以写明卡在哪里。")
-                event.update(choice=body.choice,explanation=body.explanation,used_help=body.used_help,
+                helped=body.used_help or current["active"]["help_used"]
+                event.update(choice=body.choice,explanation=body.explanation,used_help=helped,
                     choice_matches=None if body.choice is None else body.choice==start["task"]["correct"],
-                    independence="supported" if body.used_help else "repeat_family" if start["repeat_family"] else "not_established")
+                    independence="supported" if helped else "repeat_family" if start["repeat_family"] else "not_established")
             else:
                 answer=next((e for e in row.events if e["action"]=="submit" and e["attempt_id"]==body.attempt_id),None)
                 if not answer: raise HTTPException(409,"先提交自己的作答，再查看量规复盘。")

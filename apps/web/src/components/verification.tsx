@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { ApiError, request } from "@/lib/api";
 import { loadDraft, writeDraft } from "@/lib/draft-store";
 import { observationLabels, reviewLabels, judgementLabels, type ReviewSummary } from "@/lib/reviewing";
+import { RelationBridge, type Support } from "@/components/relation-bridge";
 import { RevisionChallenge } from "@/components/revision-challenge";
 import { CandidateEvidence } from "@/components/candidate-evidence";
 import type { EvidenceIntent } from "@/lib/star-evidence";
 
-type Task={id:string;goal:string;title:string;prompt:string;options:string[];repeat_family:boolean;kind?:string};
+type Task={support_available?:boolean;help_used?:boolean;support?:Support;id:string;goal:string;title:string;prompt:string;options:string[];repeat_family:boolean;kind?:string};
 type Criterion={id:string;title:string;requirement:string};
 type Review={criterion:string;judgement:string;quote:string;reason:string};
 type Origin={revision_id:string;source_attempt:string;focus:string;graph_revision:number};
@@ -49,6 +50,7 @@ export function Verification({onBack,intent,backLabel="回到群岛",onRepair}:{
       const next=await request<State>("/verification/actions",body);setState(next);pending.current=null;
       if(action==="submit"&&state.active){draftEpoch.current++;void writeDraft(undefined,`verification:${state.active.id}`).catch(()=>setNotice("作答已提交，本机旧草稿清除尚未确认。"));setForm(empty);setReportId(state.active.id);setReview([]);setNotice("作答原文已保存，解释仍待独立复核。");}
       if(action==="start"||action==="start_relation"||action==="start_recheck"||action==="start_revision_challenge"){setForm(empty);setNotice("先独立尝试；提交后才展示参考关系与量规。使用过资料请如实标记。");}
+      if(action==="support"){setNotice("补桥已记录，原解释保留。这次尝试会标记使用帮助。");}
       if(action==="self_review"){
         setNotice("复盘已保存。本人复盘不会替代独立复核，解释仍待复核。");
         if(targetReport&&targetReport.id===extra.attempt_id&&!next.reports.some(r=>r.id===targetReport.id)){
@@ -75,8 +77,9 @@ export function Verification({onBack,intent,backLabel="回到群岛",onRepair}:{
     {previousDraft&&<details className="intake-feedback"><summary>上一情境未提交的本机解释</summary><pre className="verification-original">{previousDraft}</pre></details>}
     {!state?<button disabled={busy} onClick={()=>{void load();}}>重新连接</button>:state.active?<section className="intake-card"><span>{state.active.kind==="revision_challenge"?`修订练习：只检查本次缺口${state.active.repeat_family?" · 同题族重做":""}`:state.active.kind==="recheck"?"延后复验：先尝试新关系，再提交解释":state.active.repeat_family?"同题族重做：保留练习记录，不新增独立证据":"新情境尝试：独立性仍待确认"}</span><h2>{state.active.title}</h2><p>{state.active.prompt}</p>
       <fieldset disabled={busy||blocked}><legend>你的判断（不选则记录不知道）</legend>{state.active.options.map((o,i)=><label className="intake-option" key={o}><input type="radio" name="transfer-choice" checked={form.choice===i} onChange={()=>preserve({...form,choice:i})}/><span>{o}</span></label>)}<button onClick={()=>preserve({...form,choice:null})}>改为不知道</button></fieldset>
+      {state.active.support_available&&!state.active.help_used&&<button disabled={busy||blocked} onClick={()=>{void send("support",{attempt_id:state.active!.id});}}>卡住了，补一小步</button>}{state.active.support&&<RelationBridge key={state.active.id} support={state.active.support}/>}
       <label className="intake-reason">我的解释、条件与反例<textarea aria-label="验证解释" disabled={busy||blocked} rows={7} maxLength={5000} value={form.explanation} onChange={e=>preserve({...form,explanation:e.target.value})}/></label>
-      <label className="intake-option"><input type="checkbox" disabled={busy||blocked} checked={form.used_help} onChange={e=>preserve({...form,used_help:e.target.checked})}/>这次查看过资料、答案或使用了他人/AI帮助</label>
+      <label className="intake-option"><input type="checkbox" disabled={busy||blocked||state.active.help_used} checked={form.used_help||!!state.active.help_used} onChange={e=>preserve({...form,used_help:e.target.checked})}/>这次查看过资料、答案或使用了他人/AI帮助</label>
       <small>草稿在本标签页暂存；提交成功后才进入数据库历史。浏览器清理存储后不保证草稿恢复。</small>
       <button className="guidance-enter" disabled={busy||blocked||!form.explanation.trim()} onClick={()=>{void send("submit",{attempt_id:state.active!.id,...form});}}>提交解释，留下原文</button>
     </section>:!intent?.challenge&&<section className="intake-card"><h2>选一个已探索的关系</h2><p>当前四类验证按对应知识探索完成后开放。每次只展开一个情境，先尝试再对照量规。</p>{[...state.goals].sort((a,b)=>Number(b.id===intent?.goal)-Number(a.id===intent?.goal)).map(g=><button className={`verification-goal ${g.id===intent?.goal?"verification-target-goal":""}`} key={g.id} disabled={busy||blocked} onClick={()=>{void send("start",{goal:g.id});}}>{g.title}</button>)}{!state.goals.length&&<p>先点亮第一束光，验证入口随后开放。</p>}</section>}

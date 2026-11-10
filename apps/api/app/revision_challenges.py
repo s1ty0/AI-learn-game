@@ -6,10 +6,29 @@ from fastapi import HTTPException
 from .relation_evidence import binding_for, current_edge
 from .relation_tasks import signature, TEMPLATES
 from .verification_content import TASKS
+from .attention_relation_content import SUPPORT,CHALLENGE_REQUIREMENTS
 
 FOCI={"path":"检查推导","conditions":"检查条件","boundary":"检查边界"}
 # Each family has its own situation. Editing a proposition never resets exposure.
 SCENARIOS={
+ ("softmax-aggregation","path"):(
+  "两项分数的指数值为3、1，V为−4、8。无dropout/投影。先归一化再汇聚，结果是多少？别直接把指数值作为权重。",
+  ["−1","2","4"],0,"权重为3/4、1/4，输出=0.75×(−4)+0.25×8=−1。指数值之比决定归一化权重，原始指数值3和1本身不是总和为1的权重。"),
+ ("softmax-aggregation","conditions"):(
+  "V固定为0、10，分数指数值原为1、1，输出5。只增加第一个分数，使指数值变成3、1。无dropout/投影。新输出是多少？是否能套用原先的1/2权重？",
+  ["仍为5，因为V没变","变为2.5，需重新计算权重","变为10"],1,"新权重3/4、1/4，输出0.75×0+0.25×10=2.5。V固定不代表权重固定；相对分数改变后需重算，不能沿用1/2。"),
+ ("softmax-aggregation","boundary"):(
+  "无dropout/投影的标量汇聚，Softmax权重为1/4、3/4，V为−8、4。输出和能据此得到的结论是哪项？",
+  ["输出1，位于[−8,4]内；这不能直接证明某输入的因果重要性","输出4，必定等于最大值","输出−12，所有加权和都能越过原值范围"],0,"输出−2+3=1。非负且和为1的标量权重保证结果位于最小/最大V之间；任意未归一化加权、dropout或后续投影不自动继承这个范围。权重本身不是完整的因果解释。"),
+ ("causal-attention","path"):(
+  "位置1只读0、1。三项分数指数值2、1、7，V为−3、9、100。先排除位置2再归一化，无其他路径。输出是多少？说明分母用哪些项。",
+  ["70.3","1","0.3"],1,"分母只用2+1=3，权重2/3、1/3、0，输出−2+3=1。不能让被排除项的7进入分母，也不能读取它的100。"),
+ ("causal-attention","conditions"):(
+  "位置1只读0、1。三项指数值1、1、2，V为2、6、100。有人先对三项归一化为1/4、1/4、1/2，再把第三个权重清零，算出2。正确的局部输出是多少？还缺哪一步？",
+  ["4，要在允许项上归一化或清零后再归一化","2，清零就完成了因果掩码","100，未来项最大"],0,"允许项的正确权重为1/2、1/2，输出4。先全体归一化再仅清零会留下权重和1/2；需要重新归一化，或在Softmax前排除未来项。"),
+ ("causal-attention","boundary"):(
+  "位置1本层只读0、1，两项等权。但上游把未来输入x2复制进V0，V1=0。只把x2从4改为12，其他规则固定。本层输出如何？本层掩码能否保证整条计算没有未来泄露？",
+  ["始终为2，任何因果掩码都消除所有泄露","从2变为6，仍可经上游V0传入未来信息","从4变为12，等权不需要除以2"],1,"输出从(4+0)/2=2变为(12+0)/2=6。未来信息已由上游进入允许读取的V0；本层只屏蔽直接读取路径，必须检查上游/旁路，不能只凭一个局部掩码保证整个系统因果。"),
  ("lookup-map","path"):(
   "词表中‘风’编号2、‘雨’编号0。嵌入表第0行[4,1]、第1行[-2,3]、第2行[0,5]。输入‘风 雨 风’，只执行查表，结果是什么？解释你实际按什么索引。",
   ["[[4,1],[0,5],[4,1]]","[[0,5],[4,1],[0,5]]","[[2,2],[0,0],[2,2]]"],1,
@@ -58,6 +77,10 @@ def task_for(repair,binding,focus):
                   "conditions":"说明本情境依赖的映射、样本权重或度量条件，对照修订后的文字，标出仍遗漏或过度概括的地方。",
                   "boundary":"给出具体反例或不能推出的结论，解释新命题的适用边界，不把本题答案当普遍证明。"}
     for c in task["criteria"]:c["requirement"]=requirements[c["id"]]+(" 本轮重点检查此条。" if c["id"]==focus else "")
+    if binding["template"] in CHALLENGE_REQUIREMENTS:
+        for c,r in zip(task["criteria"],CHALLENGE_REQUIREMENTS[binding["template"]]):
+            c["requirement"]=r+" 同时检查修订命题本身，原命题仍有误不能因选择正确标满足。"+(" 本轮重点检查此条。" if c["id"]==focus else "")
+        task["support"]=deepcopy(SUPPORT[binding["template"]])
     return task
 
 
