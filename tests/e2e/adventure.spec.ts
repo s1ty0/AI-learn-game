@@ -23,6 +23,30 @@ async function voyageFixture(page: Page) {
   return moves;
 }
 
+test("航行记录延迟返回时不会把已经打开的星图切回群岛", async ({ page }) => {
+  await page.route("**/api/v1/**", route => route.fulfill({ status: 404, json: { detail: "Unneeded fixture endpoint" } }));
+  await voyageFixture(page);
+  await page.route("**/api/v1/auth/session", route => route.fulfill({ json: {
+    user: null, mode: "local-demo", demo_available: true, invite_required: false,
+  } }));
+  let release!: () => void;
+  const delayed = new Promise<void>(resolve => { release = resolve; });
+  await page.route(/\/api\/v1\/adventure$/, async route => {
+    await delayed;
+    await route.fulfill({ json: { revision: 3, stage: 3, release_id: "delayed-fixture",
+      discovered: ["entity-0068"], mastery: "unverified", trail: [] } });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "更多", exact: true }).click();
+  await page.getByRole("button").filter({ hasText: "我的星图" }).click();
+  await expect(page.getByRole("heading", { name: "我的星图", exact: true })).toBeVisible();
+  const followup = page.waitForResponse(response => response.url().endsWith("/api/v1/adventure/prism"));
+  release();
+  await followup;
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => resolve())));
+  await expect(page.getByRole("heading", { name: "我的星图", exact: true })).toBeVisible();
+});
+
 test("只露出一座小岛，逐步操作后才揭示知识，并保留探索位置", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));

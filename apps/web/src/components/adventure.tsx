@@ -70,7 +70,7 @@ export function Adventure() {
       const current = await request<Journey>("/adventure");
       setJourney(current); setStage(Math.min(current.stage, 2)); setMask(current.stage !== 2);
       setFuture(current.stage === 1 ? 30 : 10); setReason(null); setRetryMove(null); setError("");
-      if (current.stage === 3) setView("world");
+      if (current.stage === 3) setView(currentView => currentView === "room" ? "world" : currentView);
     }
     catch { setError("暂时连不上你的航行记录。重试后继续，已有发现仍在。"); }
   }
