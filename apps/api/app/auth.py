@@ -57,6 +57,10 @@ class Credentials(BaseModel):
 def public_user(account):return {"id":account.id,"username":account.username}
 
 
+def invite_required(app):
+    return not app.state.allow_local_demo and not app.state.open_registration
+
+
 def demo_available(session,app):
     return app.state.allow_local_demo and session.scalar(select(Account.id).where(Account.graph_id==DEMO_GRAPH)) is None
 
@@ -101,7 +105,7 @@ def issue(session,account,request,response):
     session.add(AuthSession(token_hash=digest(token),account_id=account.id,expires_at=now()+LIFETIME))
     response.set_cookie(COOKIE,token,max_age=int(LIFETIME.total_seconds()),httponly=True,secure=not request.app.state.allow_local_demo,samesite="strict",path="/")
     response.headers["Cache-Control"]="no-store"
-    return {"user":public_user(account),"mode":"account","demo_available":demo_available(session,request.app),"invite_required":not request.app.state.allow_local_demo}
+    return {"user":public_user(account),"mode":"account","demo_available":demo_available(session,request.app),"invite_required":invite_required(request.app)}
 
 
 @router.get("/session")
@@ -110,9 +114,9 @@ def whoami(request:Request,response:Response):
     with request.app.state.sessions() as session:
         account=session_account(session,request.cookies.get(COOKIE))
         available=demo_available(session,request.app)
-        if account:return {"user":public_user(account),"mode":"account","demo_available":available,"invite_required":not request.app.state.allow_local_demo}
+        if account:return {"user":public_user(account),"mode":"account","demo_available":available,"invite_required":invite_required(request.app)}
         if request.cookies.get(COOKIE):response.delete_cookie(COOKIE,path="/")
-        return {"user":None,"mode":"local-demo" if available else "required","demo_available":available,"invite_required":not request.app.state.allow_local_demo}
+        return {"user":None,"mode":"local-demo" if available else "required","demo_available":available,"invite_required":invite_required(request.app)}
 
 
 @router.post("/register")
@@ -123,7 +127,7 @@ def register(body:Credentials,request:Request,response:Response):
     try:
         with request.app.state.sessions() as session,session.begin():
             invitation=None
-            if not request.app.state.allow_local_demo:
+            if invite_required(request.app):
                 invitation=session.scalar(select(AuthInvite).where(AuthInvite.token_hash==digest(body.invite)).with_for_update())
                 if not invitation or invitation.used_by or invitation.expires_at<=now():raise HTTPException(403,"邀请码无效、过期或已使用。")
             if session.scalar(select(Account.id).where(Account.username==name)):raise HTTPException(409,"这个用户名已使用，请换一个。")
@@ -133,7 +137,7 @@ def register(body:Credentials,request:Request,response:Response):
             session.add(account);session.flush()
             if invitation:invitation.used_by=account.id
             return issue(session,account,request,response)
-    except IntegrityError:raise HTTPException(409,"用户名或邀请状态已变化，请重新确认。")
+    except IntegrityError:raise HTTPException(409,"用户名或注册状态已变化，请重新确认。")
 
 
 @router.post("/login")
@@ -160,6 +164,7 @@ def logout(request:Request,response:Response):
 
 def install(app,allow_local_demo):
     app.state.allow_local_demo=allow_local_demo
+    app.state.open_registration=os.environ.get("LEARN_OPEN_REGISTRATION")=="1"
     vercel_host=""
     if os.environ.get("VERCEL")=="1":
         key="VERCEL_PROJECT_PRODUCTION_URL" if os.environ.get("VERCEL_ENV")=="production" else "VERCEL_URL"

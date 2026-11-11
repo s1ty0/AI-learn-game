@@ -2,6 +2,37 @@ import {test,expect,type Page} from "@playwright/test";
 
 const password="fixture account passphrase 2026";
 
+test("开放注册无需邀请码，新访客注册后进入游戏，退出后回到登录",async({page})=>{
+  let signedIn=false;
+  let submitted:Record<string,unknown>|undefined;
+  const user={id:"open-registration-fixture",username:"open_player"};
+  await page.route("**/api/v1/**",async route=>{
+    const pathname=new URL(route.request().url()).pathname;
+    const status={user:signedIn?user:null,mode:signedIn?"account":"required",demo_available:false,invite_required:false};
+    if(pathname==="/api/v1/auth/session")return route.fulfill({json:status});
+    if(pathname==="/api/v1/auth/register"){
+      submitted=route.request().postDataJSON();signedIn=true;
+      return route.fulfill({json:{...status,user,mode:"account"}});
+    }
+    if(pathname==="/api/v1/auth/logout"){signedIn=false;return route.fulfill({json:{signed_out:true}});}
+    if(pathname==="/api/v1/adventure")return route.fulfill({json:{revision:0,stage:0,release_id:"fixture",discovered:[],mastery:"unverified",trail:[]}});
+    return route.fulfill({status:404,json:{detail:"Unused fixture endpoint"}});
+  });
+  await page.setViewportSize({width:390,height:844});
+  await page.goto("/");
+  await expect(page.getByRole("heading",{name:"创建自己的学习档案",exact:true})).toBeVisible();
+  await expect(page.getByText("无需邀请码，创建账号即可开始。",{exact:true})).toBeVisible();
+  await expect(page.getByLabel("账号邀请码")).toHaveCount(0);
+  await page.getByLabel("账号用户名").fill(user.username);
+  await page.getByLabel("账号密码").fill(password);
+  await page.getByRole("button",{name:"创建账号并进入",exact:true}).click();
+  await expect(page.locator(".auth-toolbar")).toContainText(user.username);
+  expect(submitted).toEqual({username:user.username,password});
+  await expect(page.getByRole("button",{name:"探索第一束光",exact:true})).toBeVisible();
+  await page.getByRole("button",{name:"退出登录",exact:true}).click();
+  await expect(page.getByRole("heading",{name:"回到你的群岛",exact:true})).toBeVisible();
+});
+
 async function draftStatus(page:Page){
   return page.evaluate(()=>new Promise<{tab:string|null;keys:IDBValidKey[];hasAlice:boolean}>((resolve,reject)=>{
     const open=indexedDB.open("learnai-recovery",1);open.onerror=()=>reject(open.error);open.onsuccess=()=>{

@@ -59,7 +59,7 @@ def create_app(database_engine=None,allow_local_demo=None):
     @app.exception_handler(RequestValidationError)
     async def validation_error(request,error):
         if request.url.path.startswith("/api/v1/auth/"):
-            return JSONResponse({"detail":"请检查用户名、密码长度与邀请码。"},status_code=422,headers={"Cache-Control":"no-store"})
+            return JSONResponse({"detail":"请检查用户名、密码长度等填写内容。"},status_code=422,headers={"Cache-Control":"no-store"})
         return await request_validation_exception_handler(request,error)
     app.include_router(discoveries_router)
     app.include_router(intake_router)

@@ -76,6 +76,46 @@ def test_registration_uses_single_use_invitation_hashed_password_and_opaque_cook
         assert session.get(AuthInvite,digest(code)).used_by==account.id
 
 
+def test_open_registration_without_invites_keeps_private_account_scopes(client,monkeypatch):
+    monkeypatch.setenv("LEARN_OPEN_REGISTRATION","1")
+    app=create_app(client.app.state.engine,allow_local_demo=False)
+    with TestClient(app,base_url="https://testserver") as a,TestClient(app,base_url="https://testserver") as b:
+        app.state.web_origin="https://testserver"
+        status=a.get("/api/v1/auth/session").json()
+        assert status=={"user":None,"mode":"required","demo_available":False,"invite_required":False}
+        assert a.get("/api/v1/learner-graph").status_code==401
+        users=[]
+        for browser,name,extra in [(a,"alice",{}),(b,"bob",{"invite":""})]:
+            response=browser.post("/api/v1/auth/register",json={"username":name,"password":PASSWORD,**extra},headers=WRITE)
+            assert response.status_code==200
+            assert response.json()["invite_required"] is False
+            users.append(response.json()["user"]["id"])
+            browser.headers.update({**WRITE,"X-LearnAI-Account":users[-1]})
+        assert users[0]!=users[1]
+        saved=a.post("/api/v1/learner-graph/operations",json=mutation(a,"open registration private note"))
+        assert saved.status_code==200
+        assert b.get("/api/v1/learner-graph").json()["revision"]==0
+        assert "open registration private note" not in b.get("/api/v1/learner-graph").text
+        assert b.get("/api/v1/learner-graph",headers={"X-LearnAI-Account":users[0]}).status_code==401
+        assert a.post("/api/v1/auth/logout",json={}).status_code==200
+        assert a.get("/api/v1/learner-graph").status_code==401
+        assert a.post("/api/v1/auth/login",json={"username":"alice","password":PASSWORD},headers=WRITE).status_code==200
+        assert a.get("/api/v1/learner-graph").json()["revision"]==saved.json()["revision"]
+
+
+def test_open_registration_still_rejects_invalid_input_and_duplicate_names(client,monkeypatch):
+    monkeypatch.setenv("LEARN_OPEN_REGISTRATION","1")
+    app=create_app(client.app.state.engine,allow_local_demo=False)
+    with TestClient(app,base_url="https://testserver") as browser:
+        app.state.web_origin="https://testserver"
+        for extra in [{"password":"short"},{"password":" "*12},{"owner":"local-demo"}]:
+            response=browser.post("/api/v1/auth/register",json={"username":"alice","password":PASSWORD,**extra},headers=WRITE)
+            assert response.status_code==422
+        assert browser.post("/api/v1/auth/register",json={"username":"alice","password":PASSWORD},headers={**WRITE,"Origin":"https://evil.example"}).status_code==403
+        assert browser.post("/api/v1/auth/register",json={"username":"alice","password":PASSWORD},headers=WRITE).status_code==200
+        assert browser.post("/api/v1/auth/register",json={"username":"Alice","password":PASSWORD},headers=WRITE).status_code==409
+
+
 def test_invalid_invite_password_and_owner_fields_are_rejected(pair):
     a,_=pair
     assert a.post("/api/v1/auth/register",json={"username":"alice","password":PASSWORD},headers=WRITE).status_code==403
