@@ -23,7 +23,7 @@
 
 状态（2026-11-10）：本地生产构建经HTTPS入口验证邀请注册、会话与数据隔离。线上环境、域名、监控和发布回滚待验收。见[邀请内测发布步骤](./docs/invite-beta-deployment.md)。
 
-2026-11-11用户选择先用 Vercel 快速发布。现已发布[公网体验版](https://ai-learn-game.vercel.app)，Services（Beta）同源部署 Web/API，连接新加坡 Neon 免费 PostgreSQL，原阿里云与 NetBird 未改动。公网已验证邀请注册、登录退出、首岛机关、星图保存与刷新续玩，以及双账号、并发与历史恢复。云端备份恢复、故障通知和应用回滚仍待S2验收，不提前创建内测tag。操作见[Vercel 公网部署](./docs/vercel-deployment.md)。
+2026-11-11用户选择先用 Vercel 快速发布。现已发布[公网体验版](https://ai-learn-game.vercel.app)，Services（Beta）同源部署 Web/API，连接新加坡 Neon 免费 PostgreSQL，原阿里云与 NetBird 未改动。按最新要求已开放无需邀请码注册，并验证登录退出、首岛机关、星图保存与刷新续玩，以及双账号、并发与历史恢复；原账号存档保留。云端备份恢复、故障通知和应用回滚仍待S2验收，不提前创建内测tag。操作见[Vercel 公网部署](./docs/vercel-deployment.md)。
 
 - 确定部署环境，接通线上Web/API/PostgreSQL、域名与HTTPS；2026-11-11按用户最新要求改为无需邀请码开放注册，生产环境仍关闭匿名本机档案入口，每个账号保留独立存档。
 - 接通健康检查、日志与必要监控、资源/请求限制，完成数据库备份与真实恢复演练。
