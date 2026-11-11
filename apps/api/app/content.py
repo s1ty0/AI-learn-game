@@ -2,31 +2,37 @@ import hashlib
 import json
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.dialects.postgresql import insert
 
 from .models import ContentRelease, EntityRevision, RelationRevision, LearnerGraph, GraphSnapshot, AdventureSession, Account
 
 ROOT = Path(__file__).resolve().parents[3]
+CONTENT_ROOT = Path(__file__).resolve().parents[1] / ".vercel-content"
+if not CONTENT_ROOT.is_dir():
+    CONTENT_ROOT = ROOT
 DEMO_GRAPH = "local-demo"
 
 
 def read_catalog(kind):
-    return json.loads((ROOT / f"data/catalog/{kind}.json").read_text(encoding="utf-8"))
+    return json.loads((CONTENT_ROOT / f"data/catalog/{kind}.json").read_text(encoding="utf-8"))
 
 
 def seed(session):
+    # Cold starts can overlap. Keep release and initial graph creation atomic
+    # across processes; the lock is released by this transaction's commit.
+    session.execute(text("SELECT pg_advisory_xact_lock(1095522625)"))
     catalog = read_catalog("entities")
     relations = read_catalog("relations")
-    module_dir = ROOT / "knowledge/zh-CN/transformer"
+    module_dir = CONTENT_ROOT / "knowledge/zh-CN/transformer"
     lessons = {name: (module_dir / name).read_text(encoding="utf-8") for name in
                ["README.md", "input-and-position.md", "multihead-and-mask.md", "block-components.md", "training-and-generation.md", "missions.md"]}
-    task_source = json.loads((ROOT / "data/quests/transformer.json").read_text(encoding="utf-8"))
+    task_source = json.loads((CONTENT_ROOT / "data/quests/transformer.json").read_text(encoding="utf-8"))
     prism_lesson = (module_dir / "prism-island.md").read_text(encoding="utf-8")
-    chapter = json.loads((ROOT / "data/games/information-sea.json").read_text(encoding="utf-8"))
+    chapter = json.loads((CONTENT_ROOT / "data/games/information-sea.json").read_text(encoding="utf-8"))
     chapter_lesson = (module_dir / "information-sea.md").read_text(encoding="utf-8")
-    expedition = json.loads((ROOT / "data/games/expedition.json").read_text(encoding="utf-8"))
-    expedition_lessons = {name: (ROOT / "knowledge/zh-CN/expedition" / name).read_text(encoding="utf-8") for name in ["representation.md", "learning.md", "generation.md", "tower.md", "optimization.md", "decoding.md", "architecture.md", "generalization.md"]}
+    expedition = json.loads((CONTENT_ROOT / "data/games/expedition.json").read_text(encoding="utf-8"))
+    expedition_lessons = {name: (CONTENT_ROOT / "knowledge/zh-CN/expedition" / name).read_text(encoding="utf-8") for name in ["representation.md", "learning.md", "generation.md", "tower.md", "optimization.md", "decoding.md", "architecture.md", "generalization.md"]}
     # A release pins relevant lesson/task text as well as the graph catalogs.
     digest = hashlib.sha256(json.dumps([catalog, relations, lessons, task_source, prism_lesson, chapter, chapter_lesson, expedition, expedition_lessons], sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:12]
     release_id = f"{catalog['dataset_version']}+{digest}"

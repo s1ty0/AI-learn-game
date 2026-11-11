@@ -1,6 +1,7 @@
 import os
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 
@@ -16,7 +17,13 @@ def database_url():
 
 
 def engine_for(url=None):
-    return create_engine(url or database_url(), pool_pre_ping=True)
+    target = make_url(url or database_url())
+    if target.drivername in {"postgres", "postgresql"}:
+        target = target.set(drivername="postgresql+psycopg")
+    options = {"pool_pre_ping": True}
+    if os.environ.get("VERCEL") == "1":
+        options.update(pool_size=2, max_overflow=2, pool_recycle=300)
+    return create_engine(target, **options)
 
 
 def session_factory(engine):

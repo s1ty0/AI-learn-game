@@ -160,7 +160,12 @@ def logout(request:Request,response:Response):
 
 def install(app,allow_local_demo):
     app.state.allow_local_demo=allow_local_demo
-    app.state.web_origin=os.environ.get("LEARN_WEB_ORIGIN","http://127.0.0.1:3000" if allow_local_demo else "")
+    vercel_host=""
+    if os.environ.get("VERCEL")=="1":
+        key="VERCEL_PROJECT_PRODUCTION_URL" if os.environ.get("VERCEL_ENV")=="production" else "VERCEL_URL"
+        vercel_host=os.environ.get(key,"")
+    default_origin="http://127.0.0.1:3000" if allow_local_demo else ("https://"+vercel_host if vercel_host else "")
+    app.state.web_origin=os.environ.get("LEARN_WEB_ORIGIN",default_origin)
     app.state.auth_limits=defaultdict(deque);app.state.auth_limit_lock=Lock()
     app.include_router(router)
 
