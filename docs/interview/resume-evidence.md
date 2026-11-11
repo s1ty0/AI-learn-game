@@ -10,7 +10,7 @@
 | 实现重复提交和多窗口冲突处理 | [图保存接口](../../apps/api/app/main.py)、[数据库模型](../../apps/api/app/models.py)、[接口检查](../../apps/api/tests/test_learning_loop.py) | 行锁、基础版本、操作键和摘要各管一件事，重试检查顺序决定旧结果是否可返回 |
 | 实现本机草稿找回与账号隔离 | [草稿存储](../../apps/web/src/lib/draft-store.ts)、[账号边界](../../apps/web/src/components/auth-boundary.tsx)、[账号浏览器检查](../../tests/e2e/accounts.spec.ts) | 存储键在请求排队前确定，切换前等待写入，刷新后重新确认身份 |
 | 实现账号独立档案与权限检查 | [身份解析](../../apps/api/app/auth.py)、[档案上下文](../../apps/api/app/learner_context.py)、[双账号检查](../../apps/api/tests/test_accounts.py) | 服务端会话决定档案，页面账号头用于陈旧标签页检查 |
-| 实现关系修订及证据追溯 | [关系绑定](../../apps/api/app/relation_evidence.py)、[修订事务](../../apps/api/app/relation_revisions.py)、[检查](../../apps/api/tests/test_relation_revisions.py) | 修改前后与当时复核冻结，后来意见变更不改旧修订依据 |
+| 实现关系修订及证据追溯 | [关系绑定](../../apps/api/app/relation_evidence.py)、[修订事务](../../apps/api/app/relation_revisions.py)、[检查](../../apps/api/tests/test_relation_revisions.py) | 同时校验图谱、作答与复核版本；图头、快照、操作和修订事件同事务保存，后来意见变更不改旧修订依据 |
 | 完成旧档案升级与恢复验证 | [迁移0007](../../apps/api/migrations/versions/0007_accounts.py)、[账号维护](../../apps/api/app/account_access.py)、[备份工具](../../scripts/backup-local-db.mjs) | 备份恢复到隔离库，维护者指定旧档归属，拒绝覆盖已有学习进度 |
 | 完成游戏数值验算与学习阶段保存 | [章节规则](../../apps/api/app/chapter.py)、[扩展章节](../../apps/api/app/expedition.py)、[结构检查](../../scripts/check_game_chapter.py) | 前端交互与服务端校验分工，数值正确与自由解释评价分别记录 |
 
